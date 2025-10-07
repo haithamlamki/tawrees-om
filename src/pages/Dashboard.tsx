@@ -6,10 +6,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Package, Clock, CheckCircle, XCircle, Ship, Settings, User, FileText } from "lucide-react";
+import { Package, Clock, CheckCircle, XCircle, Ship, Settings, User, FileText, Bell } from "lucide-react";
 import { toast } from "sonner";
 import ProfileSettings from "@/components/dashboard/ProfileSettings";
 import DocumentManager from "@/components/documents/DocumentManager";
+import NotificationSettings from "@/components/notifications/NotificationSettings";
 
 interface ShipmentRequest {
   id: string;
@@ -144,6 +145,10 @@ const Dashboard = () => {
               <User className="mr-2 h-4 w-4" />
               Profile
             </TabsTrigger>
+            <TabsTrigger value="notifications">
+              <Bell className="mr-2 h-4 w-4" />
+              Notifications
+            </TabsTrigger>
             {isAdmin && (
               <TabsTrigger value="admin" onClick={() => navigate("/admin")}>
                 <Settings className="mr-2 h-4 w-4" />
@@ -210,6 +215,10 @@ const Dashboard = () => {
 
           <TabsContent value="profile">
             <ProfileSettings />
+          </TabsContent>
+
+          <TabsContent value="notifications">
+            <NotificationSettings />
           </TabsContent>
         </Tabs>
       </main>

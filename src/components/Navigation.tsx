@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Ship, User, LogOut, LayoutDashboard } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import NotificationBell from "@/components/notifications/NotificationBell";
 
 interface NavigationProps {
   isAuthenticated: boolean;
@@ -37,6 +38,7 @@ const Navigation = ({ isAuthenticated }: NavigationProps) => {
                     Dashboard
                   </Link>
                 </Button>
+                <NotificationBell />
                 <Button variant="ghost" onClick={handleLogout}>
                   <LogOut className="mr-2 h-4 w-4" />
                   Logout
