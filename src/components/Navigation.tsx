@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Ship, User, LogOut, LayoutDashboard } from "lucide-react";
+import { Ship, User, LogOut, LayoutDashboard, Package, Truck, Calculator } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import NotificationBell from "@/components/notifications/NotificationBell";
@@ -11,6 +12,25 @@ interface NavigationProps {
 
 const Navigation = ({ isAuthenticated }: NavigationProps) => {
   const navigate = useNavigate();
+  const [userRoles, setUserRoles] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      loadUserRoles();
+    }
+  }, [isAuthenticated]);
+
+  const loadUserRoles = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+      const { data } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", session.user.id);
+      
+      setUserRoles(data?.map(r => r.role) || []);
+    }
+  };
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -32,12 +52,46 @@ const Navigation = ({ isAuthenticated }: NavigationProps) => {
           <div className="flex items-center gap-4">
             {isAuthenticated ? (
               <>
-                <Button variant="ghost" asChild>
-                  <Link to="/dashboard">
-                    <LayoutDashboard className="mr-2 h-4 w-4" />
-                    Dashboard
-                  </Link>
-                </Button>
+                {userRoles.includes("customer") && (
+                  <Button variant="ghost" asChild>
+                    <Link to="/dashboard">
+                      <LayoutDashboard className="mr-2 h-4 w-4" />
+                      Dashboard
+                    </Link>
+                  </Button>
+                )}
+                {userRoles.includes("admin") && (
+                  <Button variant="ghost" asChild>
+                    <Link to="/admin">
+                      <LayoutDashboard className="mr-2 h-4 w-4" />
+                      Admin
+                    </Link>
+                  </Button>
+                )}
+                {userRoles.includes("employee") && (
+                  <Button variant="ghost" asChild>
+                    <Link to="/employee">
+                      <Package className="mr-2 h-4 w-4" />
+                      Employee
+                    </Link>
+                  </Button>
+                )}
+                {userRoles.includes("shipping_partner") && (
+                  <Button variant="ghost" asChild>
+                    <Link to="/partner">
+                      <Truck className="mr-2 h-4 w-4" />
+                      Partner
+                    </Link>
+                  </Button>
+                )}
+                {userRoles.includes("accountant") && (
+                  <Button variant="ghost" asChild>
+                    <Link to="/finance">
+                      <Calculator className="mr-2 h-4 w-4" />
+                      Finance
+                    </Link>
+                  </Button>
+                )}
                 <NotificationBell />
                 <Button variant="ghost" onClick={handleLogout}>
                   <LogOut className="mr-2 h-4 w-4" />

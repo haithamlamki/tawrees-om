@@ -464,6 +464,8 @@ export type Database = {
       shipments: {
         Row: {
           actual_delivery: string | null
+          assigned_partner_id: string | null
+          assigned_to: string | null
           created_at: string
           current_location: string | null
           estimated_delivery: string | null
@@ -476,6 +478,8 @@ export type Database = {
         }
         Insert: {
           actual_delivery?: string | null
+          assigned_partner_id?: string | null
+          assigned_to?: string | null
           created_at?: string
           current_location?: string | null
           estimated_delivery?: string | null
@@ -488,6 +492,8 @@ export type Database = {
         }
         Update: {
           actual_delivery?: string | null
+          assigned_partner_id?: string | null
+          assigned_to?: string | null
           created_at?: string
           current_location?: string | null
           estimated_delivery?: string | null
@@ -500,6 +506,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "shipments_assigned_partner_id_fkey"
+            columns: ["assigned_partner_id"]
+            isOneToOne: false
+            referencedRelation: "shipping_partners"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "shipments_request_id_fkey"
             columns: ["request_id"]
             isOneToOne: false
@@ -507,6 +520,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      shipping_partners: {
+        Row: {
+          address: string | null
+          company_name: string
+          contact_person: string | null
+          created_at: string
+          email: string | null
+          id: string
+          is_active: boolean
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          company_name: string
+          contact_person?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          company_name?: string
+          contact_person?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       shipping_rates: {
         Row: {
@@ -563,21 +612,31 @@ export type Database = {
           created_at: string
           id: string
           role: Database["public"]["Enums"]["app_role"]
+          shipping_partner_id: string | null
           user_id: string
         }
         Insert: {
           created_at?: string
           id?: string
           role: Database["public"]["Enums"]["app_role"]
+          shipping_partner_id?: string | null
           user_id: string
         }
         Update: {
           created_at?: string
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
+          shipping_partner_id?: string | null
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "user_roles_shipping_partner_id_fkey"
+            columns: ["shipping_partner_id"]
+            isOneToOne: false
+            referencedRelation: "shipping_partners"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "user_roles_user_id_fkey"
             columns: ["user_id"]
