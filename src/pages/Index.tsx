@@ -100,7 +100,7 @@ const Index = () => {
       {/* Footer */}
       <footer className="bg-card border-t py-8">
         <div className="container mx-auto px-4 text-center text-muted-foreground">
-          <p>&copy; 2025 ShipFlow. Your trusted shipping partner.</p>
+          <p>&copy; 2025 Tawreed. Your trusted shipping partner.</p>
         </div>
       </footer>
     </div>

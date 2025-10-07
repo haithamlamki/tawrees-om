@@ -7,7 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Ship, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
+import logo from "@/assets/tawreed-logo.png";
 
 const Auth = () => {
   const [loading, setLoading] = useState(false);
@@ -89,12 +90,10 @@ const Auth = () => {
       <Card className="w-full max-w-md shadow-elevated">
         <CardHeader className="space-y-4">
           <div className="flex items-center justify-center">
-            <div className="bg-primary p-3 rounded-xl">
-              <Ship className="h-8 w-8 text-primary-foreground" />
-            </div>
+            <img src={logo} alt="Tawreed" className="h-16 w-auto" />
           </div>
           <div className="text-center">
-            <CardTitle className="text-2xl">Welcome to ShipFlow</CardTitle>
+            <CardTitle className="text-2xl">Welcome to Tawreed</CardTitle>
             <CardDescription>
               Your trusted partner for international shipping
             </CardDescription>
