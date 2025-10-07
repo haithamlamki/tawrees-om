@@ -68,6 +68,41 @@ export type Database = {
         }
         Relationships: []
       }
+      quotes: {
+        Row: {
+          breakdown: Json
+          created_at: string
+          id: string
+          shipment_request_id: string | null
+          total_sell_price: number
+          valid_until: string
+        }
+        Insert: {
+          breakdown: Json
+          created_at?: string
+          id?: string
+          shipment_request_id?: string | null
+          total_sell_price: number
+          valid_until: string
+        }
+        Update: {
+          breakdown?: Json
+          created_at?: string
+          id?: string
+          shipment_request_id?: string | null
+          total_sell_price?: number
+          valid_until?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quotes_shipment_request_id_fkey"
+            columns: ["shipment_request_id"]
+            isOneToOne: false
+            referencedRelation: "shipment_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shipment_requests: {
         Row: {
           calculated_cost: number
@@ -78,6 +113,7 @@ export type Database = {
           customer_id: string
           height_cm: number | null
           id: string
+          items: Json | null
           length_cm: number | null
           notes: string | null
           payment_timing: string | null
@@ -96,6 +132,7 @@ export type Database = {
           customer_id: string
           height_cm?: number | null
           id?: string
+          items?: Json | null
           length_cm?: number | null
           notes?: string | null
           payment_timing?: string | null
@@ -114,6 +151,7 @@ export type Database = {
           customer_id?: string
           height_cm?: number | null
           id?: string
+          items?: Json | null
           length_cm?: number | null
           notes?: string | null
           payment_timing?: string | null
