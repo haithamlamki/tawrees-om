@@ -17,6 +17,8 @@ import ShipmentManagement from "@/components/admin/ShipmentManagement";
 import DashboardMetrics from "@/components/admin/DashboardMetrics";
 import RevenueChart from "@/components/admin/RevenueChart";
 import TopCustomers from "@/components/admin/TopCustomers";
+import QuoteManagement from "@/components/admin/QuoteManagement";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface ShipmentRequest {
   id: string;
@@ -49,6 +51,7 @@ const Admin = () => {
   const [buyPrice, setBuyPrice] = useState<string>("");
   const [sellPrice, setSellPrice] = useState<string>("");
   const [margin, setMargin] = useState<string>("");
+  const [selectedRequestForQuote, setSelectedRequestForQuote] = useState<string | null>(null);
 
   useEffect(() => {
     checkAdminAndLoadData();
@@ -264,74 +267,78 @@ const Admin = () => {
                 </CardContent>
               </Card>
             ) : (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Pending Shipment Requests</CardTitle>
-                  <CardDescription>Review and approve customer requests</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Customer</TableHead>
-                        <TableHead>Type</TableHead>
-                        <TableHead>Cost</TableHead>
-                        <TableHead>Date</TableHead>
-                        <TableHead>Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {pendingRequests.map((request) => (
-                        <TableRow key={request.id}>
-                          <TableCell className="font-medium">
-                            {request.profiles?.full_name || "Unknown"}
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="outline">
-                              {request.shipping_type.toUpperCase()}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="font-semibold text-accent">
-                            ${request.calculated_cost.toFixed(2)}
-                          </TableCell>
-                          <TableCell>
-                            {new Date(request.created_at).toLocaleDateString()}
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex gap-2">
-                              <Button
-                                size="sm"
-                                variant="default"
-                                onClick={() => handleApproveRequest(request.id, "before")}
-                              >
-                                <CheckCircle className="mr-1 h-3 w-3" />
-                                Pay Before
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="secondary"
-                                onClick={() => handleApproveRequest(request.id, "after")}
-                              >
-                                <CheckCircle className="mr-1 h-3 w-3" />
-                                Pay After
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="destructive"
-                                onClick={() => handleRejectRequest(request.id)}
-                              >
-                                <XCircle className="mr-1 h-3 w-3" />
-                                Reject
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
+              <div className="space-y-4">
+                {pendingRequests.map((request) => (
+                  <Card key={request.id}>
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <CardTitle>{request.profiles?.full_name || "Unknown"}</CardTitle>
+                          <CardDescription>
+                            {request.shipping_type.toUpperCase()} • {new Date(request.created_at).toLocaleDateString()}
+                          </CardDescription>
+                        </div>
+                        <Badge variant="outline">{request.status}</Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
+                        <div>
+                          <p className="text-sm text-muted-foreground">Calculated Cost</p>
+                          <p className="text-2xl font-bold">₦{request.calculated_cost.toFixed(2)}</p>
+                        </div>
+                      </div>
+
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="default"
+                          onClick={() => setSelectedRequestForQuote(request.id)}
+                        >
+                          <DollarSign className="mr-1 h-3 w-3" />
+                          Create Quote
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          onClick={() => handleApproveRequest(request.id, "after")}
+                        >
+                          <CheckCircle className="mr-1 h-3 w-3" />
+                          Quick Approve
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => handleRejectRequest(request.id)}
+                        >
+                          <XCircle className="mr-1 h-3 w-3" />
+                          Reject
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
             )}
+
+            {/* Quote Creation Dialog */}
+            <Dialog open={!!selectedRequestForQuote} onOpenChange={(open) => !open && setSelectedRequestForQuote(null)}>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>Create Quote</DialogTitle>
+                </DialogHeader>
+                {selectedRequestForQuote && (
+                  <QuoteManagement
+                    requestId={selectedRequestForQuote}
+                    calculatedCost={pendingRequests.find(r => r.id === selectedRequestForQuote)?.calculated_cost || 0}
+                    onQuoteCreated={() => {
+                      setSelectedRequestForQuote(null);
+                      loadPendingRequests();
+                    }}
+                  />
+                )}
+              </DialogContent>
+            </Dialog>
           </TabsContent>
 
           <TabsContent value="customers">
