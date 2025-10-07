@@ -1,15 +1,24 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Ship, Plane, Package, Calculator } from "lucide-react";
+import { Ship, Plane, Package, Calculator, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import ItemRow from "./calculator/ItemRow";
+import QuoteBreakdown from "./calculator/QuoteBreakdown";
+import { ShipmentItem, QuoteBreakdown as QuoteBreakdownType } from "@/types/calculator";
+import {
+  calculateCBM,
+  calculateChargeableWeight,
+  calculateActualWeight,
+  calculateVolumetricWeight,
+  generateItemId,
+} from "@/utils/calculatorUtils";
 
 interface ContainerType {
   id: string;
@@ -33,14 +42,22 @@ const ShippingCalculator = () => {
   const [selectedContainer, setSelectedContainer] = useState<string>("");
   const [rates, setRates] = useState<Rate[]>([]);
   
-  // Form fields
-  const [cbm, setCbm] = useState<string>("");
-  const [weight, setWeight] = useState<string>("");
-  const [length, setLength] = useState<string>("");
-  const [width, setWidth] = useState<string>("");
-  const [height, setHeight] = useState<string>("");
+  // Multi-item state
+  const [items, setItems] = useState<ShipmentItem[]>([
+    {
+      id: generateItemId(),
+      length: 0,
+      width: 0,
+      height: 0,
+      dimensionUnit: "cm",
+      weight: 0,
+      weightUnit: "kg",
+      quantity: 1,
+    },
+  ]);
   
-  const [calculatedCost, setCalculatedCost] = useState<number | null>(null);
+  const [quoteBreakdown, setQuoteBreakdown] = useState<QuoteBreakdownType | null>(null);
+  const [validUntil, setValidUntil] = useState<Date | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
@@ -82,36 +99,156 @@ const ShippingCalculator = () => {
     setRates(data || []);
   };
 
-  const calculateCost = () => {
-    let cost = 0;
-    
+  const addItem = () => {
+    setItems([
+      ...items,
+      {
+        id: generateItemId(),
+        length: 0,
+        width: 0,
+        height: 0,
+        dimensionUnit: "cm",
+        weight: 0,
+        weightUnit: "kg",
+        quantity: 1,
+      },
+    ]);
+  };
+
+  const removeItem = (id: string) => {
+    if (items.length > 1) {
+      setItems(items.filter((item) => item.id !== id));
+    }
+  };
+
+  const updateItem = (id: string, field: keyof ShipmentItem, value: any) => {
+    setItems(
+      items.map((item) =>
+        item.id === id ? { ...item, [field]: value } : item
+      )
+    );
+  };
+
+  const calculateQuote = () => {
+    // Validate items
+    const validItems = items.filter(
+      (item) => item.length > 0 && item.width > 0 && item.height > 0 && item.weight > 0
+    );
+
+    if (validItems.length === 0) {
+      toast.error("Please add at least one complete item");
+      return;
+    }
+
+    let baseRate = 0;
+    let calculations: any = {};
+
     if (shippingType === "sea") {
       if (seaMethod === "cbm") {
-        const cbmValue = parseFloat(cbm);
-        const cbmRate = rates.find(r => r.rate_type === "sea_cbm");
-        if (cbmRate && cbmValue) {
-          const baseWithMargin = cbmRate.base_rate * (1 + cbmRate.margin_percentage / 100);
-          cost = cbmValue * baseWithMargin;
+        const totalCBM = calculateCBM(validItems);
+        const cbmRate = rates.find((r) => r.rate_type === "sea_cbm");
+        
+        if (!cbmRate) {
+          toast.error("CBM rate not found");
+          return;
         }
+
+        calculations.totalCBM = totalCBM;
+        baseRate = totalCBM * cbmRate.base_rate;
+        
+        // Apply margin
+        const marginAmount = baseRate * (cbmRate.margin_percentage / 100);
+        const breakdown: QuoteBreakdownType = {
+          baseRate,
+          surcharges: [], // Will be enhanced in Phase 9
+          margin: {
+            type: "percentage",
+            value: cbmRate.margin_percentage,
+            amount: marginAmount,
+          },
+          subtotal: baseRate + marginAmount,
+          total: baseRate + marginAmount,
+          calculations,
+        };
+        
+        setQuoteBreakdown(breakdown);
       } else {
-        const containerRate = rates.find(
-          r => r.rate_type === "sea_container" && r.container_type_id === selectedContainer
-        );
-        if (containerRate) {
-          cost = containerRate.base_rate * (1 + containerRate.margin_percentage / 100);
+        // Container method
+        if (!selectedContainer) {
+          toast.error("Please select a container type");
+          return;
         }
+
+        const containerRate = rates.find(
+          (r) => r.rate_type === "sea_container" && r.container_type_id === selectedContainer
+        );
+
+        if (!containerRate) {
+          toast.error("Container rate not found");
+          return;
+        }
+
+        baseRate = containerRate.base_rate;
+        const marginAmount = baseRate * (containerRate.margin_percentage / 100);
+        
+        const breakdown: QuoteBreakdownType = {
+          baseRate,
+          surcharges: [],
+          margin: {
+            type: "percentage",
+            value: containerRate.margin_percentage,
+            amount: marginAmount,
+          },
+          subtotal: baseRate + marginAmount,
+          total: baseRate + marginAmount,
+          calculations,
+        };
+        
+        setQuoteBreakdown(breakdown);
       }
     } else {
-      // Air shipping - use weight
-      const weightValue = parseFloat(weight);
-      const airRate = rates.find(r => r.rate_type === "air_kg");
-      if (airRate && weightValue) {
-        const baseWithMargin = airRate.base_rate * (1 + airRate.margin_percentage / 100);
-        cost = weightValue * baseWithMargin;
+      // Air shipping
+      const chargeableWeight = calculateChargeableWeight(validItems);
+      const actualWeight = calculateActualWeight(validItems);
+      const volumetricWeight = calculateVolumetricWeight(validItems);
+      const airRate = rates.find((r) => r.rate_type === "air_kg");
+
+      if (!airRate) {
+        toast.error("Air rate not found");
+        return;
       }
+
+      calculations = {
+        totalWeight: actualWeight,
+        volumetricWeight: volumetricWeight,
+        chargeableWeight: chargeableWeight,
+      };
+
+      baseRate = chargeableWeight * airRate.base_rate;
+      const marginAmount = baseRate * (airRate.margin_percentage / 100);
+      
+      const breakdown: QuoteBreakdownType = {
+        baseRate,
+        surcharges: [],
+        margin: {
+          type: "percentage",
+          value: airRate.margin_percentage,
+          amount: marginAmount,
+        },
+        subtotal: baseRate + marginAmount,
+        total: baseRate + marginAmount,
+        calculations,
+      };
+      
+      setQuoteBreakdown(breakdown);
     }
-    
-    setCalculatedCost(cost);
+
+    // Set validity (7 days from now)
+    const validity = new Date();
+    validity.setDate(validity.getDate() + 7);
+    setValidUntil(validity);
+
+    toast.success("Quote calculated successfully!");
   };
 
   const handleSubmitRequest = async () => {
@@ -121,7 +258,7 @@ const ShippingCalculator = () => {
       return;
     }
 
-    if (!calculatedCost) {
+    if (!quoteBreakdown) {
       toast.error("Please calculate the cost first");
       return;
     }
@@ -132,32 +269,43 @@ const ShippingCalculator = () => {
     const requestData: any = {
       customer_id: user.id,
       shipping_type: shippingType,
-      calculated_cost: calculatedCost,
+      calculated_cost: quoteBreakdown.total,
+      items: JSON.stringify(items),
     };
 
     if (shippingType === "sea") {
       requestData.calculation_method = seaMethod;
-      if (seaMethod === "cbm") {
-        requestData.cbm_volume = parseFloat(cbm);
-      } else {
+      if (seaMethod === "container") {
         requestData.container_type_id = selectedContainer;
       }
     } else {
       requestData.calculation_method = "weight";
-      requestData.weight_kg = parseFloat(weight);
-      requestData.length_cm = parseFloat(length);
-      requestData.width_cm = parseFloat(width);
-      requestData.height_cm = parseFloat(height);
     }
 
-    const { error } = await supabase
+    const { data: shipmentRequest, error: requestError } = await supabase
       .from("shipment_requests")
-      .insert([requestData]);
+      .insert([requestData])
+      .select()
+      .single();
 
-    if (error) {
+    if (requestError || !shipmentRequest) {
       toast.error("Failed to submit request");
-      console.error(error);
+      console.error(requestError);
       return;
+    }
+
+    // Create quote record
+    const { error: quoteError } = await supabase.from("quotes").insert([
+      {
+        shipment_request_id: shipmentRequest.id,
+        breakdown: JSON.parse(JSON.stringify(quoteBreakdown)),
+        total_sell_price: quoteBreakdown.total,
+        valid_until: validUntil?.toISOString(),
+      },
+    ]);
+
+    if (quoteError) {
+      console.error("Failed to save quote:", quoteError);
     }
 
     toast.success("Shipment request submitted successfully!");
@@ -172,12 +320,12 @@ const ShippingCalculator = () => {
           Shipping Cost Calculator
         </CardTitle>
         <CardDescription>
-          Calculate your shipping costs for sea or air freight
+          Calculate your shipping costs for sea or air freight with multiple items
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-6">
         <Tabs value={shippingType} onValueChange={(v) => setShippingType(v as "sea" | "air")}>
-          <TabsList className="grid w-full grid-cols-2 mb-6">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="sea" className="flex items-center gap-2">
               <Ship className="h-4 w-4" />
               Sea Shipping
@@ -188,7 +336,7 @@ const ShippingCalculator = () => {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="sea" className="space-y-6">
+          <TabsContent value="sea" className="space-y-6 mt-6">
             <RadioGroup value={seaMethod} onValueChange={(v) => setSeaMethod(v as "cbm" | "container")}>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="cbm" id="cbm" />
@@ -200,19 +348,7 @@ const ShippingCalculator = () => {
               </div>
             </RadioGroup>
 
-            {seaMethod === "cbm" ? (
-              <div className="space-y-2">
-                <Label htmlFor="cbm-input">Volume (CBM)</Label>
-                <Input
-                  id="cbm-input"
-                  type="number"
-                  step="0.01"
-                  placeholder="Enter volume in cubic meters"
-                  value={cbm}
-                  onChange={(e) => setCbm(e.target.value)}
-                />
-              </div>
-            ) : (
+            {seaMethod === "container" && (
               <div className="space-y-2">
                 <Label htmlFor="container-select">Select Container Type</Label>
                 <Select value={selectedContainer} onValueChange={setSelectedContainer}>
@@ -231,75 +367,57 @@ const ShippingCalculator = () => {
             )}
           </TabsContent>
 
-          <TabsContent value="air" className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="weight">Weight (kg)</Label>
-              <Input
-                id="weight"
-                type="number"
-                step="0.1"
-                placeholder="Enter weight in kilograms"
-                value={weight}
-                onChange={(e) => setWeight(e.target.value)}
-              />
-            </div>
-            
-            <div className="grid grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="length">Length (cm)</Label>
-                <Input
-                  id="length"
-                  type="number"
-                  step="0.1"
-                  placeholder="Length"
-                  value={length}
-                  onChange={(e) => setLength(e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="width">Width (cm)</Label>
-                <Input
-                  id="width"
-                  type="number"
-                  step="0.1"
-                  placeholder="Width"
-                  value={width}
-                  onChange={(e) => setWidth(e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="height">Height (cm)</Label>
-                <Input
-                  id="height"
-                  type="number"
-                  step="0.1"
-                  placeholder="Height"
-                  value={height}
-                  onChange={(e) => setHeight(e.target.value)}
-                />
-              </div>
-            </div>
+          <TabsContent value="air" className="mt-6">
+            <p className="text-sm text-muted-foreground mb-4">
+              Air freight is calculated using chargeable weight (higher of actual or volumetric weight)
+            </p>
           </TabsContent>
         </Tabs>
 
-        <div className="mt-6 space-y-4">
-          <Button onClick={calculateCost} className="w-full" size="lg">
-            Calculate Cost
-          </Button>
+        {/* Items Section */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="font-semibold">Shipment Items</h3>
+            <Button type="button" variant="outline" size="sm" onClick={addItem}>
+              <Plus className="mr-2 h-4 w-4" />
+              Add Item
+            </Button>
+          </div>
 
-          {calculatedCost !== null && (
-            <div className="bg-accent/10 border border-accent rounded-lg p-6 text-center space-y-3">
-              <p className="text-sm text-muted-foreground">Estimated Cost</p>
-              <p className="text-4xl font-bold text-accent">
-                ${calculatedCost.toFixed(2)}
-              </p>
-              <Button onClick={handleSubmitRequest} variant="default" size="lg" className="mt-4">
-                <Package className="mr-2 h-4 w-4" />
-                Submit Request
-              </Button>
-            </div>
-          )}
+          <div className="space-y-3">
+            {items.map((item) => (
+              <ItemRow
+                key={item.id}
+                item={item}
+                onUpdate={updateItem}
+                onRemove={removeItem}
+                canRemove={items.length > 1}
+              />
+            ))}
+          </div>
         </div>
+
+        {/* Calculate Button */}
+        <Button onClick={calculateQuote} className="w-full" size="lg">
+          <Calculator className="mr-2 h-4 w-4" />
+          Calculate Quote
+        </Button>
+
+        {/* Quote Breakdown */}
+        {quoteBreakdown && (
+          <div className="space-y-4">
+            <QuoteBreakdown
+              breakdown={quoteBreakdown}
+              validUntil={validUntil}
+              shippingType={shippingType}
+            />
+
+            <Button onClick={handleSubmitRequest} className="w-full" size="lg">
+              <Package className="mr-2 h-4 w-4" />
+              Submit Shipment Request
+            </Button>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
