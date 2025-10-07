@@ -149,6 +149,59 @@ export type Database = {
         }
         Relationships: []
       }
+      payments: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string
+          customer_id: string
+          id: string
+          paid_at: string | null
+          payment_method: string | null
+          shipment_request_id: string
+          status: string
+          stripe_customer_id: string | null
+          stripe_payment_intent_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          currency?: string
+          customer_id: string
+          id?: string
+          paid_at?: string | null
+          payment_method?: string | null
+          shipment_request_id: string
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_payment_intent_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          customer_id?: string
+          id?: string
+          paid_at?: string | null
+          payment_method?: string | null
+          shipment_request_id?: string
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_payment_intent_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_shipment_request_id_fkey"
+            columns: ["shipment_request_id"]
+            isOneToOne: false
+            referencedRelation: "shipment_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           address: string | null

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Navigation from "@/components/Navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,6 +13,7 @@ import DocumentManager from "@/components/documents/DocumentManager";
 import NotificationSettings from "@/components/notifications/NotificationSettings";
 import QuoteView from "@/components/dashboard/QuoteView";
 import InvoiceGenerator from "@/components/dashboard/InvoiceGenerator";
+import PaymentButton from "@/components/dashboard/PaymentButton";
 
 interface ShipmentRequest {
   id: string;
@@ -32,6 +33,7 @@ interface Shipment {
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [requests, setRequests] = useState<ShipmentRequest[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -39,6 +41,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     checkAuthAndLoadData();
+    handlePaymentCallback();
   }, []);
 
   const checkAuthAndLoadData = async () => {
@@ -60,6 +63,31 @@ const Dashboard = () => {
 
     await loadRequests(session.user.id, !!adminRole);
     setLoading(false);
+  };
+
+  const handlePaymentCallback = async () => {
+    const paymentStatus = searchParams.get("payment");
+    const sessionId = searchParams.get("session_id");
+
+    if (paymentStatus === "success" && sessionId) {
+      try {
+        const { data, error } = await supabase.functions.invoke("verify-payment", {
+          body: { sessionId },
+        });
+
+        if (error) throw error;
+
+        if (data?.paid) {
+          toast.success(`Payment successful! Amount: ₦${data.amount?.toFixed(2)}`);
+          // Reload requests to show updated status
+          await loadRequests((await supabase.auth.getUser()).data.user?.id || "", isAdmin);
+        }
+      } catch (error) {
+        console.error("Error verifying payment:", error);
+      }
+    } else if (paymentStatus === "canceled") {
+      toast.error("Payment was canceled");
+    }
   };
 
   const loadRequests = async (userId: string, isAdmin: boolean) => {
@@ -217,6 +245,13 @@ const Dashboard = () => {
                         />
                       </div>
                     </div>
+
+                    {/* Payment Button */}
+                    <PaymentButton
+                      requestId={request.id}
+                      amount={request.calculated_cost}
+                      requestStatus={request.status}
+                    />
 
                     {/* Document Manager */}
                     <DocumentManager shipmentRequestId={request.id} />
