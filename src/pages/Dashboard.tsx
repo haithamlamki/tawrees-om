@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import ProfileSettings from "@/components/dashboard/ProfileSettings";
 import DocumentManager from "@/components/documents/DocumentManager";
 import NotificationSettings from "@/components/notifications/NotificationSettings";
+import QuoteView from "@/components/dashboard/QuoteView";
 
 interface ShipmentRequest {
   id: string;
@@ -33,6 +34,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [requests, setRequests] = useState<ShipmentRequest[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [selectedRequestId, setSelectedRequestId] = useState<string | null>(null);
 
   useEffect(() => {
     checkAuthAndLoadData();
@@ -149,6 +151,10 @@ const Dashboard = () => {
               <Bell className="mr-2 h-4 w-4" />
               Notifications
             </TabsTrigger>
+            <TabsTrigger value="quotes">
+              <FileText className="mr-2 h-4 w-4" />
+              My Quotes
+            </TabsTrigger>
             {isAdmin && (
               <TabsTrigger value="admin" onClick={() => navigate("/admin")}>
                 <Settings className="mr-2 h-4 w-4" />
@@ -219,6 +225,41 @@ const Dashboard = () => {
 
           <TabsContent value="notifications">
             <NotificationSettings />
+          </TabsContent>
+
+          <TabsContent value="quotes" className="space-y-4">
+            {requests.length > 0 ? (
+              requests.map((request) => (
+                <div key={request.id} className="space-y-2">
+                  <div className="flex items-center justify-between p-4 border rounded-lg bg-card">
+                    <div>
+                      <p className="font-medium">Request #{request.id.slice(0, 8)}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {request.shipping_type} - {new Date(request.created_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setSelectedRequestId(selectedRequestId === request.id ? null : request.id)}
+                    >
+                      {selectedRequestId === request.id ? "Hide Quote" : "View Quote"}
+                    </Button>
+                  </div>
+                  {selectedRequestId === request.id && (
+                    <QuoteView requestId={request.id} />
+                  )}
+                </div>
+              ))
+            ) : (
+              <Card>
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <FileText className="h-12 w-12 text-muted-foreground mb-4" />
+                  <p className="text-muted-foreground mb-4">No shipment requests yet</p>
+                  <Button onClick={() => navigate("/")}>Create New Request</Button>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
         </Tabs>
       </main>
