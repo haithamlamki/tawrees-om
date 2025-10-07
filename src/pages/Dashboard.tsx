@@ -6,9 +6,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Package, Clock, CheckCircle, XCircle, Ship, Settings, User } from "lucide-react";
+import { Package, Clock, CheckCircle, XCircle, Ship, Settings, User, FileText } from "lucide-react";
 import { toast } from "sonner";
 import ProfileSettings from "@/components/dashboard/ProfileSettings";
+import DocumentManager from "@/components/documents/DocumentManager";
 
 interface ShipmentRequest {
   id: string;
@@ -181,7 +182,7 @@ const Dashboard = () => {
                       {getStatusBadge(request.status)}
                     </div>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="space-y-4">
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm text-muted-foreground">Estimated Cost</p>
@@ -198,6 +199,9 @@ const Dashboard = () => {
                         </Button>
                       )}
                     </div>
+
+                    {/* Document Manager */}
+                    <DocumentManager shipmentRequestId={request.id} />
                   </CardContent>
                 </Card>
               ))

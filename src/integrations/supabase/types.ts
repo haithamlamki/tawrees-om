@@ -133,6 +133,53 @@ export type Database = {
           },
         ]
       }
+      shipment_documents: {
+        Row: {
+          created_at: string
+          document_type: string
+          file_name: string
+          file_path: string
+          file_size: number
+          file_type: string
+          id: string
+          shipment_request_id: string
+          updated_at: string
+          uploaded_by: string
+        }
+        Insert: {
+          created_at?: string
+          document_type: string
+          file_name: string
+          file_path: string
+          file_size: number
+          file_type: string
+          id?: string
+          shipment_request_id: string
+          updated_at?: string
+          uploaded_by: string
+        }
+        Update: {
+          created_at?: string
+          document_type?: string
+          file_name?: string
+          file_path?: string
+          file_size?: number
+          file_type?: string
+          id?: string
+          shipment_request_id?: string
+          updated_at?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shipment_documents_shipment_request_id_fkey"
+            columns: ["shipment_request_id"]
+            isOneToOne: false
+            referencedRelation: "shipment_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shipment_requests: {
         Row: {
           calculated_cost: number
