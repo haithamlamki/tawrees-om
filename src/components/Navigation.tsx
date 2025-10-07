@@ -5,6 +5,7 @@ import { Ship, User, LogOut, LayoutDashboard, Package, Truck, Calculator } from 
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import NotificationBell from "@/components/notifications/NotificationBell";
+import logo from "@/assets/tawreed-logo.png";
 
 interface NavigationProps {
   isAuthenticated: boolean;
@@ -43,10 +44,8 @@ const Navigation = ({ isAuthenticated }: NavigationProps) => {
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           <Link to="/" className="flex items-center space-x-2">
-            <div className="bg-primary p-2 rounded-lg">
-              <Ship className="h-5 w-5 text-primary-foreground" />
-            </div>
-            <span className="text-xl font-bold text-primary">ShipFlow</span>
+            <img src={logo} alt="Tawreed" className="h-10 w-auto" />
+            <span className="text-xl font-bold text-primary">Tawreed</span>
           </Link>
 
           <div className="flex items-center gap-4">
