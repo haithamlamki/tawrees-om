@@ -71,9 +71,9 @@ const QuoteBreakdown = ({ breakdown, validUntil, shippingType }: QuoteBreakdownP
           </div>
         )}
 
-        {/* Base Rate */}
+        {/* Base Cost */}
         <div className="flex justify-between items-center">
-          <span className="text-muted-foreground">Base Rate</span>
+          <span className="text-muted-foreground">Buy Cost</span>
           <span className="font-semibold">{formatCurrency(breakdown.baseRate)}</span>
         </div>
 
@@ -95,26 +95,19 @@ const QuoteBreakdown = ({ breakdown, validUntil, shippingType }: QuoteBreakdownP
           </>
         )}
 
-        {/* Margin */}
+        {/* Profit */}
         <Separator />
         <div className="flex justify-between items-center">
           <span className="text-muted-foreground">
-            Margin ({breakdown.margin.type === "percentage" ? `${breakdown.margin.value}%` : "Flat"})
+            Profit ({breakdown.margin.value.toFixed(2)}% margin)
           </span>
-          <span className="font-semibold">{formatCurrency(breakdown.margin.amount)}</span>
+          <span className="font-semibold text-green-600">+{formatCurrency(breakdown.margin.amount)}</span>
         </div>
 
-        {/* Subtotal */}
-        <Separator />
-        <div className="flex justify-between items-center">
-          <span className="font-medium">Subtotal</span>
-          <span className="font-bold">{formatCurrency(breakdown.subtotal)}</span>
-        </div>
-
-        {/* Total */}
+        {/* Total Sell Price */}
         <Separator className="bg-accent/30" />
         <div className="flex justify-between items-center bg-accent/10 -mx-6 px-6 py-4 rounded-lg">
-          <span className="text-lg font-bold">Total Cost</span>
+          <span className="text-lg font-bold">Total Sell Price</span>
           <span className="text-2xl font-bold text-accent">
             {formatCurrency(breakdown.total)}
           </span>

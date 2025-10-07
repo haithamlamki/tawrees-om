@@ -30,6 +30,8 @@ interface Rate {
   id: string;
   rate_type: string;
   base_rate: number;
+  buy_price: number | null;
+  sell_price: number | null;
   margin_percentage: number;
   container_type_id: string | null;
 }
@@ -141,6 +143,8 @@ const ShippingCalculator = () => {
     }
 
     let baseRate = 0;
+    let buyCost = 0;
+    let sellPrice = 0;
     let calculations: any = {};
 
     if (shippingType === "sea") {
@@ -154,20 +158,26 @@ const ShippingCalculator = () => {
         }
 
         calculations.totalCBM = totalCBM;
-        baseRate = totalCBM * cbmRate.base_rate;
         
-        // Apply margin
-        const marginAmount = baseRate * (cbmRate.margin_percentage / 100);
+        // Use buy/sell prices if available, otherwise fall back to base_rate
+        buyCost = totalCBM * (cbmRate.buy_price || cbmRate.base_rate);
+        sellPrice = totalCBM * (cbmRate.sell_price || cbmRate.base_rate);
+        baseRate = buyCost;
+        
+        // Calculate profit
+        const profitAmount = sellPrice - buyCost;
+        const profitMarginPercentage = buyCost > 0 ? (profitAmount / buyCost) * 100 : 0;
+        
         const breakdown: QuoteBreakdownType = {
-          baseRate,
-          surcharges: [], // Will be enhanced in Phase 9
+          baseRate: buyCost,
+          surcharges: [],
           margin: {
             type: "percentage",
-            value: cbmRate.margin_percentage,
-            amount: marginAmount,
+            value: profitMarginPercentage,
+            amount: profitAmount,
           },
-          subtotal: baseRate + marginAmount,
-          total: baseRate + marginAmount,
+          subtotal: sellPrice,
+          total: sellPrice,
           calculations,
         };
         
@@ -188,19 +198,23 @@ const ShippingCalculator = () => {
           return;
         }
 
-        baseRate = containerRate.base_rate;
-        const marginAmount = baseRate * (containerRate.margin_percentage / 100);
+        buyCost = containerRate.buy_price || containerRate.base_rate;
+        sellPrice = containerRate.sell_price || containerRate.base_rate;
+        baseRate = buyCost;
+        
+        const profitAmount = sellPrice - buyCost;
+        const profitMarginPercentage = buyCost > 0 ? (profitAmount / buyCost) * 100 : 0;
         
         const breakdown: QuoteBreakdownType = {
-          baseRate,
+          baseRate: buyCost,
           surcharges: [],
           margin: {
             type: "percentage",
-            value: containerRate.margin_percentage,
-            amount: marginAmount,
+            value: profitMarginPercentage,
+            amount: profitAmount,
           },
-          subtotal: baseRate + marginAmount,
-          total: baseRate + marginAmount,
+          subtotal: sellPrice,
+          total: sellPrice,
           calculations,
         };
         
@@ -224,19 +238,23 @@ const ShippingCalculator = () => {
         chargeableWeight: chargeableWeight,
       };
 
-      baseRate = chargeableWeight * airRate.base_rate;
-      const marginAmount = baseRate * (airRate.margin_percentage / 100);
+      buyCost = chargeableWeight * (airRate.buy_price || airRate.base_rate);
+      sellPrice = chargeableWeight * (airRate.sell_price || airRate.base_rate);
+      baseRate = buyCost;
+      
+      const profitAmount = sellPrice - buyCost;
+      const profitMarginPercentage = buyCost > 0 ? (profitAmount / buyCost) * 100 : 0;
       
       const breakdown: QuoteBreakdownType = {
-        baseRate,
+        baseRate: buyCost,
         surcharges: [],
         margin: {
           type: "percentage",
-          value: airRate.margin_percentage,
-          amount: marginAmount,
+          value: profitMarginPercentage,
+          amount: profitAmount,
         },
-        subtotal: baseRate + marginAmount,
-        total: baseRate + marginAmount,
+        subtotal: sellPrice,
+        total: sellPrice,
         calculations,
       };
       
@@ -294,12 +312,15 @@ const ShippingCalculator = () => {
       return;
     }
 
-    // Create quote record
+    // Create quote record with profit tracking
     const { error: quoteError } = await supabase.from("quotes").insert([
       {
         shipment_request_id: shipmentRequest.id,
         breakdown: JSON.parse(JSON.stringify(quoteBreakdown)),
         total_sell_price: quoteBreakdown.total,
+        buy_cost: quoteBreakdown.baseRate,
+        profit_amount: quoteBreakdown.margin.amount,
+        profit_margin_percentage: quoteBreakdown.margin.value,
         valid_until: validUntil?.toISOString(),
       },
     ]);

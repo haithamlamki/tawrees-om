@@ -71,24 +71,33 @@ export type Database = {
       quotes: {
         Row: {
           breakdown: Json
+          buy_cost: number | null
           created_at: string
           id: string
+          profit_amount: number | null
+          profit_margin_percentage: number | null
           shipment_request_id: string | null
           total_sell_price: number
           valid_until: string
         }
         Insert: {
           breakdown: Json
+          buy_cost?: number | null
           created_at?: string
           id?: string
+          profit_amount?: number | null
+          profit_margin_percentage?: number | null
           shipment_request_id?: string | null
           total_sell_price: number
           valid_until: string
         }
         Update: {
           breakdown?: Json
+          buy_cost?: number | null
           created_at?: string
           id?: string
+          profit_amount?: number | null
+          profit_margin_percentage?: number | null
           shipment_request_id?: string | null
           total_sell_price?: number
           valid_until?: string
@@ -222,6 +231,7 @@ export type Database = {
       shipping_rates: {
         Row: {
           base_rate: number
+          buy_price: number | null
           container_type_id: string | null
           created_at: string
           effective_from: string
@@ -229,10 +239,12 @@ export type Database = {
           is_active: boolean
           margin_percentage: number
           rate_type: string
+          sell_price: number | null
           updated_at: string
         }
         Insert: {
           base_rate: number
+          buy_price?: number | null
           container_type_id?: string | null
           created_at?: string
           effective_from?: string
@@ -240,10 +252,12 @@ export type Database = {
           is_active?: boolean
           margin_percentage?: number
           rate_type: string
+          sell_price?: number | null
           updated_at?: string
         }
         Update: {
           base_rate?: number
+          buy_price?: number | null
           container_type_id?: string | null
           created_at?: string
           effective_from?: string
@@ -251,6 +265,7 @@ export type Database = {
           is_active?: boolean
           margin_percentage?: number
           rate_type?: string
+          sell_price?: number | null
           updated_at?: string
         }
         Relationships: [

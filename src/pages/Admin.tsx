@@ -29,6 +29,8 @@ interface Rate {
   id: string;
   rate_type: string;
   base_rate: number;
+  buy_price: number | null;
+  sell_price: number | null;
   margin_percentage: number;
 }
 
@@ -39,6 +41,8 @@ const Admin = () => {
   const [rates, setRates] = useState<Rate[]>([]);
   const [selectedRate, setSelectedRate] = useState<string>("");
   const [baseRate, setBaseRate] = useState<string>("");
+  const [buyPrice, setBuyPrice] = useState<string>("");
+  const [sellPrice, setSellPrice] = useState<string>("");
   const [margin, setMargin] = useState<string>("");
 
   useEffect(() => {
@@ -152,17 +156,26 @@ const Admin = () => {
   };
 
   const handleUpdateRate = async () => {
-    if (!selectedRate || !baseRate || !margin) {
-      toast.error("Please fill all fields");
+    if (!selectedRate) {
+      toast.error("Please select a rate");
+      return;
+    }
+
+    const updateData: any = {};
+    
+    if (baseRate) updateData.base_rate = parseFloat(baseRate);
+    if (buyPrice) updateData.buy_price = parseFloat(buyPrice);
+    if (sellPrice) updateData.sell_price = parseFloat(sellPrice);
+    if (margin) updateData.margin_percentage = parseFloat(margin);
+
+    if (Object.keys(updateData).length === 0) {
+      toast.error("Please fill at least one field to update");
       return;
     }
 
     const { error } = await supabase
       .from("shipping_rates")
-      .update({
-        base_rate: parseFloat(baseRate),
-        margin_percentage: parseFloat(margin),
-      })
+      .update(updateData)
       .eq("id", selectedRate);
 
     if (error) {
@@ -174,6 +187,8 @@ const Admin = () => {
     await loadRates();
     setSelectedRate("");
     setBaseRate("");
+    setBuyPrice("");
+    setSellPrice("");
     setMargin("");
   };
 
@@ -307,6 +322,8 @@ const Admin = () => {
                       const rate = rates.find(r => r.id === value);
                       if (rate) {
                         setBaseRate(rate.base_rate.toString());
+                        setBuyPrice(rate.buy_price?.toString() || "");
+                        setSellPrice(rate.sell_price?.toString() || "");
                         setMargin(rate.margin_percentage.toString());
                       }
                     }}>
@@ -324,7 +341,31 @@ const Admin = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="base-rate">Base Rate ($)</Label>
+                    <Label htmlFor="buy-price">Buy Price ($)</Label>
+                    <Input
+                      id="buy-price"
+                      type="number"
+                      step="0.01"
+                      placeholder="Enter buy price"
+                      value={buyPrice}
+                      onChange={(e) => setBuyPrice(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="sell-price">Sell Price ($)</Label>
+                    <Input
+                      id="sell-price"
+                      type="number"
+                      step="0.01"
+                      placeholder="Enter sell price"
+                      value={sellPrice}
+                      onChange={(e) => setSellPrice(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="base-rate">Base Rate ($) - Legacy</Label>
                     <Input
                       id="base-rate"
                       type="number"
@@ -336,7 +377,7 @@ const Admin = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="margin">Margin (%)</Label>
+                    <Label htmlFor="margin">Margin (%) - Legacy</Label>
                     <Input
                       id="margin"
                       type="number"
@@ -360,24 +401,31 @@ const Admin = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {rates.map((rate) => (
-                      <div
-                        key={rate.id}
-                        className="flex items-center justify-between p-4 border rounded-lg"
-                      >
-                        <div>
-                          <p className="font-medium">
-                            {rate.rate_type.replace("_", " ").toUpperCase()}
-                          </p>
-                          <p className="text-sm text-muted-foreground">
-                            Base: ${rate.base_rate} • Margin: {rate.margin_percentage}%
-                          </p>
+                    {rates.map((rate) => {
+                      const buyPrice = rate.buy_price || rate.base_rate;
+                      const sellPrice = rate.sell_price || rate.base_rate * (1 + rate.margin_percentage / 100);
+                      const profit = sellPrice - buyPrice;
+                      const profitMargin = buyPrice > 0 ? ((profit / buyPrice) * 100).toFixed(2) : "0.00";
+                      
+                      return (
+                        <div
+                          key={rate.id}
+                          className="flex items-center justify-between p-4 border rounded-lg"
+                        >
+                          <div className="flex-1">
+                            <p className="font-medium">
+                              {rate.rate_type.replace("_", " ").toUpperCase()}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              Buy: ${buyPrice.toFixed(2)} • Sell: ${sellPrice.toFixed(2)}
+                            </p>
+                            <p className="text-xs text-green-600 font-medium">
+                              Profit: ${profit.toFixed(2)} ({profitMargin}% margin)
+                            </p>
+                          </div>
                         </div>
-                        <p className="text-lg font-bold text-accent">
-                          ${(rate.base_rate * (1 + rate.margin_percentage / 100)).toFixed(2)}
-                        </p>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </CardContent>
               </Card>
