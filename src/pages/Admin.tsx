@@ -19,6 +19,7 @@ import RevenueChart from "@/components/admin/RevenueChart";
 import TopCustomers from "@/components/admin/TopCustomers";
 import QuoteManagement from "@/components/admin/QuoteManagement";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { sendRequestApprovedNotification } from "@/utils/notificationUtils";
 
 interface ShipmentRequest {
   id: string;
@@ -142,6 +143,16 @@ const Admin = () => {
     if (shipmentError) {
       toast.error("Failed to create shipment");
       return;
+    }
+
+    // Get customer ID for notification
+    const request = pendingRequests.find(r => r.id === requestId);
+    if (request?.customer_id) {
+      await sendRequestApprovedNotification(
+        request.customer_id,
+        requestId,
+        trackingNumber
+      );
     }
 
     toast.success(`Request approved! Tracking: ${trackingNumber}`);

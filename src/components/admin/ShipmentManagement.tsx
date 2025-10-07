@@ -4,12 +4,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Package, Edit, Calendar } from "lucide-react";
+import { Package, Edit } from "lucide-react";
+import ShipmentStatusUpdate from "./ShipmentStatusUpdate";
 
 interface Shipment {
   id: string;
@@ -32,10 +30,6 @@ const ShipmentManagement = () => {
   const [shipments, setShipments] = useState<Shipment[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedShipment, setSelectedShipment] = useState<Shipment | null>(null);
-  const [statusUpdate, setStatusUpdate] = useState("");
-  const [locationUpdate, setLocationUpdate] = useState("");
-  const [notesUpdate, setNotesUpdate] = useState("");
-  const [estimatedDelivery, setEstimatedDelivery] = useState("");
 
   useEffect(() => {
     loadShipments();
@@ -83,55 +77,6 @@ const ShipmentManagement = () => {
 
     setShipments(data || []);
     setLoading(false);
-  };
-
-  const handleUpdateShipment = async () => {
-    if (!selectedShipment) return;
-
-    const updateData: any = {
-      status: statusUpdate || selectedShipment.status,
-      current_location: locationUpdate || selectedShipment.current_location,
-      notes: notesUpdate || null,
-    };
-
-    if (estimatedDelivery) {
-      updateData.estimated_delivery = new Date(estimatedDelivery).toISOString();
-    }
-
-    // Mark as delivered if status is delivered
-    if (statusUpdate === "delivered" && !selectedShipment.actual_delivery) {
-      updateData.actual_delivery = new Date().toISOString();
-    }
-
-    const { error } = await supabase
-      .from("shipments")
-      .update(updateData)
-      .eq("id", selectedShipment.id);
-
-    if (error) {
-      toast.error("Failed to update shipment");
-      console.error(error);
-      return;
-    }
-
-    toast.success("Shipment updated successfully");
-    setSelectedShipment(null);
-    setStatusUpdate("");
-    setLocationUpdate("");
-    setNotesUpdate("");
-    setEstimatedDelivery("");
-    loadShipments();
-  };
-
-  const openUpdateDialog = (shipment: Shipment) => {
-    setSelectedShipment(shipment);
-    setStatusUpdate(shipment.status);
-    setLocationUpdate(shipment.current_location || "");
-    setEstimatedDelivery(
-      shipment.estimated_delivery
-        ? new Date(shipment.estimated_delivery).toISOString().split("T")[0]
-        : ""
-    );
   };
 
   if (loading) {
@@ -195,12 +140,12 @@ const ShipmentManagement = () => {
                     {new Date(shipment.created_at).toLocaleDateString()}
                   </TableCell>
                   <TableCell>
-                    <Dialog>
+                    <Dialog open={selectedShipment?.id === shipment.id} onOpenChange={(open) => !open && setSelectedShipment(null)}>
                       <DialogTrigger asChild>
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => openUpdateDialog(shipment)}
+                          onClick={() => setSelectedShipment(shipment)}
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
@@ -213,60 +158,15 @@ const ShipmentManagement = () => {
                           </DialogDescription>
                         </DialogHeader>
                         
-                        <div className="space-y-4 py-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="status">Status</Label>
-                            <Select value={statusUpdate} onValueChange={setStatusUpdate}>
-                              <SelectTrigger id="status">
-                                <SelectValue placeholder="Select status" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="processing">Processing</SelectItem>
-                                <SelectItem value="in_transit">In Transit</SelectItem>
-                                <SelectItem value="out_for_delivery">Out for Delivery</SelectItem>
-                                <SelectItem value="delivered">Delivered</SelectItem>
-                                <SelectItem value="delayed">Delayed</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label htmlFor="location">Current Location</Label>
-                            <Input
-                              id="location"
-                              value={locationUpdate}
-                              onChange={(e) => setLocationUpdate(e.target.value)}
-                              placeholder="e.g., Los Angeles, CA"
-                            />
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label htmlFor="notes">Notes</Label>
-                            <Input
-                              id="notes"
-                              value={notesUpdate}
-                              onChange={(e) => setNotesUpdate(e.target.value)}
-                              placeholder="Optional update notes"
-                            />
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label htmlFor="estimated_delivery" className="flex items-center gap-2">
-                              <Calendar className="h-4 w-4" />
-                              Estimated Delivery
-                            </Label>
-                            <Input
-                              id="estimated_delivery"
-                              type="date"
-                              value={estimatedDelivery}
-                              onChange={(e) => setEstimatedDelivery(e.target.value)}
-                            />
-                          </div>
-
-                          <Button onClick={handleUpdateShipment} className="w-full">
-                            Update Shipment
-                          </Button>
-                        </div>
+                        <ShipmentStatusUpdate
+                          shipmentId={shipment.id}
+                          currentStatus={shipment.status}
+                          trackingNumber={shipment.tracking_number}
+                          onUpdate={() => {
+                            setSelectedShipment(null);
+                            loadShipments();
+                          }}
+                        />
                       </DialogContent>
                     </Dialog>
                   </TableCell>

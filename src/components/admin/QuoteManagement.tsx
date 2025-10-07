@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
+import { sendQuoteReadyNotification } from "@/utils/notificationUtils";
 
 interface QuoteManagementProps {
   requestId: string;
@@ -74,6 +75,23 @@ const QuoteManagement = ({ requestId, calculatedCost, onQuoteCreated }: QuoteMan
         .eq("id", requestId);
 
       if (updateError) throw updateError;
+
+      // Get customer ID for notification
+      const { data: requestData } = await supabase
+        .from("shipment_requests")
+        .select("customer_id")
+        .eq("id", requestId)
+        .single();
+
+      if (requestData?.customer_id) {
+        // Send notification
+        await sendQuoteReadyNotification(
+          requestData.customer_id,
+          requestId,
+          parseFloat(formData.sellPrice),
+          validUntil.toISOString()
+        );
+      }
 
       toast({
         title: "Quote created",
