@@ -11,9 +11,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { DollarSign, Settings, Package, CheckCircle, XCircle, Users, Ship } from "lucide-react";
+import { DollarSign, Settings, Package, CheckCircle, XCircle, Users, Ship, BarChart3 } from "lucide-react";
 import CustomerManagement from "@/components/admin/CustomerManagement";
 import ShipmentManagement from "@/components/admin/ShipmentManagement";
+import DashboardMetrics from "@/components/admin/DashboardMetrics";
+import RevenueChart from "@/components/admin/RevenueChart";
+import TopCustomers from "@/components/admin/TopCustomers";
 
 interface ShipmentRequest {
   id: string;
@@ -215,25 +218,42 @@ const Admin = () => {
           <p className="text-muted-foreground">Manage rates and approve shipment requests</p>
         </div>
 
-        <Tabs defaultValue="requests" className="space-y-6">
+        <Tabs defaultValue="dashboard" className="space-y-6">
           <TabsList>
+            <TabsTrigger value="dashboard">
+              <BarChart3 className="mr-2 h-4 w-4" />
+              Dashboard
+            </TabsTrigger>
             <TabsTrigger value="requests">
               <Package className="mr-2 h-4 w-4" />
-              Pending Requests ({pendingRequests.length})
-            </TabsTrigger>
-            <TabsTrigger value="customers">
-              <Users className="mr-2 h-4 w-4" />
-              Customers
+              Requests ({pendingRequests.length})
             </TabsTrigger>
             <TabsTrigger value="shipments">
               <Ship className="mr-2 h-4 w-4" />
               Shipments
             </TabsTrigger>
+            <TabsTrigger value="customers">
+              <Users className="mr-2 h-4 w-4" />
+              Customers
+            </TabsTrigger>
             <TabsTrigger value="rates">
               <DollarSign className="mr-2 h-4 w-4" />
-              Rate Management
+              Rates
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="dashboard" className="space-y-6">
+            <DashboardMetrics />
+            
+            <div className="grid gap-6 md:grid-cols-3">
+              <div className="md:col-span-2">
+                <RevenueChart />
+              </div>
+              <div>
+                <TopCustomers />
+              </div>
+            </div>
+          </TabsContent>
 
           <TabsContent value="requests">
             {pendingRequests.length === 0 ? (
