@@ -4,13 +4,24 @@ import { supabase } from "@/integrations/supabase/client";
 import Navigation from "@/components/Navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Package, Truck, Plane, CheckCircle, Clock } from "lucide-react";
+import { Package, Truck, Plane, Calendar } from "lucide-react";
+import TrackingTimeline from "@/components/tracking/TrackingTimeline";
+
+interface StatusHistoryItem {
+  id: string;
+  status: string;
+  location: string | null;
+  notes: string | null;
+  created_at: string;
+}
 
 interface Shipment {
   id: string;
   tracking_number: string;
   status: string;
+  current_location: string | null;
   estimated_delivery: string | null;
+  actual_delivery: string | null;
   notes: string | null;
   created_at: string;
   shipment_requests?: {
@@ -24,10 +35,43 @@ const Tracking = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [shipment, setShipment] = useState<Shipment | null>(null);
+  const [statusHistory, setStatusHistory] = useState<StatusHistoryItem[]>([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     checkAuthAndLoadShipment();
+    
+    // Subscribe to realtime updates
+    const channel = supabase
+      .channel('tracking-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'shipments',
+          filter: `tracking_number=eq.${trackingNumber}`
+        },
+        () => {
+          checkAuthAndLoadShipment();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'shipment_status_history'
+        },
+        () => {
+          loadStatusHistory();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [trackingNumber]);
 
   const checkAuthAndLoadShipment = async () => {
@@ -58,25 +102,26 @@ const Tracking = () => {
     }
 
     setShipment(data as any);
+    await loadStatusHistory(data.id);
     setLoading(false);
   };
 
-  const getStatusSteps = () => {
-    const steps = [
-      { status: "processing", label: "Processing", icon: Clock },
-      { status: "in_transit", label: "In Transit", icon: Truck },
-      { status: "customs", label: "Customs", icon: Package },
-      { status: "ready_for_pickup", label: "Ready for Pickup", icon: CheckCircle },
-      { status: "delivered", label: "Delivered", icon: CheckCircle },
-    ];
+  const loadStatusHistory = async (shipmentId?: string) => {
+    const id = shipmentId || shipment?.id;
+    if (!id) return;
 
-    const currentIndex = steps.findIndex(s => s.status === shipment?.status);
-    
-    return steps.map((step, index) => ({
-      ...step,
-      completed: index <= currentIndex,
-      current: index === currentIndex,
-    }));
+    const { data, error } = await supabase
+      .from("shipment_status_history")
+      .select("*")
+      .eq("shipment_id", id)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error loading status history:", error);
+      return;
+    }
+
+    setStatusHistory(data || []);
   };
 
   if (loading) {
@@ -105,8 +150,6 @@ const Tracking = () => {
     );
   }
 
-  const steps = getStatusSteps();
-
   return (
     <div className="min-h-screen bg-background">
       <Navigation isAuthenticated={isAuthenticated} />
@@ -128,7 +171,7 @@ const Tracking = () => {
               </div>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="grid md:grid-cols-2 gap-4">
+              <div className="grid md:grid-cols-3 gap-4">
                 <div className="space-y-1">
                   <p className="text-sm text-muted-foreground">Shipping Type</p>
                   <p className="font-semibold flex items-center gap-2">
@@ -146,72 +189,50 @@ const Tracking = () => {
                     ${shipment.shipment_requests?.calculated_cost.toFixed(2)}
                   </p>
                 </div>
+                {shipment.current_location && (
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground">Current Location</p>
+                    <p className="font-semibold">{shipment.current_location}</p>
+                  </div>
+                )}
               </div>
 
-              {shipment.estimated_delivery && (
-                <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">Estimated Delivery</p>
-                  <p className="font-semibold">
-                    {new Date(shipment.estimated_delivery).toLocaleDateString()}
-                  </p>
-                </div>
-              )}
+              <div className="grid md:grid-cols-2 gap-4">
+                {shipment.estimated_delivery && (
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground flex items-center gap-1">
+                      <Calendar className="h-4 w-4" />
+                      Estimated Delivery
+                    </p>
+                    <p className="font-semibold">
+                      {new Date(shipment.estimated_delivery).toLocaleDateString()}
+                    </p>
+                  </div>
+                )}
+                {shipment.actual_delivery && (
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground">Actual Delivery</p>
+                    <p className="font-semibold text-green-600">
+                      {new Date(shipment.actual_delivery).toLocaleDateString()}
+                    </p>
+                  </div>
+                )}
+              </div>
             </CardContent>
           </Card>
 
           <Card className="shadow-card">
             <CardHeader>
-              <CardTitle>Shipment Progress</CardTitle>
-              <CardDescription>Track the journey of your package</CardDescription>
+              <CardTitle>Shipment History</CardTitle>
+              <CardDescription>Detailed tracking timeline</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="relative">
-                {/* Progress line */}
-                <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-border" />
-                
-                <div className="space-y-8">
-                  {steps.map((step, index) => {
-                    const Icon = step.icon;
-                    return (
-                      <div key={step.status} className="relative flex items-start gap-4">
-                        <div
-                          className={`relative z-10 flex h-16 w-16 items-center justify-center rounded-full border-4 ${
-                            step.completed
-                              ? "bg-primary border-primary"
-                              : "bg-background border-border"
-                          }`}
-                        >
-                          <Icon
-                            className={`h-6 w-6 ${
-                              step.completed ? "text-primary-foreground" : "text-muted-foreground"
-                            }`}
-                          />
-                        </div>
-                        <div className="flex-1 pt-3">
-                          <p
-                            className={`font-semibold ${
-                              step.completed ? "text-foreground" : "text-muted-foreground"
-                            }`}
-                          >
-                            {step.label}
-                          </p>
-                          {step.current && (
-                            <p className="text-sm text-muted-foreground mt-1">
-                              Current Status
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {shipment.notes && (
-                <div className="mt-8 p-4 bg-muted rounded-lg">
-                  <p className="text-sm font-medium mb-1">Additional Notes</p>
-                  <p className="text-sm text-muted-foreground">{shipment.notes}</p>
-                </div>
+              {statusHistory.length > 0 ? (
+                <TrackingTimeline statusHistory={statusHistory} />
+              ) : (
+                <p className="text-center text-muted-foreground py-8">
+                  No tracking updates yet
+                </p>
               )}
             </CardContent>
           </Card>

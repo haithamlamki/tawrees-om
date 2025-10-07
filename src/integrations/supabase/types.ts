@@ -215,9 +215,49 @@ export type Database = {
           },
         ]
       }
-      shipments: {
+      shipment_status_history: {
         Row: {
           created_at: string
+          created_by: string | null
+          id: string
+          location: string | null
+          notes: string | null
+          shipment_id: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          location?: string | null
+          notes?: string | null
+          shipment_id: string
+          status: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          location?: string | null
+          notes?: string | null
+          shipment_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shipment_status_history_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shipments: {
+        Row: {
+          actual_delivery: string | null
+          created_at: string
+          current_location: string | null
           estimated_delivery: string | null
           id: string
           notes: string | null
@@ -227,7 +267,9 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          actual_delivery?: string | null
           created_at?: string
+          current_location?: string | null
           estimated_delivery?: string | null
           id?: string
           notes?: string | null
@@ -237,7 +279,9 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          actual_delivery?: string | null
           created_at?: string
+          current_location?: string | null
           estimated_delivery?: string | null
           id?: string
           notes?: string | null
