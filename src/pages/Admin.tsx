@@ -11,7 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { DollarSign, Settings, Package, CheckCircle, XCircle } from "lucide-react";
+import { DollarSign, Settings, Package, CheckCircle, XCircle, Users } from "lucide-react";
+import CustomerManagement from "@/components/admin/CustomerManagement";
 
 interface ShipmentRequest {
   id: string;
@@ -219,6 +220,10 @@ const Admin = () => {
               <Package className="mr-2 h-4 w-4" />
               Pending Requests ({pendingRequests.length})
             </TabsTrigger>
+            <TabsTrigger value="customers">
+              <Users className="mr-2 h-4 w-4" />
+              Customers
+            </TabsTrigger>
             <TabsTrigger value="rates">
               <DollarSign className="mr-2 h-4 w-4" />
               Rate Management
@@ -302,6 +307,10 @@ const Admin = () => {
                 </CardContent>
               </Card>
             )}
+          </TabsContent>
+
+          <TabsContent value="customers">
+            <CustomerManagement />
           </TabsContent>
 
           <TabsContent value="rates">

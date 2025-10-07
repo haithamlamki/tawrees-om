@@ -6,8 +6,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Package, Clock, CheckCircle, XCircle, Ship, Settings } from "lucide-react";
+import { Package, Clock, CheckCircle, XCircle, Ship, Settings, User } from "lucide-react";
 import { toast } from "sonner";
+import ProfileSettings from "@/components/dashboard/ProfileSettings";
 
 interface ShipmentRequest {
   id: string;
@@ -138,6 +139,10 @@ const Dashboard = () => {
               <Package className="mr-2 h-4 w-4" />
               Shipment Requests
             </TabsTrigger>
+            <TabsTrigger value="profile">
+              <User className="mr-2 h-4 w-4" />
+              Profile
+            </TabsTrigger>
             {isAdmin && (
               <TabsTrigger value="admin" onClick={() => navigate("/admin")}>
                 <Settings className="mr-2 h-4 w-4" />
@@ -197,6 +202,10 @@ const Dashboard = () => {
                 </Card>
               ))
             )}
+          </TabsContent>
+
+          <TabsContent value="profile">
+            <ProfileSettings />
           </TabsContent>
         </Tabs>
       </main>

@@ -43,27 +43,48 @@ export type Database = {
       }
       profiles: {
         Row: {
+          address: string | null
+          city: string | null
           company_name: string | null
+          country: string | null
           created_at: string
+          customer_notes: string | null
+          email: string | null
           full_name: string
           id: string
+          payment_preference: string | null
           phone: string | null
+          postal_code: string | null
           updated_at: string
         }
         Insert: {
+          address?: string | null
+          city?: string | null
           company_name?: string | null
+          country?: string | null
           created_at?: string
+          customer_notes?: string | null
+          email?: string | null
           full_name: string
           id: string
+          payment_preference?: string | null
           phone?: string | null
+          postal_code?: string | null
           updated_at?: string
         }
         Update: {
+          address?: string | null
+          city?: string | null
           company_name?: string | null
+          country?: string | null
           created_at?: string
+          customer_notes?: string | null
+          email?: string | null
           full_name?: string
           id?: string
+          payment_preference?: string | null
           phone?: string | null
+          postal_code?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -177,6 +198,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "container_types"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shipment_requests_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customer_statistics"
+            referencedColumns: ["customer_id"]
           },
           {
             foreignKeyName: "shipment_requests_customer_id_fkey"
@@ -302,6 +330,13 @@ export type Database = {
             foreignKeyName: "user_roles_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "customer_statistics"
+            referencedColumns: ["customer_id"]
+          },
+          {
+            foreignKeyName: "user_roles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -309,7 +344,20 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      customer_statistics: {
+        Row: {
+          approved_requests: number | null
+          company_name: string | null
+          customer_id: string | null
+          email: string | null
+          full_name: string | null
+          last_request_date: string | null
+          total_requests: number | null
+          total_shipments: number | null
+          total_spent: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       generate_tracking_number: {
