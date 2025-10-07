@@ -12,6 +12,7 @@ import ProfileSettings from "@/components/dashboard/ProfileSettings";
 import DocumentManager from "@/components/documents/DocumentManager";
 import NotificationSettings from "@/components/notifications/NotificationSettings";
 import QuoteView from "@/components/dashboard/QuoteView";
+import InvoiceGenerator from "@/components/dashboard/InvoiceGenerator";
 
 interface ShipmentRequest {
   id: string;
@@ -201,14 +202,20 @@ const Dashboard = () => {
                           ${request.calculated_cost.toFixed(2)}
                         </p>
                       </div>
-                      {request.shipments && request.shipments.length > 0 && (
-                        <Button
-                          variant="outline"
-                          onClick={() => navigate(`/tracking/${request.shipments![0].tracking_number}`)}
-                        >
-                          Track Shipment
-                        </Button>
-                      )}
+                      <div className="flex gap-2">
+                        {request.shipments && request.shipments.length > 0 && (
+                          <Button
+                            variant="outline"
+                            onClick={() => navigate(`/tracking/${request.shipments![0].tracking_number}`)}
+                          >
+                            Track Shipment
+                          </Button>
+                        )}
+                        <InvoiceGenerator 
+                          requestId={request.id} 
+                          requestStatus={request.status}
+                        />
+                      </div>
                     </div>
 
                     {/* Document Manager */}

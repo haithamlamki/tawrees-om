@@ -18,6 +18,7 @@ import DashboardMetrics from "@/components/admin/DashboardMetrics";
 import RevenueChart from "@/components/admin/RevenueChart";
 import TopCustomers from "@/components/admin/TopCustomers";
 import QuoteManagement from "@/components/admin/QuoteManagement";
+import AnalyticsExport from "@/components/admin/AnalyticsExport";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { sendRequestApprovedNotification } from "@/utils/notificationUtils";
 
@@ -263,8 +264,9 @@ const Admin = () => {
               <div className="md:col-span-2">
                 <RevenueChart />
               </div>
-              <div>
+              <div className="space-y-6">
                 <TopCustomers />
+                <AnalyticsExport />
               </div>
             </div>
           </TabsContent>
