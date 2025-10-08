@@ -74,7 +74,13 @@ const AnalyticsExport = () => {
         { metric: "Date Range", value: `${format(start, "MMM dd, yyyy")} - ${format(end, "MMM dd, yyyy")}` },
       ];
 
-      downloadCSV(analyticsData, `analytics-${dateRange}-${format(new Date(), "yyyy-MM-dd")}.csv`);
+      const csvData = analyticsData.map(item => ({
+        Metric: item.metric,
+        Value: String(item.value)
+      }));
+
+      const csvString = `Metric,Value\n${csvData.map(row => `${row.Metric},${row.Value}`).join('\n')}`;
+      downloadCSV(csvString, `analytics-${dateRange}-${format(new Date(), "yyyy-MM-dd")}.csv`);
 
       toast({
         title: "Success",
