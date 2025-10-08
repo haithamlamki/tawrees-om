@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { DollarSign, Settings, Package, CheckCircle, XCircle, Users, Ship, BarChart3, UserCog, Building2, FileText, History as HistoryIcon, ClipboardList, FolderSync } from "lucide-react";
+import { DollarSign, Settings, Package, CheckCircle, XCircle, Users, Ship, BarChart3, UserCog, Building2, FileText, History as HistoryIcon, ClipboardList, FolderSync, Warehouse, Truck } from "lucide-react";
 import CustomerManagement from "@/components/admin/CustomerManagement";
 import ShipmentManagement from "@/components/admin/ShipmentManagement";
 import DashboardMetrics from "@/components/admin/DashboardMetrics";
@@ -303,6 +303,10 @@ const Admin = () => {
               <FolderSync className="mr-2 h-4 w-4" />
               Bulk Ops
             </TabsTrigger>
+            <TabsTrigger value="wms">
+              <Warehouse className="mr-2 h-4 w-4" />
+              WMS
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="dashboard" className="space-y-6">
@@ -568,6 +572,121 @@ const Admin = () => {
 
           <TabsContent value="bulk">
             <BulkOperations />
+          </TabsContent>
+
+          <TabsContent value="wms">
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Warehouse className="h-5 w-5" />
+                    Warehouse Management System
+                  </CardTitle>
+                  <CardDescription>
+                    Manage warehouse operations, inventory, orders, and customers
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <Button
+                      variant="outline"
+                      className="h-32 flex flex-col items-center justify-center gap-3"
+                      onClick={() => navigate("/admin/wms")}
+                    >
+                      <BarChart3 className="h-8 w-8 text-primary" />
+                      <div className="text-center">
+                        <div className="font-semibold">Dashboard</div>
+                        <div className="text-xs text-muted-foreground">Overview & Stats</div>
+                      </div>
+                    </Button>
+
+                    <Button
+                      variant="outline"
+                      className="h-32 flex flex-col items-center justify-center gap-3"
+                      onClick={() => navigate("/admin/wms-customers")}
+                    >
+                      <Users className="h-8 w-8 text-blue-500" />
+                      <div className="text-center">
+                        <div className="font-semibold">Customers</div>
+                        <div className="text-xs text-muted-foreground">Manage WMS Customers</div>
+                      </div>
+                    </Button>
+
+                    <Button
+                      variant="outline"
+                      className="h-32 flex flex-col items-center justify-center gap-3"
+                      onClick={() => navigate("/admin/wms-inventory")}
+                    >
+                      <Package className="h-8 w-8 text-green-500" />
+                      <div className="text-center">
+                        <div className="font-semibold">Inventory</div>
+                        <div className="text-xs text-muted-foreground">Stock Management</div>
+                      </div>
+                    </Button>
+
+                    <Button
+                      variant="outline"
+                      className="h-32 flex flex-col items-center justify-center gap-3"
+                      onClick={() => navigate("/admin/wms-orders")}
+                    >
+                      <ClipboardList className="h-8 w-8 text-purple-500" />
+                      <div className="text-center">
+                        <div className="font-semibold">Orders</div>
+                        <div className="text-xs text-muted-foreground">Order Processing</div>
+                      </div>
+                    </Button>
+
+                    <Button
+                      variant="outline"
+                      className="h-32 flex flex-col items-center justify-center gap-3"
+                      onClick={() => navigate("/admin/wms-invoices")}
+                    >
+                      <FileText className="h-8 w-8 text-orange-500" />
+                      <div className="text-center">
+                        <div className="font-semibold">Invoices</div>
+                        <div className="text-xs text-muted-foreground">Billing & Payments</div>
+                      </div>
+                    </Button>
+
+                    <Button
+                      variant="outline"
+                      className="h-32 flex flex-col items-center justify-center gap-3"
+                      onClick={() => navigate("/admin/wms-contracts")}
+                    >
+                      <FileText className="h-8 w-8 text-teal-500" />
+                      <div className="text-center">
+                        <div className="font-semibold">Contracts</div>
+                        <div className="text-xs text-muted-foreground">Contract Management</div>
+                      </div>
+                    </Button>
+
+                    <Button
+                      variant="outline"
+                      className="h-32 flex flex-col items-center justify-center gap-3"
+                      onClick={() => navigate("/admin/wms-drivers")}
+                    >
+                      <Truck className="h-8 w-8 text-indigo-500" />
+                      <div className="text-center">
+                        <div className="font-semibold">Drivers</div>
+                        <div className="text-xs text-muted-foreground">Driver Management</div>
+                      </div>
+                    </Button>
+
+                    <Button
+                      variant="outline"
+                      className="h-32 flex flex-col items-center justify-center gap-3"
+                      onClick={() => navigate("/admin/wms-workflow")}
+                    >
+                      <Settings className="h-8 w-8 text-gray-500" />
+                      <div className="text-center">
+                        <div className="font-semibold">Workflow</div>
+                        <div className="text-xs text-muted-foreground">System Settings</div>
+                      </div>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
         </Tabs>
       </main>
