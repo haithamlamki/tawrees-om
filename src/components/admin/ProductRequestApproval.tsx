@@ -11,11 +11,16 @@ import { CheckCircle, XCircle, Clock, Eye } from "lucide-react";
 
 interface ProductRequest {
   id: string;
+  customer_id: string;
+  requested_by: string;
   product_name: string;
-  quantity: number;
-  notes: string | null;
+  description: string | null;
+  specifications: string | null;
+  requested_quantity: number;
+  image_url: string | null;
   status: string;
-  image_urls: string[] | null;
+  reviewer_notes: string | null;
+  admin_notes: string | null;
   created_at: string;
   customer: {
     company_name: string;
@@ -41,12 +46,12 @@ const ProductRequestApproval = () => {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return data as ProductRequest[];
+      return data as any[];
     },
   });
 
   const updateRequestMutation = useMutation({
-    mutationFn: async ({ id, status, notes }: { id: string; status: string; notes: string }) => {
+    mutationFn: async ({ id, status, notes, customerId }: { id: string; status: string; notes: string; customerId: string }) => {
       const { error } = await supabase
         .from("wms_product_requests")
         .update({ status, admin_notes: notes })
@@ -62,10 +67,14 @@ const ProductRequestApproval = () => {
             .from("wms_inventory")
             .insert({
               product_name: request.product_name,
-              quantity: request.quantity,
-              customer_id: request.customer_id,
-            });
-          if (invError) throw invError;
+              description: request.description,
+              quantity: request.requested_quantity,
+              minimum_quantity: 0,
+            } as any);
+          if (invError) {
+            console.error("Error creating inventory:", invError);
+            throw invError;
+          }
         }
       }
     },
@@ -93,6 +102,7 @@ const ProductRequestApproval = () => {
       id: selectedRequest.id,
       status,
       notes: adminNotes,
+      customerId: selectedRequest.customer_id,
     });
   };
 
@@ -128,16 +138,16 @@ const ProductRequestApproval = () => {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Quantity:</span>
-                  <span className="font-medium">{request.quantity}</span>
+                  <span className="font-medium">{request.requested_quantity}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Requested:</span>
                   <span className="font-medium">{new Date(request.created_at).toLocaleDateString()}</span>
                 </div>
-                {request.notes && (
+                {request.description && (
                   <div className="pt-2 border-t">
-                    <span className="text-muted-foreground">Notes:</span>
-                    <p className="mt-1">{request.notes}</p>
+                    <span className="text-muted-foreground">Description:</span>
+                    <p className="mt-1">{request.description}</p>
                   </div>
                 )}
                 {request.status === "pending" && (
@@ -172,7 +182,7 @@ const ProductRequestApproval = () => {
                 </div>
                 <div>
                   <span className="text-sm text-muted-foreground">Quantity:</span>
-                  <p className="font-medium">{selectedRequest.quantity}</p>
+                  <p className="font-medium">{selectedRequest.requested_quantity}</p>
                 </div>
                 <div>
                   <span className="text-sm text-muted-foreground">Customer:</span>
@@ -185,25 +195,26 @@ const ProductRequestApproval = () => {
                   </Badge>
                 </div>
               </div>
-              {selectedRequest.notes && (
+              {selectedRequest.description && (
                 <div>
-                  <span className="text-sm text-muted-foreground">Customer Notes:</span>
-                  <p className="mt-1 text-sm">{selectedRequest.notes}</p>
+                  <span className="text-sm text-muted-foreground">Description:</span>
+                  <p className="mt-1 text-sm">{selectedRequest.description}</p>
                 </div>
               )}
-              {selectedRequest.image_urls && selectedRequest.image_urls.length > 0 && (
+              {selectedRequest.specifications && (
                 <div>
-                  <span className="text-sm text-muted-foreground">Images:</span>
-                  <div className="grid grid-cols-3 gap-2 mt-2">
-                    {selectedRequest.image_urls.map((url, index) => (
-                      <img
-                        key={index}
-                        src={url}
-                        alt={`Product ${index + 1}`}
-                        className="w-full h-32 object-cover rounded"
-                      />
-                    ))}
-                  </div>
+                  <span className="text-sm text-muted-foreground">Specifications:</span>
+                  <p className="mt-1 text-sm">{selectedRequest.specifications}</p>
+                </div>
+              )}
+              {selectedRequest.image_url && (
+                <div>
+                  <span className="text-sm text-muted-foreground">Image:</span>
+                  <img
+                    src={selectedRequest.image_url}
+                    alt="Product"
+                    className="w-full max-w-md h-64 object-cover rounded mt-2"
+                  />
                 </div>
               )}
               {!actionType && selectedRequest.status === "pending" && (

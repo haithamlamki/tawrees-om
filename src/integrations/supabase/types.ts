@@ -2128,6 +2128,7 @@ export type Database = {
       }
       wms_product_requests: {
         Row: {
+          admin_notes: string | null
           created_at: string
           customer_id: string
           description: string | null
@@ -2144,6 +2145,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          admin_notes?: string | null
           created_at?: string
           customer_id: string
           description?: string | null
@@ -2160,6 +2162,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          admin_notes?: string | null
           created_at?: string
           customer_id?: string
           description?: string | null

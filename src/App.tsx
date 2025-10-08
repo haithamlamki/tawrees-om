@@ -5,6 +5,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import ResetPassword from "./pages/ResetPassword";
+import UpdatePassword from "./pages/UpdatePassword";
 import Dashboard from "./pages/Dashboard";
 import Admin from "./pages/Admin";
 import EmployeeDashboard from "./pages/EmployeeDashboard";
@@ -38,6 +40,7 @@ import AdminWMSWorkflow from "./pages/admin/WMSWorkflow";
 import AdminWMSDashboard from "./pages/admin/WMSDashboard";
 import WMSAuth from "./pages/warehouse/Auth";
 import WMSCustomerOrders from "./components/admin/WMSCustomerOrders";
+import ProductRequestApproval from "./components/admin/ProductRequestApproval";
 
 const queryClient = new QueryClient();
 
@@ -50,6 +53,8 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/update-password" element={<UpdatePassword />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/employee" element={<EmployeeDashboard />} />
@@ -84,6 +89,7 @@ const App = () => (
           <Route path="/admin/wms" element={<AdminWMSDashboard />} />
           <Route path="/admin/wms-customers" element={<AdminWMSCustomers />} />
           <Route path="/admin/wms-customer-orders" element={<WMSCustomerOrders />} />
+          <Route path="/admin/product-approvals" element={<ProductRequestApproval />} />
           <Route path="/admin/wms-contracts" element={<AdminWMSContracts />} />
           <Route path="/admin/wms-inventory" element={<AdminWMSInventory />} />
           <Route path="/admin/wms-orders" element={<AdminWMSOrders />} />
