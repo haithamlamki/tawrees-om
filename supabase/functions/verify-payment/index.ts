@@ -7,25 +7,54 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Input validation helper
+function validateSessionId(sessionId: unknown): string {
+  if (typeof sessionId !== "string") {
+    throw new Error("Invalid input");
+  }
+  if (!sessionId || sessionId.length < 10 || sessionId.length > 500) {
+    throw new Error("Invalid input");
+  }
+  if (!sessionId.startsWith("cs_")) {
+    throw new Error("Invalid input");
+  }
+  return sessionId;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Use ANON_KEY with proper authentication instead of SERVICE_ROLE_KEY
   const supabaseClient = createClient(
     Deno.env.get("SUPABASE_URL") ?? "",
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-    { auth: { persistSession: false } }
+    Deno.env.get("SUPABASE_ANON_KEY") ?? ""
   );
 
   try {
     console.log("[VERIFY-PAYMENT] Function started");
 
-    const { sessionId } = await req.json();
-
-    if (!sessionId) {
-      throw new Error("Session ID is required");
+    // Authenticate user
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      throw new Error("Unauthorized");
     }
+
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser(
+      authHeader.replace("Bearer ", "")
+    );
+
+    if (authError || !user) {
+      console.error("[VERIFY-PAYMENT] Auth failed");
+      throw new Error("Unauthorized");
+    }
+
+    console.log("[VERIFY-PAYMENT] User authenticated:", user.id);
+
+    // Validate input
+    const body = await req.json();
+    const sessionId = validateSessionId(body.sessionId);
 
     // Initialize Stripe
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
@@ -34,17 +63,24 @@ serve(async (req) => {
 
     // Retrieve session
     const session = await stripe.checkout.sessions.retrieve(sessionId);
-    console.log("[VERIFY-PAYMENT] Session retrieved:", session.id, "Status:", session.payment_status);
+    console.log("[VERIFY-PAYMENT] Session status:", session.payment_status);
+
+    // Verify user owns this payment
+    const userId = session.metadata?.user_id;
+    if (!userId || userId !== user.id) {
+      console.error("[VERIFY-PAYMENT] Ownership verification failed");
+      throw new Error("Unauthorized");
+    }
 
     if (session.payment_status === "paid") {
       const requestId = session.metadata?.shipment_request_id;
-      const userId = session.metadata?.user_id;
 
-      if (!requestId || !userId) {
-        throw new Error("Missing metadata in session");
+      if (!requestId) {
+        console.error("[VERIFY-PAYMENT] Missing metadata");
+        throw new Error("Invalid session");
       }
 
-      // Update payment record
+      // Update payment record using RLS-protected query
       const { error: paymentUpdateError } = await supabaseClient
         .from("payments")
         .update({
@@ -54,23 +90,26 @@ serve(async (req) => {
           payment_method: session.payment_method_types?.[0] || null,
         })
         .eq("shipment_request_id", requestId)
-        .eq("customer_id", userId);
+        .eq("customer_id", user.id);
 
       if (paymentUpdateError) {
-        console.error("[VERIFY-PAYMENT] Error updating payment:", paymentUpdateError);
+        console.error("[VERIFY-PAYMENT] Payment update failed:", paymentUpdateError.message);
+        throw new Error("Update failed");
       }
 
-      // Update shipment request status
+      // Update shipment request status using RLS-protected query
       const { error: requestUpdateError } = await supabaseClient
         .from("shipment_requests")
         .update({ status: "paid" })
-        .eq("id", requestId);
+        .eq("id", requestId)
+        .eq("customer_id", user.id);
 
       if (requestUpdateError) {
-        console.error("[VERIFY-PAYMENT] Error updating request:", requestUpdateError);
+        console.error("[VERIFY-PAYMENT] Request update failed:", requestUpdateError.message);
+        throw new Error("Update failed");
       }
 
-      console.log("[VERIFY-PAYMENT] Payment verified and records updated");
+      console.log("[VERIFY-PAYMENT] Payment verified successfully");
 
       return new Response(
         JSON.stringify({
@@ -93,10 +132,15 @@ serve(async (req) => {
       }
     );
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    console.error("[VERIFY-PAYMENT] ERROR:", errorMessage);
+    // Log full error server-side only
+    console.error("[VERIFY-PAYMENT] Error:", error instanceof Error ? error.message : "Unknown");
+    
+    // Return sanitized error to client
     return new Response(
-      JSON.stringify({ error: errorMessage }),
+      JSON.stringify({ 
+        error: "Payment verification failed",
+        success: false 
+      }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 500,

@@ -13,6 +13,33 @@ interface PaymentRequest {
   currency?: string;
 }
 
+// Input validation helpers
+function validateUUID(id: unknown): string {
+  if (typeof id !== "string") {
+    throw new Error("Invalid input");
+  }
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!uuidRegex.test(id)) {
+    throw new Error("Invalid input");
+  }
+  return id;
+}
+
+function validateAmount(amount: unknown): number {
+  if (typeof amount !== "number" || isNaN(amount) || amount <= 0 || amount > 1000000000) {
+    throw new Error("Invalid input");
+  }
+  return amount;
+}
+
+function validateCurrency(currency: unknown): string {
+  const allowedCurrencies = ["ngn", "usd", "omr", "eur", "gbp"];
+  if (typeof currency !== "string" || !allowedCurrencies.includes(currency.toLowerCase())) {
+    return "ngn"; // Default
+  }
+  return currency.toLowerCase();
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -27,17 +54,27 @@ serve(async (req) => {
     console.log("[CREATE-PAYMENT] Function started");
 
     // Authenticate user
-    const authHeader = req.headers.get("Authorization")!;
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      throw new Error("Unauthorized");
+    }
+
     const token = authHeader.replace("Bearer ", "");
     const { data } = await supabaseClient.auth.getUser(token);
     const user = data.user;
-    if (!user?.email) throw new Error("User not authenticated");
+    if (!user?.email) {
+      throw new Error("Unauthorized");
+    }
 
-    console.log("[CREATE-PAYMENT] User authenticated:", user.email);
+    console.log("[CREATE-PAYMENT] User authenticated");
 
-    const { requestId, amount, currency = "ngn" } = await req.json() as PaymentRequest;
+    // Validate input
+    const body = await req.json() as PaymentRequest;
+    const requestId = validateUUID(body.requestId);
+    const amount = validateAmount(body.amount);
+    const currency = validateCurrency(body.currency);
 
-    // Verify the request belongs to the user
+    // Verify the request belongs to the user with RLS protection
     const { data: request, error: requestError } = await supabaseClient
       .from("shipment_requests")
       .select("*")
@@ -46,10 +83,11 @@ serve(async (req) => {
       .single();
 
     if (requestError || !request) {
-      throw new Error("Shipment request not found or unauthorized");
+      console.error("[CREATE-PAYMENT] Request verification failed");
+      throw new Error("Shipment request not found");
     }
 
-    console.log("[CREATE-PAYMENT] Request verified:", requestId);
+    console.log("[CREATE-PAYMENT] Request verified");
 
     // Initialize Stripe
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
@@ -62,7 +100,7 @@ serve(async (req) => {
     
     if (customers.data.length > 0) {
       customerId = customers.data[0].id;
-      console.log("[CREATE-PAYMENT] Existing customer found:", customerId);
+      console.log("[CREATE-PAYMENT] Existing customer found");
     }
 
     // Create checkout session
@@ -72,12 +110,12 @@ serve(async (req) => {
       line_items: [
         {
           price_data: {
-            currency: currency.toLowerCase(),
+            currency: currency,
             product_data: {
               name: `Shipment - ${request.shipping_type.toUpperCase()}`,
-              description: `Payment for shipment request #${requestId.slice(0, 8)}`,
+              description: `Payment for shipment request`,
             },
-            unit_amount: Math.round(amount * 100), // Convert to cents
+            unit_amount: Math.round(amount * 100),
           },
           quantity: 1,
         },
@@ -91,9 +129,9 @@ serve(async (req) => {
       },
     });
 
-    console.log("[CREATE-PAYMENT] Checkout session created:", session.id);
+    console.log("[CREATE-PAYMENT] Checkout session created");
 
-    // Create payment record
+    // Create payment record with RLS protection
     const { error: paymentError } = await supabaseClient
       .from("payments")
       .insert({
@@ -101,12 +139,12 @@ serve(async (req) => {
         customer_id: user.id,
         stripe_customer_id: customerId || null,
         amount,
-        currency: currency.toLowerCase(),
+        currency: currency,
         status: "pending",
       });
 
     if (paymentError) {
-      console.error("[CREATE-PAYMENT] Error creating payment record:", paymentError);
+      console.error("[CREATE-PAYMENT] Payment record creation failed:", paymentError.message);
     }
 
     return new Response(
@@ -117,10 +155,12 @@ serve(async (req) => {
       }
     );
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    console.error("[CREATE-PAYMENT] ERROR:", errorMessage);
+    // Log full error server-side only
+    console.error("[CREATE-PAYMENT] Error:", error instanceof Error ? error.message : "Unknown");
+    
+    // Return sanitized error to client
     return new Response(
-      JSON.stringify({ error: errorMessage }),
+      JSON.stringify({ error: "Unable to create payment session" }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 500,

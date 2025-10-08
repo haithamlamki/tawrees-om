@@ -7,6 +7,18 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Input validation helper
+function validateUUID(id: unknown): string {
+  if (typeof id !== "string") {
+    throw new Error("Invalid input");
+  }
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!uuidRegex.test(id)) {
+    throw new Error("Invalid input");
+  }
+  return id;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -18,24 +30,36 @@ serve(async (req) => {
   );
 
   try {
-    const authHeader = req.headers.get("Authorization")!;
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      throw new Error("Unauthorized");
+    }
+
     const token = authHeader.replace("Bearer ", "");
     const { data } = await supabaseClient.auth.getUser(token);
     const user = data.user;
-    if (!user?.email) throw new Error("User not authenticated");
+    if (!user?.email) {
+      throw new Error("Unauthorized");
+    }
 
-    const { invoice_id } = await req.json();
-    if (!invoice_id) throw new Error("Invoice ID is required");
+    // Validate input
+    const body = await req.json();
+    const invoice_id = validateUUID(body.invoice_id);
 
-    // Get invoice details
+    // Get invoice details with RLS protection
     const { data: invoice, error: invoiceError } = await supabaseClient
       .from("wms_invoices")
       .select("*")
       .eq("id", invoice_id)
       .single();
 
-    if (invoiceError) throw invoiceError;
-    if (!invoice) throw new Error("Invoice not found");
+    if (invoiceError) {
+      console.error("[CREATE-INVOICE-PAYMENT] Invoice query failed:", invoiceError.message);
+      throw new Error("Invoice not found");
+    }
+    if (!invoice) {
+      throw new Error("Invoice not found");
+    }
 
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
       apiVersion: "2025-08-27.basil",
@@ -60,7 +84,7 @@ serve(async (req) => {
               name: `Invoice ${invoice.invoice_number}`,
               description: `Payment for warehouse invoice`,
             },
-            unit_amount: Math.round(invoice.total_amount * 100), // Convert to cents
+            unit_amount: Math.round(invoice.total_amount * 100),
           },
           quantity: 1,
         },
@@ -79,11 +103,16 @@ serve(async (req) => {
       status: 200,
     });
   } catch (error) {
-    console.error("Payment creation error:", error);
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    return new Response(JSON.stringify({ error: errorMessage }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 500,
-    });
+    // Log full error server-side only
+    console.error("[CREATE-INVOICE-PAYMENT] Error:", error instanceof Error ? error.message : "Unknown");
+    
+    // Return sanitized error to client
+    return new Response(
+      JSON.stringify({ error: "Unable to create payment session" }), 
+      {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 500,
+      }
+    );
   }
 });

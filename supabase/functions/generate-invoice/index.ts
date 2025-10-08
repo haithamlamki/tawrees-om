@@ -6,8 +6,16 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-interface InvoiceData {
-  requestId: string;
+// Input validation helper
+function validateUUID(id: unknown): string {
+  if (typeof id !== "string") {
+    throw new Error("Invalid input");
+  }
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!uuidRegex.test(id)) {
+    throw new Error("Invalid input");
+  }
+  return id;
 }
 
 serve(async (req) => {
@@ -36,7 +44,9 @@ serve(async (req) => {
       throw new Error("Unauthorized");
     }
 
-    const { requestId } = await req.json() as InvoiceData;
+    // Validate input
+    const body = await req.json();
+    const requestId = validateUUID(body.requestId);
 
     // Fetch shipment request with all related data
     const { data: request, error: requestError } = await supabaseClient
@@ -64,6 +74,7 @@ serve(async (req) => {
       .single();
 
     if (requestError || !request) {
+      console.error("[GENERATE-INVOICE] Request query failed");
       throw new Error("Shipment request not found");
     }
 
@@ -77,7 +88,8 @@ serve(async (req) => {
     const isOwner = request.customer_id === user.id;
 
     if (!isAdmin && !isOwner) {
-      throw new Error("Unauthorized to generate invoice for this request");
+      console.error("[GENERATE-INVOICE] Authorization failed");
+      throw new Error("Unauthorized");
     }
 
     // Generate invoice HTML
@@ -94,10 +106,12 @@ serve(async (req) => {
       }
     );
   } catch (error) {
-    console.error("Error generating invoice:", error);
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    // Log full error server-side only
+    console.error("[GENERATE-INVOICE] Error:", error instanceof Error ? error.message : "Unknown");
+    
+    // Return sanitized error to client
     return new Response(
-      JSON.stringify({ error: errorMessage }),
+      JSON.stringify({ error: "Unable to generate invoice" }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 500,
