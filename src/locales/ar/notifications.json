@@ -1,0 +1,23 @@
+{
+  "title": "الإشعارات",
+  "settings": "إعدادات الإشعارات",
+  "inApp": "إشعارات التطبيق",
+  "email": "إشعارات البريد الإلكتروني",
+  "push": "إشعارات المتصفح",
+  "quoteReady": "عرض السعر جاهز",
+  "statusUpdate": "تحديث الحالة",
+  "requestApproved": "تمت الموافقة على الطلب",
+  "documentUploaded": "تم رفع المستند",
+  "emailOnQuoteReady": "بريد إلكتروني عند جاهزية عرض السعر",
+  "emailOnStatusUpdate": "بريد إلكتروني عند تحديث حالة الشحنة",
+  "emailOnRequestApproved": "بريد إلكتروني عند الموافقة على الطلب",
+  "emailOnDocumentUploaded": "بريد إلكتروني عند رفع مستند",
+  "enablePush": "تفعيل إشعارات المتصفح",
+  "pushSupported": "متصفحك يدعم الإشعارات",
+  "pushNotSupported": "متصفحك لا يدعم الإشعارات",
+  "permissionGranted": "تم تفعيل الإشعارات",
+  "permissionDenied": "الإشعارات محظورة. يرجى التفعيل في إعدادات المتصفح.",
+  "permissionDefault": "انقر لتفعيل الإشعارات",
+  "markAllRead": "وضع علامة مقروء على الكل",
+  "noNotifications": "لا توجد إشعارات"
+}

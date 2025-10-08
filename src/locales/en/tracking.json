@@ -1,0 +1,19 @@
+{
+  "title": "Track Shipment",
+  "enterTracking": "Enter Tracking Number",
+  "trackingNumber": "Tracking Number",
+  "track": "Track",
+  "shipmentStatus": "Shipment Status",
+  "timeline": "Timeline",
+  "location": "Location",
+  "estimatedDelivery": "Estimated Delivery",
+  "actualDelivery": "Actual Delivery",
+  "status": {
+    "processing": "Processing",
+    "in_transit": "In Transit",
+    "customs": "In Customs",
+    "out_for_delivery": "Out for Delivery",
+    "delivered": "Delivered",
+    "on_hold": "On Hold"
+  }
+}

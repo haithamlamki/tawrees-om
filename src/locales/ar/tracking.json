@@ -1,0 +1,19 @@
+{
+  "title": "تتبع الشحنة",
+  "enterTracking": "أدخل رقم التتبع",
+  "trackingNumber": "رقم التتبع",
+  "track": "تتبع",
+  "shipmentStatus": "حالة الشحنة",
+  "timeline": "الجدول الزمني",
+  "location": "الموقع",
+  "estimatedDelivery": "التسليم المتوقع",
+  "actualDelivery": "التسليم الفعلي",
+  "status": {
+    "processing": "قيد المعالجة",
+    "in_transit": "في الطريق",
+    "customs": "في الجمارك",
+    "out_for_delivery": "خارج للتسليم",
+    "delivered": "تم التسليم",
+    "on_hold": "معلق"
+  }
+}

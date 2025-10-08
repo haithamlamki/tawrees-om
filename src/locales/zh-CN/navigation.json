@@ -1,0 +1,18 @@
+{
+  "home": "首页",
+  "dashboard": "控制面板",
+  "admin": "管理员",
+  "employee": "员工",
+  "partner": "合作伙伴",
+  "finance": "财务",
+  "calculator": "运费计算器",
+  "tracking": "货物追踪",
+  "locations": "地点",
+  "rates": "费率",
+  "signIn": "登录",
+  "signOut": "退出",
+  "logout": "退出登录",
+  "profile": "个人资料",
+  "settings": "设置",
+  "notifications": "通知"
+}

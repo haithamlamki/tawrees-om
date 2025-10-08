@@ -1,0 +1,18 @@
+{
+  "home": "الرئيسية",
+  "dashboard": "لوحة التحكم",
+  "admin": "الإدارة",
+  "employee": "الموظف",
+  "partner": "الشريك",
+  "finance": "المالية",
+  "calculator": "حاسبة الشحن",
+  "tracking": "تتبع الشحنة",
+  "locations": "المواقع",
+  "rates": "الأسعار",
+  "signIn": "تسجيل الدخول",
+  "signOut": "تسجيل الخروج",
+  "logout": "تسجيل الخروج",
+  "profile": "الملف الشخصي",
+  "settings": "الإعدادات",
+  "notifications": "الإشعارات"
+}

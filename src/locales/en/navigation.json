@@ -1,0 +1,18 @@
+{
+  "home": "Home",
+  "dashboard": "Dashboard",
+  "admin": "Admin",
+  "employee": "Employee",
+  "partner": "Partner",
+  "finance": "Finance",
+  "calculator": "Calculator",
+  "tracking": "Tracking",
+  "locations": "Locations",
+  "rates": "Rates",
+  "signIn": "Sign In",
+  "signOut": "Sign Out",
+  "logout": "Logout",
+  "profile": "Profile",
+  "settings": "Settings",
+  "notifications": "Notifications"
+}

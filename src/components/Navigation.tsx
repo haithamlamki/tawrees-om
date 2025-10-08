@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import NotificationBell from "@/components/notifications/NotificationBell";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { LanguageSelector } from "@/components/LanguageSelector";
 import logo from "@/assets/tawreed-logo.png";
 
 interface NavigationProps {
@@ -109,6 +110,7 @@ const Navigation = ({ isAuthenticated }: NavigationProps) => {
                   </Button>
                 )}
                 <NotificationBell />
+                <LanguageSelector />
                 <ThemeToggle />
                 <Button variant="ghost" onClick={handleLogout}>
                   <LogOut className="mr-2 h-4 w-4" />
@@ -117,6 +119,7 @@ const Navigation = ({ isAuthenticated }: NavigationProps) => {
               </>
             ) : (
               <>
+                <LanguageSelector />
                 <Button variant="ghost" asChild>
                   <Link to="/">Calculator</Link>
                 </Button>

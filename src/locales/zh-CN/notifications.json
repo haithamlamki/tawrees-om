@@ -1,0 +1,23 @@
+{
+  "title": "通知",
+  "settings": "通知设置",
+  "inApp": "应用内通知",
+  "email": "邮件通知",
+  "push": "浏览器推送通知",
+  "quoteReady": "报价已准备",
+  "statusUpdate": "状态更新",
+  "requestApproved": "请求已批准",
+  "documentUploaded": "文档已上传",
+  "emailOnQuoteReady": "报价准备好时发送邮件",
+  "emailOnStatusUpdate": "货运状态更新时发送邮件",
+  "emailOnRequestApproved": "请求批准时发送邮件",
+  "emailOnDocumentUploaded": "文档上传时发送邮件",
+  "enablePush": "启用浏览器通知",
+  "pushSupported": "您的浏览器支持推送通知",
+  "pushNotSupported": "您的浏览器不支持推送通知",
+  "permissionGranted": "通知已启用",
+  "permissionDenied": "通知已屏蔽。请在浏览器设置中启用。",
+  "permissionDefault": "点击启用通知",
+  "markAllRead": "全部标为已读",
+  "noNotifications": "暂无通知"
+}

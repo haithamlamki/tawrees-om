@@ -1,0 +1,23 @@
+{
+  "title": "Notifications",
+  "settings": "Notification Settings",
+  "inApp": "In-App Notifications",
+  "email": "Email Notifications",
+  "push": "Browser Push Notifications",
+  "quoteReady": "Quote Ready",
+  "statusUpdate": "Status Update",
+  "requestApproved": "Request Approved",
+  "documentUploaded": "Document Uploaded",
+  "emailOnQuoteReady": "Email when quote is ready",
+  "emailOnStatusUpdate": "Email on shipment status update",
+  "emailOnRequestApproved": "Email when request is approved",
+  "emailOnDocumentUploaded": "Email when document is uploaded",
+  "enablePush": "Enable Browser Notifications",
+  "pushSupported": "Your browser supports push notifications",
+  "pushNotSupported": "Your browser doesn't support push notifications",
+  "permissionGranted": "Notifications enabled",
+  "permissionDenied": "Notifications blocked. Please enable in browser settings.",
+  "permissionDefault": "Click to enable notifications",
+  "markAllRead": "Mark All as Read",
+  "noNotifications": "No notifications"
+}

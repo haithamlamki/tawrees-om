@@ -1,0 +1,19 @@
+{
+  "title": "追踪货物",
+  "enterTracking": "输入追踪单号",
+  "trackingNumber": "追踪单号",
+  "track": "追踪",
+  "shipmentStatus": "货运状态",
+  "timeline": "时间线",
+  "location": "位置",
+  "estimatedDelivery": "预计送达",
+  "actualDelivery": "实际送达",
+  "status": {
+    "processing": "处理中",
+    "in_transit": "运输中",
+    "customs": "清关中",
+    "out_for_delivery": "派送中",
+    "delivered": "已送达",
+    "on_hold": "暂停"
+  }
+}

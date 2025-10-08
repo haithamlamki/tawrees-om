@@ -134,4 +134,41 @@ export const sendRequestApprovedNotification = async (
       trackingNumber,
     },
   });
+
+  // Send push notification
+  await sendPushNotification({
+    userId,
+    title: "Request Approved",
+    body: `Your shipment request has been approved! Tracking: ${trackingNumber}`,
+    url: `/tracking/${trackingNumber}`,
+  });
+};
+
+export const sendPushNotification = async ({
+  userId,
+  title,
+  body,
+  url,
+}: {
+  userId: string;
+  title: string;
+  body: string;
+  url?: string;
+}) => {
+  try {
+    const { data, error } = await supabase.functions.invoke("send-push-notification", {
+      body: {
+        userId,
+        title,
+        body,
+        url,
+      },
+    });
+
+    if (error) throw error;
+    return { success: true, data };
+  } catch (error) {
+    console.error("Error sending push notification:", error);
+    return { success: false, error };
+  }
 };

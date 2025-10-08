@@ -1,13 +1,17 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { Bell } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { PushNotificationToggle } from "./PushNotificationToggle";
 
 const NotificationSettings = () => {
   const { toast } = useToast();
+  const { t } = useTranslation('notifications');
   const [preferences, setPreferences] = useState({
     in_app_notifications: true,
     email_on_quote_ready: true,
@@ -82,49 +86,69 @@ const NotificationSettings = () => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Bell className="h-5 w-5" />
-          Notification Settings
+          {t('settings')}
         </CardTitle>
+        <CardDescription>
+          Manage how you receive notifications
+        </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-6">
         <div className="flex items-center justify-between">
-          <Label htmlFor="in_app">In-App Notifications</Label>
+          <Label htmlFor="in_app">{t('inApp')}</Label>
           <Switch
             id="in_app"
             checked={preferences.in_app_notifications}
             onCheckedChange={(checked) => updatePreference("in_app_notifications", checked)}
           />
         </div>
-        <div className="flex items-center justify-between">
-          <Label htmlFor="quote_ready">Email on Quote Ready</Label>
-          <Switch
-            id="quote_ready"
-            checked={preferences.email_on_quote_ready}
-            onCheckedChange={(checked) => updatePreference("email_on_quote_ready", checked)}
-          />
+
+        <Separator />
+
+        <div className="space-y-4">
+          <h4 className="text-sm font-medium">{t('email')}</h4>
+          
+          <div className="flex items-center justify-between">
+            <Label htmlFor="quote_ready">{t('emailOnQuoteReady')}</Label>
+            <Switch
+              id="quote_ready"
+              checked={preferences.email_on_quote_ready}
+              onCheckedChange={(checked) => updatePreference("email_on_quote_ready", checked)}
+            />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <Label htmlFor="request_approved">{t('emailOnRequestApproved')}</Label>
+            <Switch
+              id="request_approved"
+              checked={preferences.email_on_request_approved}
+              onCheckedChange={(checked) => updatePreference("email_on_request_approved", checked)}
+            />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <Label htmlFor="status_update">{t('emailOnStatusUpdate')}</Label>
+            <Switch
+              id="status_update"
+              checked={preferences.email_on_status_update}
+              onCheckedChange={(checked) => updatePreference("email_on_status_update", checked)}
+            />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <Label htmlFor="document_uploaded">{t('emailOnDocumentUploaded')}</Label>
+            <Switch
+              id="document_uploaded"
+              checked={preferences.email_on_document_uploaded}
+              onCheckedChange={(checked) => updatePreference("email_on_document_uploaded", checked)}
+            />
+          </div>
         </div>
-        <div className="flex items-center justify-between">
-          <Label htmlFor="request_approved">Email on Request Approved</Label>
-          <Switch
-            id="request_approved"
-            checked={preferences.email_on_request_approved}
-            onCheckedChange={(checked) => updatePreference("email_on_request_approved", checked)}
-          />
-        </div>
-        <div className="flex items-center justify-between">
-          <Label htmlFor="status_update">Email on Status Update</Label>
-          <Switch
-            id="status_update"
-            checked={preferences.email_on_status_update}
-            onCheckedChange={(checked) => updatePreference("email_on_status_update", checked)}
-          />
-        </div>
-        <div className="flex items-center justify-between">
-          <Label htmlFor="document_uploaded">Email on Document Upload</Label>
-          <Switch
-            id="document_uploaded"
-            checked={preferences.email_on_document_uploaded}
-            onCheckedChange={(checked) => updatePreference("email_on_document_uploaded", checked)}
-          />
+
+        <Separator />
+
+        <div className="space-y-4">
+          <h4 className="text-sm font-medium">{t('push')}</h4>
+          <PushNotificationToggle />
         </div>
       </CardContent>
     </Card>
