@@ -74,7 +74,6 @@ serve(async (req) => {
         }
 
         // Insert inventory item
-        const price = row.price || row.price_per_unit;
         const { error: insertError } = await supabase
           .from('wms_inventory')
           .insert({
@@ -82,14 +81,11 @@ serve(async (req) => {
             product_name: row.product_name,
             sku: row.sku,
             quantity: Number(row.quantity),
-            unit: row.unit || 'pcs',
-            category: row.category || null,
             unit_price: Number(price),
-            consumed_quantity: row.consumed_quantity ? Number(row.consumed_quantity) : 0,
-            minimum_quantity: row.minimum_quantity ? Number(row.minimum_quantity) : 0,
             description: row.description || null,
-            image_url: row.image_url || null,
-            status: row.status || 'available',
+            location: row.location || null,
+            min_stock_level: row.minimum_quantity ? Number(row.minimum_quantity) : null,
+            max_stock_level: row.max_stock_level ? Number(row.max_stock_level) : null,
           });
 
         if (insertError) {
