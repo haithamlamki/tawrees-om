@@ -72,14 +72,14 @@ export function InventoryExcelImportAdmin() {
       if (error) throw error;
 
       setImportResult({
-        success: data.success || 0,
-        failed: data.failed || 0,
-        errors: data.errors || [],
+        success: data.results?.success || 0,
+        failed: data.results?.failed || 0,
+        errors: data.results?.errors || [],
       });
 
-      if (data.success > 0) {
-        toast.success(`Successfully imported ${data.success} items`);
-        if (data.failed === 0) {
+      if (data.results.success > 0) {
+        toast.success(`Successfully imported ${data.results.success} items`);
+        if (data.results.failed === 0) {
           setTimeout(() => {
             setOpen(false);
             window.location.reload();
@@ -87,8 +87,8 @@ export function InventoryExcelImportAdmin() {
         }
       }
 
-      if (data.failed > 0) {
-        toast.error(`Failed to import ${data.failed} items. See details below.`);
+      if (data.results.failed > 0) {
+        toast.error(`Failed to import ${data.results.failed} items. See details below.`);
       }
     } catch (error: any) {
       console.error('Import error:', error);
@@ -100,9 +100,9 @@ export function InventoryExcelImportAdmin() {
 
   const downloadTemplate = () => {
     const template = [
-      ["product_name", "sku", "quantity", "unit", "category", "price_per_unit", "minimum_quantity", "description", "image_url", "status"],
-      ["Example Product", "SKU-001", "100", "pcs", "Electronics", "25.50", "10", "Sample description", "", "available"],
-      ["Another Product", "SKU-002", "50", "boxes", "Furniture", "150.00", "5", "Another example", "", "low"],
+      ["product_name", "sku", "quantity", "unit", "category", "price_per_unit", "consumed_quantity", "minimum_quantity", "description", "image_url", "status"],
+      ["Example Product", "SKU-001", "100", "pcs", "Electronics", "25.50", "0", "10", "Sample description", "", "available"],
+      ["Another Product", "SKU-002", "50", "boxes", "Furniture", "150.00", "0", "5", "Another example", "", "available"],
     ];
 
     const csvContent = template.map(row => row.join(',')).join('\n');

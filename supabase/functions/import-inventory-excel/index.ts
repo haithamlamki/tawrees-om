@@ -55,9 +55,10 @@ serve(async (req) => {
       const rowNumber = i + 2; // Excel row number (accounting for header)
 
       try {
-        // Validate required fields
-        if (!row.product_name || !row.sku || !row.quantity || !row.price) {
-          throw new Error('Missing required fields: product_name, sku, quantity, price');
+        // Validate required fields - accept both 'price' and 'price_per_unit'
+        const price = row.price || row.price_per_unit;
+        if (!row.product_name || !row.sku || !row.quantity || !price) {
+          throw new Error('Missing required fields: product_name, sku, quantity, price (or price_per_unit)');
         }
 
         // Check for duplicate SKU
@@ -73,6 +74,7 @@ serve(async (req) => {
         }
 
         // Insert inventory item
+        const price = row.price || row.price_per_unit;
         const { error: insertError } = await supabase
           .from('wms_inventory')
           .insert({
@@ -80,11 +82,14 @@ serve(async (req) => {
             product_name: row.product_name,
             sku: row.sku,
             quantity: Number(row.quantity),
-            unit_price: Number(row.price),
+            unit: row.unit || 'pcs',
+            category: row.category || null,
+            unit_price: Number(price),
+            consumed_quantity: row.consumed_quantity ? Number(row.consumed_quantity) : 0,
+            minimum_quantity: row.minimum_quantity ? Number(row.minimum_quantity) : 0,
             description: row.description || null,
-            location: row.location || null,
-            min_stock_level: row.min_stock_level ? Number(row.min_stock_level) : null,
-            max_stock_level: row.max_stock_level ? Number(row.max_stock_level) : null,
+            image_url: row.image_url || null,
+            status: row.status || 'available',
           });
 
         if (insertError) {
