@@ -29,10 +29,10 @@ export default function AdminWMSInvoices() {
         `)
         .order("created_at", { ascending: false });
       
-      if (selectedCustomer) {
+      if (selectedCustomer && selectedCustomer !== "all") {
         query = query.eq("customer_id", selectedCustomer);
       }
-      if (statusFilter) {
+      if (statusFilter && statusFilter !== "all") {
         query = query.eq("status", statusFilter);
       }
       
@@ -144,7 +144,7 @@ export default function AdminWMSInvoices() {
             <SelectValue placeholder="All customers" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All customers</SelectItem>
+            <SelectItem value="all">All customers</SelectItem>
             {customers?.map((customer) => (
               <SelectItem key={customer.id} value={customer.id}>
                 {customer.company_name}
@@ -157,7 +157,7 @@ export default function AdminWMSInvoices() {
             <SelectValue placeholder="All statuses" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All statuses</SelectItem>
+            <SelectItem value="all">All statuses</SelectItem>
             <SelectItem value="pending">Pending</SelectItem>
             <SelectItem value="paid">Paid</SelectItem>
             <SelectItem value="overdue">Overdue</SelectItem>
