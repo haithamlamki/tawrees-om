@@ -5,8 +5,10 @@ import { Badge } from "@/components/ui/badge";
 import { useWMSCustomer } from "@/hooks/useWMSCustomer";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, FileText, DollarSign, Package } from "lucide-react";
+import { AlertCircle, FileText, DollarSign, Package, Download, Calendar } from "lucide-react";
 import type { WMSContract } from "@/types/wms";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 
 export default function WMSContract() {
   const { data: customer, isLoading: customerLoading } = useWMSCustomer();
@@ -71,17 +73,34 @@ export default function WMSContract() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "active": return "bg-green-100 text-green-800";
-      case "expired": return "bg-red-100 text-red-800";
-      default: return "bg-gray-100 text-gray-800";
+      case "active": return "bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20";
+      case "expired": return "bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20";
+      default: return "bg-gray-500/10 text-gray-700 dark:text-gray-400 border-gray-500/20";
     }
+  };
+
+  const totalDays = Math.ceil(
+    (new Date(contract.end_date).getTime() - new Date(contract.start_date).getTime()) / (1000 * 60 * 60 * 24)
+  );
+  const elapsedDays = totalDays - daysRemaining;
+  const progressPercentage = (elapsedDays / totalDays) * 100;
+
+  const handleDownloadContract = () => {
+    console.log("Downloading contract:", contract.contract_number);
+    // Placeholder for download functionality
   };
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Contract Details</h1>
-        <p className="text-muted-foreground">View your warehouse contract information</p>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">Contract Details</h1>
+          <p className="text-muted-foreground">View your warehouse contract information</p>
+        </div>
+        <Button variant="outline" onClick={handleDownloadContract}>
+          <Download className="h-4 w-4 mr-2" />
+          Download Contract
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -91,10 +110,19 @@ export default function WMSContract() {
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <Badge className={getStatusColor(contract.status)}>{contract.status}</Badge>
-            <p className="text-xs text-muted-foreground mt-2">
-              {contract.status === "active" && `${daysRemaining} days remaining`}
-            </p>
+            <Badge variant="outline" className={getStatusColor(contract.status)}>{contract.status}</Badge>
+            {contract.status === "active" && (
+              <div className="mt-4 space-y-2">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-muted-foreground">Contract Progress</span>
+                  <span className="font-medium">{Math.round(progressPercentage)}%</span>
+                </div>
+                <Progress value={progressPercentage} className="h-2" />
+                <p className="text-xs text-muted-foreground">
+                  {daysRemaining} of {totalDays} days remaining
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -123,7 +151,10 @@ export default function WMSContract() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Contract Information</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle>Contract Information</CardTitle>
+            <span className="text-sm text-muted-foreground">#{contract.contract_number}</span>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -177,13 +208,25 @@ export default function WMSContract() {
           </div>
 
           {contract.storage_conditions && (
-            <div className="mt-6">
-              <h3 className="font-semibold mb-2">Storage Conditions</h3>
-              <p className="text-sm text-muted-foreground">{contract.storage_conditions}</p>
+            <div className="mt-6 pt-6 border-t">
+              <h3 className="font-semibold mb-2 flex items-center gap-2">
+                <Package className="h-4 w-4" />
+                Storage Conditions
+              </h3>
+              <p className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg">{contract.storage_conditions}</p>
             </div>
           )}
         </CardContent>
       </Card>
+
+      {contract.status === "active" && daysRemaining < 30 && (
+        <Alert>
+          <Calendar className="h-4 w-4" />
+          <AlertDescription>
+            Your contract will expire in {daysRemaining} days. Please contact administration to renew.
+          </AlertDescription>
+        </Alert>
+      )}
     </div>
   );
 }

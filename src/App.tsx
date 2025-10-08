@@ -36,6 +36,7 @@ import AdminWMSInvoices from "./pages/admin/WMSInvoices";
 import AdminWMSDrivers from "./pages/admin/WMSDrivers";
 import AdminWMSWorkflow from "./pages/admin/WMSWorkflow";
 import AdminWMSDashboard from "./pages/admin/WMSDashboard";
+import WMSAuth from "./pages/warehouse/Auth";
 
 const queryClient = new QueryClient();
 
@@ -63,6 +64,9 @@ const App = () => (
           <Route path="/admin/products/:id/edit" element={<ProductForm />} />
           <Route path="/admin/products/import/alibaba" element={<AlibabaImport />} />
           <Route path="/admin/quotes" element={<QuoteManagement />} />
+          
+          {/* WMS Auth */}
+          <Route path="/warehouse/auth" element={<WMSAuth />} />
           
           {/* WMS Routes */}
           <Route path="/warehouse" element={<WMSCustomerLayout />}>
