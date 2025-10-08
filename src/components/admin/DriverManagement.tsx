@@ -46,13 +46,13 @@ export const DriverManagement = () => {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return data as Driver[];
+      return data as any[];
     },
   });
 
   const createDriverMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
-      const { error } = await supabase.from("wms_drivers").insert(data);
+      const { error } = await supabase.from("wms_drivers").insert(data as any);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -69,7 +69,7 @@ export const DriverManagement = () => {
     mutationFn: async ({ id, data }: { id: string; data: typeof formData }) => {
       const { error } = await supabase
         .from("wms_drivers")
-        .update(data)
+        .update(data as any)
         .eq("id", id);
       if (error) throw error;
     },
@@ -181,7 +181,7 @@ export const DriverManagement = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {drivers?.map((driver) => (
+              {drivers?.map((driver: any) => (
                 <TableRow key={driver.id}>
                   <TableCell className="font-medium">{driver.full_name}</TableCell>
                   <TableCell>{driver.phone}</TableCell>

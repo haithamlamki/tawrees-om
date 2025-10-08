@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -32,7 +33,7 @@ export const DeliveryTracking = ({ orderId, currentStatus }: DeliveryTrackingPro
         .select("*")
         .eq("status", "active");
       if (error) throw error;
-      return data;
+      return data as any[];
     },
   });
 
@@ -43,12 +44,12 @@ export const DeliveryTracking = ({ orderId, currentStatus }: DeliveryTrackingPro
         .from("wms_orders")
         .select(`
           *,
-          driver:wms_drivers(full_name, phone, vehicle_plate)
+          driver:wms_drivers!wms_orders_driver_id_fkey(full_name, phone, vehicle_plate)
         `)
         .eq("id", orderId)
         .single();
       if (error) throw error;
-      return data;
+      return data as any;
     },
   });
 
@@ -191,7 +192,7 @@ export const DeliveryTracking = ({ orderId, currentStatus }: DeliveryTrackingPro
                   <SelectValue placeholder="Choose a driver" />
                 </SelectTrigger>
                 <SelectContent>
-                  {drivers?.map((driver) => (
+                  {drivers?.map((driver: any) => (
                     <SelectItem key={driver.id} value={driver.id}>
                       {driver.full_name} - {driver.vehicle_plate}
                     </SelectItem>

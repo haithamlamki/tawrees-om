@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Ship, User, LogOut, LayoutDashboard, Package, Truck, Calculator } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import NotificationBell from "@/components/notifications/NotificationBell";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LanguageSelector } from "@/components/LanguageSelector";
 import logo from "@/assets/tawreed-logo.png";

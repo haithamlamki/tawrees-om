@@ -2077,7 +2077,12 @@ export type Database = {
           created_at: string
           created_by: string | null
           customer_id: string
+          delivered_at: string | null
           delivery_branch_id: string | null
+          delivery_notes: string | null
+          delivery_proof_photo: string | null
+          delivery_signature: string | null
+          driver_id: string | null
           id: string
           notes: string | null
           order_number: string
@@ -2089,7 +2094,12 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           customer_id: string
+          delivered_at?: string | null
           delivery_branch_id?: string | null
+          delivery_notes?: string | null
+          delivery_proof_photo?: string | null
+          delivery_signature?: string | null
+          driver_id?: string | null
           id?: string
           notes?: string | null
           order_number: string
@@ -2101,7 +2111,12 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           customer_id?: string
+          delivered_at?: string | null
           delivery_branch_id?: string | null
+          delivery_notes?: string | null
+          delivery_proof_photo?: string | null
+          delivery_signature?: string | null
+          driver_id?: string | null
           id?: string
           notes?: string | null
           order_number?: string
@@ -2122,6 +2137,13 @@ export type Database = {
             columns: ["delivery_branch_id"]
             isOneToOne: false
             referencedRelation: "wms_customer_branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wms_orders_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "wms_drivers"
             referencedColumns: ["id"]
           },
         ]
