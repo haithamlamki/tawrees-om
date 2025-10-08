@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { DollarSign, Settings, Package, CheckCircle, XCircle, Users, Ship, BarChart3, UserCog, Building2, FileText } from "lucide-react";
+import { DollarSign, Settings, Package, CheckCircle, XCircle, Users, Ship, BarChart3, UserCog, Building2, FileText, History as HistoryIcon } from "lucide-react";
 import CustomerManagement from "@/components/admin/CustomerManagement";
 import ShipmentManagement from "@/components/admin/ShipmentManagement";
 import DashboardMetrics from "@/components/admin/DashboardMetrics";
@@ -24,6 +24,9 @@ import PartnerManagement from "@/components/admin/PartnerManagement";
 import { SurchargeManagement } from "@/components/admin/SurchargeManagement";
 import { AuditLogViewer } from "@/components/admin/AuditLogViewer";
 import { LastMileRateManagement } from "@/components/admin/LastMileRateManagement";
+import { RateHistoryViewer } from "@/components/admin/RateHistoryViewer";
+import { CSVExportButtons } from "@/components/admin/CSVExportButtons";
+import { CSVImportDialog } from "@/components/admin/CSVImportDialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { sendRequestApprovedNotification } from "@/utils/notificationUtils";
 
@@ -233,9 +236,15 @@ const Admin = () => {
       <Navigation isAuthenticated={true} />
       
       <main className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Admin Dashboard</h1>
-          <p className="text-muted-foreground">Manage rates and approve shipment requests</p>
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">Admin Dashboard</h1>
+            <p className="text-muted-foreground">Manage rates and approve shipment requests</p>
+          </div>
+          <div className="flex gap-2">
+            <CSVImportDialog />
+            <CSVExportButtons />
+          </div>
         </div>
 
         <Tabs defaultValue="dashboard" className="space-y-6">
@@ -279,6 +288,10 @@ const Admin = () => {
             <TabsTrigger value="rates">
               <DollarSign className="mr-2 h-4 w-4" />
               Rates
+            </TabsTrigger>
+            <TabsTrigger value="history">
+              <HistoryIcon className="mr-2 h-4 w-4" />
+              History
             </TabsTrigger>
           </TabsList>
 
@@ -405,6 +418,10 @@ const Admin = () => {
 
           <TabsContent value="audit">
             <AuditLogViewer />
+          </TabsContent>
+
+          <TabsContent value="history">
+            <RateHistoryViewer />
           </TabsContent>
 
           <TabsContent value="rates">

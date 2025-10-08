@@ -564,6 +564,51 @@ export type Database = {
           },
         ]
       }
+      rate_history: {
+        Row: {
+          change_reason: string | null
+          change_type: string
+          changed_at: string | null
+          changed_by: string | null
+          changed_by_email: string | null
+          created_at: string | null
+          id: string
+          new_values: Json | null
+          old_values: Json | null
+          record_id: string
+          table_name: string
+          version_number: number
+        }
+        Insert: {
+          change_reason?: string | null
+          change_type: string
+          changed_at?: string | null
+          changed_by?: string | null
+          changed_by_email?: string | null
+          created_at?: string | null
+          id?: string
+          new_values?: Json | null
+          old_values?: Json | null
+          record_id: string
+          table_name: string
+          version_number: number
+        }
+        Update: {
+          change_reason?: string | null
+          change_type?: string
+          changed_at?: string | null
+          changed_by?: string | null
+          changed_by_email?: string | null
+          created_at?: string | null
+          id?: string
+          new_values?: Json | null
+          old_values?: Json | null
+          record_id?: string
+          table_name?: string
+          version_number?: number
+        }
+        Relationships: []
+      }
       shipment_documents: {
         Row: {
           created_at: string
