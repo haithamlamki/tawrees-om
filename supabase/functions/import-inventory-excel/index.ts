@@ -91,23 +91,26 @@ serve(async (req) => {
           throw new Error(`Duplicate SKU: ${row.sku} already exists`);
         }
 
-        // Insert minimal safe set of columns known to exist in schema
+        // Insert using actual wms_inventory schema columns
         const { error: insertError } = await supabase
           .from('wms_inventory')
           .insert({
             customer_id: customerId,
             product_name: String(row.product_name),
             sku: String(row.sku),
+            category: row.category ?? null,
             quantity: quantity,
-            unit_price: price,
-            description: row.description ?? null,
-            location: row.location ?? null,
-            min_stock_level: row.minimum_quantity !== null && row.minimum_quantity !== undefined && row.minimum_quantity !== ''
+            consumed_quantity: row.consumed_quantity !== null && row.consumed_quantity !== undefined && row.consumed_quantity !== ''
+              ? toNumber(row.consumed_quantity)
+              : 0,
+            unit: row.unit ?? 'pcs',
+            price_per_unit: price,
+            minimum_quantity: row.minimum_quantity !== null && row.minimum_quantity !== undefined && row.minimum_quantity !== ''
               ? toNumber(row.minimum_quantity)
-              : null,
-            max_stock_level: row.max_stock_level !== null && row.max_stock_level !== undefined && row.max_stock_level !== ''
-              ? toNumber(row.max_stock_level)
-              : null,
+              : 0,
+            description: row.description ?? null,
+            image_url: row.image_url ?? null,
+            status: row.status ?? 'available',
           });
 
         if (insertError) {
