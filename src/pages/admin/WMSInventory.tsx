@@ -9,9 +9,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Pencil, Search, Eye, Trash2, Settings } from "lucide-react";
+import { Plus, Pencil, Search, Eye, Trash2, Settings, Package } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type { WMSInventory, WMSCustomer } from "@/types/wms";
+import { InventoryExcelImportAdmin } from "@/components/inventory/InventoryExcelImportAdmin";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export default function AdminWMSInventory() {
   const { toast } = useToast();
@@ -21,6 +23,8 @@ export default function AdminWMSInventory() {
   const [selectedCustomer, setSelectedCustomer] = useState<string>("all");
   const [editingItem, setEditingItem] = useState<WMSInventory | null>(null);
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>("");
   const [formData, setFormData] = useState({
     customer_id: "",
     sku: "",
@@ -33,6 +37,7 @@ export default function AdminWMSInventory() {
     minimum_quantity: 0,
     description: "",
     status: "available" as "available" | "low" | "out_of_stock",
+    image_url: "",
   });
 
   const toggleSelectAll = () => {
@@ -129,8 +134,11 @@ export default function AdminWMSInventory() {
       minimum_quantity: 0,
       description: "",
       status: "available",
+      image_url: "",
     });
     setEditingItem(null);
+    setImageFile(null);
+    setImagePreview("");
   };
 
   const handleEdit = (item: any) => {
@@ -147,16 +155,64 @@ export default function AdminWMSInventory() {
       minimum_quantity: item.minimum_quantity,
       description: item.description || "",
       status: item.status,
+      image_url: item.image_url || "",
     });
+    setImagePreview(item.image_url || "");
+    setImageFile(null);
     setOpen(true);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    let imageUrl = formData.image_url;
+
+    // Upload image if new file selected
+    if (imageFile && formData.customer_id && formData.sku) {
+      try {
+        const fileExt = imageFile.name.split('.').pop();
+        const filePath = `${formData.customer_id}/${formData.sku}/product-image.${fileExt}`;
+        
+        const { error: uploadError } = await supabase.storage
+          .from('wms-product-images')
+          .upload(filePath, imageFile, { upsert: true });
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('wms-product-images')
+          .getPublicUrl(filePath);
+
+        imageUrl = publicUrl;
+      } catch (error) {
+        console.error('Image upload error:', error);
+        toast({ title: "Failed to upload image", variant: "destructive" });
+        return;
+      }
+    }
+    
+    const dataToSubmit = { ...formData, image_url: imageUrl };
+    
     if (editingItem) {
-      updateMutation.mutate({ id: editingItem.id, data: formData });
+      updateMutation.mutate({ id: editingItem.id, data: dataToSubmit });
     } else {
-      createMutation.mutate(formData);
+      createMutation.mutate(dataToSubmit);
+    }
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        toast({ title: "Image must be less than 2MB", variant: "destructive" });
+        return;
+      }
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -182,13 +238,15 @@ export default function AdminWMSInventory() {
           <h1 className="text-3xl font-bold">WMS Inventory</h1>
           <p className="text-muted-foreground">Manage all warehouse inventory</p>
         </div>
-        <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) resetForm(); }}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Item
-            </Button>
-          </DialogTrigger>
+        <div className="flex gap-2">
+          <InventoryExcelImportAdmin />
+          <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) resetForm(); }}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Item
+              </Button>
+            </DialogTrigger>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>{editingItem ? "Edit" : "Add"} Inventory Item</DialogTitle>
@@ -296,6 +354,20 @@ export default function AdminWMSInventory() {
                     </SelectContent>
                   </Select>
                 </div>
+                <div className="col-span-2 space-y-2">
+                  <Label htmlFor="image">Product Image</Label>
+                  <Input
+                    id="image"
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    onChange={handleImageChange}
+                  />
+                  {imagePreview && (
+                    <div className="mt-2">
+                      <img src={imagePreview} alt="Preview" className="w-32 h-32 object-cover rounded" />
+                    </div>
+                  )}
+                </div>
               </div>
               <div className="flex justify-end gap-2">
                 <Button type="button" variant="outline" onClick={() => setOpen(false)}>
@@ -308,6 +380,7 @@ export default function AdminWMSInventory() {
             </form>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       <div className="flex gap-4">
@@ -347,14 +420,13 @@ export default function AdminWMSInventory() {
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-12">
-                    <input
-                      type="checkbox"
+                    <Checkbox
                       checked={selectedItems.size === filteredInventory?.length && filteredInventory?.length > 0}
-                      onChange={toggleSelectAll}
-                      className="rounded border-input"
+                      onCheckedChange={toggleSelectAll}
                     />
                   </TableHead>
                   <TableHead className="w-12"></TableHead>
+                  <TableHead className="w-16">Picture</TableHead>
                   <TableHead>SKU</TableHead>
                   <TableHead>Product Name</TableHead>
                   <TableHead>Category</TableHead>
@@ -372,15 +444,38 @@ export default function AdminWMSInventory() {
                 {filteredInventory?.map((item: any) => (
                   <TableRow key={item.id}>
                     <TableCell>
-                      <input
-                        type="checkbox"
+                      <Checkbox
                         checked={selectedItems.has(item.id)}
-                        onChange={() => toggleSelectItem(item.id)}
-                        className="rounded border-input"
+                        onCheckedChange={() => toggleSelectItem(item.id)}
                       />
                     </TableCell>
                     <TableCell>
-                      <Settings className="h-4 w-4 text-muted-foreground" />
+                      <div className={`w-2 h-2 rounded-full ${
+                        item.status === 'available' ? 'bg-green-500' : 
+                        item.status === 'low' ? 'bg-yellow-500' : 'bg-red-500'
+                      }`} />
+                    </TableCell>
+                    <TableCell>
+                      {item.image_url ? (
+                        <img 
+                          src={item.image_url} 
+                          alt={item.product_name}
+                          className="w-10 h-10 object-cover rounded"
+                          loading="lazy"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = 'none';
+                            const parent = target.parentElement;
+                            if (parent) {
+                              parent.innerHTML = '<div class="w-10 h-10 bg-muted rounded flex items-center justify-center"><svg class="h-5 w-5 text-muted-foreground" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="m21 15-5-5L5 21" /></svg></div>';
+                            }
+                          }}
+                        />
+                      ) : (
+                        <div className="w-10 h-10 bg-muted rounded flex items-center justify-center">
+                          <Package className="h-5 w-5 text-muted-foreground" />
+                        </div>
+                      )}
                     </TableCell>
                     <TableCell className="font-mono text-sm">{item.sku}</TableCell>
                     <TableCell className="font-medium">{item.product_name}</TableCell>
