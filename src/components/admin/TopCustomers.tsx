@@ -8,7 +8,7 @@ interface TopCustomer {
   customer_id: string;
   full_name: string;
   company_name: string | null;
-  total_spent: number;
+  total_spent: number | null;
   total_requests: number;
   approved_requests: number;
 }
@@ -102,7 +102,7 @@ const TopCustomers = () => {
               </div>
               <div className="text-right">
                 <p className="font-bold text-lg text-primary">
-                  ${customer.total_spent.toFixed(0)}
+                  ${customer.total_spent?.toFixed(0) ?? '0'}
                 </p>
                 <p className="text-xs text-muted-foreground">Total spent</p>
               </div>
