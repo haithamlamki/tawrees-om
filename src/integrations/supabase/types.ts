@@ -1618,6 +1618,8 @@ export type Database = {
         | "employee"
         | "shipping_partner"
         | "accountant"
+        | "store_customer"
+        | "branch_manager"
       approval_status:
         | "pending_admin"
         | "pending_partner"
@@ -1773,6 +1775,8 @@ export const Constants = {
         "employee",
         "shipping_partner",
         "accountant",
+        "store_customer",
+        "branch_manager",
       ],
       approval_status: [
         "pending_admin",
