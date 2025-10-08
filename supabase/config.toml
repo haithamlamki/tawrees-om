@@ -5,3 +5,9 @@ verify_jwt = false
 
 [functions.send-product-quote]
 verify_jwt = false
+
+[functions.scrape-alibaba-product]
+verify_jwt = true
+
+[functions.enhance-product-content]
+verify_jwt = true
