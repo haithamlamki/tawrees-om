@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertTriangle, Package } from "lucide-react";
@@ -11,6 +11,7 @@ interface ReorderAlertsProps {
 }
 
 export const ReorderAlerts = ({ customerId }: ReorderAlertsProps) => {
+  const queryClient = useQueryClient();
   const { data: lowStockItems, isLoading } = useQuery({
     queryKey: ['low-stock-items', customerId],
     queryFn: async () => {
@@ -26,8 +27,38 @@ export const ReorderAlerts = ({ customerId }: ReorderAlertsProps) => {
     },
   });
 
-  const handleReorder = (item: any) => {
-    toast.info(`Reorder functionality for ${item.product_name} - Coming soon!`);
+  const handleReorder = async (item: any) => {
+    try {
+      const { data: orderData, error: orderError } = await supabase
+        .from('wms_orders' as any)
+        .insert({
+          customer_id: customerId,
+          status: 'draft',
+          order_type: 'reorder',
+          notes: `Reorder for ${item.product_name} - Low stock alert`,
+        } as any)
+        .select()
+        .single();
+
+      if (orderError) throw orderError;
+
+      const { error: itemError } = await supabase
+        .from('wms_order_items' as any)
+        .insert({
+          order_id: (orderData as any)?.id,
+          inventory_id: item.id,
+          quantity: item.reorder_point || 20,
+          unit_price: 0,
+        } as any);
+
+      if (itemError) throw itemError;
+
+      toast.success(`Reorder created for ${item.product_name}`);
+      queryClient.invalidateQueries({ queryKey: ['low-stock-items'] });
+    } catch (error: any) {
+      console.error("Reorder error:", error);
+      toast.error(error.message || "Failed to create reorder");
+    }
   };
 
   if (isLoading) {

@@ -1,3 +1,25 @@
+const CACHE_NAME = 'tawreed-v1';
+const urlsToCache = [
+  '/',
+  '/index.html',
+  '/favicon.png',
+  '/manifest.json'
+];
+
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then((cache) => cache.addAll(urlsToCache))
+  );
+});
+
+self.addEventListener('fetch', (event) => {
+  event.respondWith(
+    caches.match(event.request)
+      .then((response) => response || fetch(event.request))
+  );
+});
+
 self.addEventListener('push', (event) => {
   const data = event.data?.json() || {};
   const title = data.title || 'Tawreed Notification';
@@ -6,6 +28,7 @@ self.addEventListener('push', (event) => {
     icon: data.icon || '/favicon.png',
     badge: '/favicon.png',
     data: data.data || {},
+    vibrate: [200, 100, 200],
     actions: [
       { action: 'view', title: 'View' },
       { action: 'dismiss', title: 'Dismiss' }
