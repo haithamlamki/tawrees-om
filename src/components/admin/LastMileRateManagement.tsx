@@ -183,13 +183,13 @@ export const LastMileRateManagement = () => {
                 <Label htmlFor="destination">Destination</Label>
                 <Select
                   value={formData.destination_id}
-                  onValueChange={(value) => setFormData({ ...formData, destination_id: value })}
+                  onValueChange={(value) => setFormData({ ...formData, destination_id: value === 'none' ? '' : value })}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select destination (optional)" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">None</SelectItem>
+                    <SelectItem value="none">None</SelectItem>
                     {destinations.map((dest) => (
                       <SelectItem key={dest.id} value={dest.id}>
                         {dest.name}, {dest.country}

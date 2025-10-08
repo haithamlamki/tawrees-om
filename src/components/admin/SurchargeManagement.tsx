@@ -206,13 +206,13 @@ export const SurchargeManagement = () => {
                 <Label htmlFor="origin">Origin (Optional)</Label>
                 <Select
                   value={formData.origin_id}
-                  onValueChange={(value) => setFormData({ ...formData, origin_id: value })}
+                  onValueChange={(value) => setFormData({ ...formData, origin_id: value === 'all' ? '' : value })}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="All origins" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All origins</SelectItem>
+                    <SelectItem value="all">All origins</SelectItem>
                     {origins.map((origin) => (
                       <SelectItem key={origin.id} value={origin.id}>
                         {origin.name}
@@ -227,14 +227,14 @@ export const SurchargeManagement = () => {
                 <Select
                   value={formData.destination_id}
                   onValueChange={(value) =>
-                    setFormData({ ...formData, destination_id: value })
+                    setFormData({ ...formData, destination_id: value === 'all' ? '' : value })
                   }
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="All destinations" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All destinations</SelectItem>
+                    <SelectItem value="all">All destinations</SelectItem>
                     {destinations.map((dest) => (
                       <SelectItem key={dest.id} value={dest.id}>
                         {dest.name}, {dest.country}
