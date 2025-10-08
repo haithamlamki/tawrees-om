@@ -493,6 +493,135 @@ export type Database = {
         }
         Relationships: []
       }
+      qc_checklist: {
+        Row: {
+          check_item: string
+          created_at: string | null
+          id: string
+          notes: string | null
+          qc_id: string
+          status: string
+        }
+        Insert: {
+          check_item: string
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          qc_id: string
+          status: string
+        }
+        Update: {
+          check_item?: string
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          qc_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "qc_checklist_qc_id_fkey"
+            columns: ["qc_id"]
+            isOneToOne: false
+            referencedRelation: "quality_checks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      qc_photos: {
+        Row: {
+          created_at: string | null
+          file_name: string
+          file_path: string
+          file_size: number
+          id: string
+          qc_id: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          file_name: string
+          file_path: string
+          file_size: number
+          id?: string
+          qc_id: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          file_name?: string
+          file_path?: string
+          file_size?: number
+          id?: string
+          qc_id?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "qc_photos_qc_id_fkey"
+            columns: ["qc_id"]
+            isOneToOne: false
+            referencedRelation: "quality_checks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quality_checks: {
+        Row: {
+          created_at: string | null
+          id: string
+          notes: string | null
+          performed_at: string | null
+          performed_by: string | null
+          qc_fee: number | null
+          quantity_actual: number | null
+          quantity_expected: number | null
+          shipment_id: string
+          status: string
+          updated_at: string | null
+          weight_actual: number | null
+          weight_expected: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          performed_at?: string | null
+          performed_by?: string | null
+          qc_fee?: number | null
+          quantity_actual?: number | null
+          quantity_expected?: number | null
+          shipment_id: string
+          status?: string
+          updated_at?: string | null
+          weight_actual?: number | null
+          weight_expected?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          performed_at?: string | null
+          performed_by?: string | null
+          qc_fee?: number | null
+          quantity_actual?: number | null
+          quantity_expected?: number | null
+          shipment_id?: string
+          status?: string
+          updated_at?: string | null
+          weight_actual?: number | null
+          weight_expected?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quality_checks_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       quotes: {
         Row: {
           breakdown: Json

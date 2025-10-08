@@ -5,6 +5,7 @@ import { Ship, User, LogOut, LayoutDashboard, Package, Truck, Calculator } from 
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import NotificationBell from "@/components/notifications/NotificationBell";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import logo from "@/assets/tawreed-logo.png";
 
 interface NavigationProps {
@@ -108,6 +109,7 @@ const Navigation = ({ isAuthenticated }: NavigationProps) => {
                   </Button>
                 )}
                 <NotificationBell />
+                <ThemeToggle />
                 <Button variant="ghost" onClick={handleLogout}>
                   <LogOut className="mr-2 h-4 w-4" />
                   Logout

@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { DollarSign, Settings, Package, CheckCircle, XCircle, Users, Ship, BarChart3, UserCog, Building2, FileText, History as HistoryIcon } from "lucide-react";
+import { DollarSign, Settings, Package, CheckCircle, XCircle, Users, Ship, BarChart3, UserCog, Building2, FileText, History as HistoryIcon, ClipboardList, FolderSync } from "lucide-react";
 import CustomerManagement from "@/components/admin/CustomerManagement";
 import ShipmentManagement from "@/components/admin/ShipmentManagement";
 import DashboardMetrics from "@/components/admin/DashboardMetrics";
@@ -25,6 +25,8 @@ import { SurchargeManagement } from "@/components/admin/SurchargeManagement";
 import { AuditLogViewer } from "@/components/admin/AuditLogViewer";
 import { LastMileRateManagement } from "@/components/admin/LastMileRateManagement";
 import { RateHistoryViewer } from "@/components/admin/RateHistoryViewer";
+import { QualityCheckManager } from "@/components/admin/QualityCheckManager";
+import { BulkOperations } from "@/components/admin/BulkOperations";
 import { CSVExportButtons } from "@/components/admin/CSVExportButtons";
 import { CSVImportDialog } from "@/components/admin/CSVImportDialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -293,6 +295,14 @@ const Admin = () => {
               <HistoryIcon className="mr-2 h-4 w-4" />
               History
             </TabsTrigger>
+            <TabsTrigger value="qc">
+              <ClipboardList className="mr-2 h-4 w-4" />
+              Quality Check
+            </TabsTrigger>
+            <TabsTrigger value="bulk">
+              <FolderSync className="mr-2 h-4 w-4" />
+              Bulk Ops
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="dashboard" className="space-y-6">
@@ -550,6 +560,14 @@ const Admin = () => {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          <TabsContent value="qc">
+            <QualityCheckManager />
+          </TabsContent>
+
+          <TabsContent value="bulk">
+            <BulkOperations />
           </TabsContent>
         </Tabs>
       </main>
