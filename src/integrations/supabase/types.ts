@@ -2388,6 +2388,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      sanitize_error_message: {
+        Args: { error_msg: string }
+        Returns: string
+      }
     }
     Enums: {
       app_role:
