@@ -14,6 +14,88 @@ export type Database = {
   }
   public: {
     Tables: {
+      agreements: {
+        Row: {
+          active: boolean
+          buy_price: number
+          created_at: string
+          created_by: string | null
+          currency: string
+          destination_id: string
+          id: string
+          margin_percent: number
+          min_charge: number | null
+          notes: string | null
+          origin_id: string
+          partner_id: string | null
+          rate_type: Database["public"]["Enums"]["rate_type"]
+          sell_price: number
+          updated_at: string
+          valid_from: string
+          valid_to: string | null
+        }
+        Insert: {
+          active?: boolean
+          buy_price: number
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          destination_id: string
+          id?: string
+          margin_percent: number
+          min_charge?: number | null
+          notes?: string | null
+          origin_id: string
+          partner_id?: string | null
+          rate_type: Database["public"]["Enums"]["rate_type"]
+          sell_price: number
+          updated_at?: string
+          valid_from?: string
+          valid_to?: string | null
+        }
+        Update: {
+          active?: boolean
+          buy_price?: number
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          destination_id?: string
+          id?: string
+          margin_percent?: number
+          min_charge?: number | null
+          notes?: string | null
+          origin_id?: string
+          partner_id?: string | null
+          rate_type?: Database["public"]["Enums"]["rate_type"]
+          sell_price?: number
+          updated_at?: string
+          valid_from?: string
+          valid_to?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agreements_destination_id_fkey"
+            columns: ["destination_id"]
+            isOneToOne: false
+            referencedRelation: "destinations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agreements_origin_id_fkey"
+            columns: ["origin_id"]
+            isOneToOne: false
+            referencedRelation: "origins"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agreements_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "shipping_partners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       container_types: {
         Row: {
           cbm_capacity: number
@@ -38,6 +120,36 @@ export type Database = {
           id?: string
           name?: string
           size_feet?: number
+        }
+        Relationships: []
+      }
+      destinations: {
+        Row: {
+          active: boolean
+          country: string
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          country: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          country?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -146,6 +258,39 @@ export type Database = {
           title?: string
           type?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      origins: {
+        Row: {
+          active: boolean
+          country: string
+          created_at: string
+          created_by: string | null
+          id: string
+          is_port: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          country?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_port?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          country?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_port?: boolean
+          name?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -700,6 +845,13 @@ export type Database = {
         | "employee"
         | "shipping_partner"
         | "accountant"
+      rate_type:
+        | "AIR_KG"
+        | "SEA_CBM"
+        | "SEA_CONTAINER_20"
+        | "SEA_CONTAINER_40"
+        | "SEA_CONTAINER_40HC"
+        | "SEA_CONTAINER_45HC"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -833,6 +985,14 @@ export const Constants = {
         "employee",
         "shipping_partner",
         "accountant",
+      ],
+      rate_type: [
+        "AIR_KG",
+        "SEA_CBM",
+        "SEA_CONTAINER_20",
+        "SEA_CONTAINER_40",
+        "SEA_CONTAINER_40HC",
+        "SEA_CONTAINER_45HC",
       ],
     },
   },

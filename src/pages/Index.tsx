@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import Navigation from "@/components/Navigation";
-import ShippingCalculator from "@/components/ShippingCalculator";
+import { ShippingCalculatorNew } from "@/components/ShippingCalculatorNew";
 import { Ship, Globe, Clock, Shield } from "lucide-react";
 
 const Index = () => {
@@ -93,7 +93,7 @@ const Index = () => {
               Get an instant quote for your shipment
             </p>
           </div>
-          <ShippingCalculator />
+          <ShippingCalculatorNew />
         </div>
       </section>
 

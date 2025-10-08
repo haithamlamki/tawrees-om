@@ -60,12 +60,20 @@ const Navigation = ({ isAuthenticated }: NavigationProps) => {
                   </Button>
                 )}
                 {userRoles.includes("admin") && (
-                  <Button variant="ghost" asChild>
-                    <Link to="/admin">
-                      <LayoutDashboard className="mr-2 h-4 w-4" />
-                      Admin
-                    </Link>
-                  </Button>
+                  <>
+                    <Button variant="ghost" asChild>
+                      <Link to="/admin">
+                        <LayoutDashboard className="mr-2 h-4 w-4" />
+                        Admin
+                      </Link>
+                    </Button>
+                    <Button variant="ghost" asChild>
+                      <Link to="/locations">Locations</Link>
+                    </Button>
+                    <Button variant="ghost" asChild>
+                      <Link to="/rates">Rates</Link>
+                    </Button>
+                  </>
                 )}
                 {userRoles.includes("employee") && (
                   <Button variant="ghost" asChild>
@@ -76,12 +84,20 @@ const Navigation = ({ isAuthenticated }: NavigationProps) => {
                   </Button>
                 )}
                 {userRoles.includes("shipping_partner") && (
-                  <Button variant="ghost" asChild>
-                    <Link to="/partner">
-                      <Truck className="mr-2 h-4 w-4" />
-                      Partner
-                    </Link>
-                  </Button>
+                  <>
+                    <Button variant="ghost" asChild>
+                      <Link to="/partner">
+                        <Truck className="mr-2 h-4 w-4" />
+                        Partner
+                      </Link>
+                    </Button>
+                    <Button variant="ghost" asChild>
+                      <Link to="/locations">Locations</Link>
+                    </Button>
+                    <Button variant="ghost" asChild>
+                      <Link to="/rates">Rates</Link>
+                    </Button>
+                  </>
                 )}
                 {userRoles.includes("accountant") && (
                   <Button variant="ghost" asChild>
