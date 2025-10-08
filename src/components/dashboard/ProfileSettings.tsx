@@ -1,35 +1,25 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
-import { User } from "lucide-react";
-
-interface ProfileData {
-  full_name: string;
-  company_name: string;
-  phone: string;
-  email: string;
-  address: string;
-  city: string;
-  country: string;
-  postal_code: string;
-}
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
+import { User, Save } from "lucide-react";
 
 const ProfileSettings = () => {
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [profile, setProfile] = useState<ProfileData>({
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
+  const [profile, setProfile] = useState({
     full_name: "",
-    company_name: "",
-    phone: "",
     email: "",
+    phone: "",
+    company_name: "",
     address: "",
     city: "",
-    country: "",
     postal_code: "",
+    country: "",
   });
 
   useEffect(() => {
@@ -37,71 +27,71 @@ const ProfileSettings = () => {
   }, []);
 
   const loadProfile = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
 
-    const { data, error } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", user.id)
-      .single();
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single();
 
-    if (error) {
-      console.error("Error loading profile:", error);
-      return;
-    }
+      if (error) throw error;
 
-    if (data) {
       setProfile({
         full_name: data.full_name || "",
-        company_name: data.company_name || "",
-        phone: data.phone || "",
         email: data.email || user.email || "",
+        phone: data.phone || "",
+        company_name: data.company_name || "",
         address: data.address || "",
         city: data.city || "",
-        country: data.country || "",
         postal_code: data.postal_code || "",
+        country: data.country || "",
       });
+    } catch (error) {
+      console.error("Error loading profile:", error);
     }
-    setLoading(false);
   };
 
-  const handleSave = async () => {
-    setSaving(true);
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
 
-    const { error } = await supabase
-      .from("profiles")
-      .update({
-        full_name: profile.full_name,
-        company_name: profile.company_name,
-        phone: profile.phone,
-        address: profile.address,
-        city: profile.city,
-        country: profile.country,
-        postal_code: profile.postal_code,
-      })
-      .eq("id", user.id);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
 
-    if (error) {
-      toast.error("Failed to update profile");
-      console.error(error);
-    } else {
-      toast.success("Profile updated successfully");
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          full_name: profile.full_name,
+          phone: profile.phone,
+          company_name: profile.company_name,
+          address: profile.address,
+          city: profile.city,
+          postal_code: profile.postal_code,
+          country: profile.country,
+        })
+        .eq("id", user.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Profile updated successfully",
+      });
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update profile",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
-    setSaving(false);
   };
-
-  if (loading) {
-    return (
-      <Card>
-        <CardContent className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-        </CardContent>
-      </Card>
-    );
-  }
 
   return (
     <Card>
@@ -110,96 +100,88 @@ const ProfileSettings = () => {
           <User className="h-5 w-5" />
           Profile Settings
         </CardTitle>
-        <CardDescription>Manage your personal and company information</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="full_name">Full Name *</Label>
-            <Input
-              id="full_name"
-              value={profile.full_name}
-              onChange={(e) => setProfile({ ...profile, full_name: e.target.value })}
-              placeholder="John Doe"
-            />
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="full_name">Full Name</Label>
+              <Input
+                id="full_name"
+                value={profile.full_name}
+                onChange={(e) => setProfile({ ...profile, full_name: e.target.value })}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={profile.email}
+                disabled
+              />
+            </div>
+            <div>
+              <Label htmlFor="phone">Phone</Label>
+              <Input
+                id="phone"
+                value={profile.phone}
+                onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label htmlFor="company_name">Company Name</Label>
+              <Input
+                id="company_name"
+                value={profile.company_name}
+                onChange={(e) => setProfile({ ...profile, company_name: e.target.value })}
+              />
+            </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              value={profile.email}
-              disabled
-              className="bg-muted"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="company_name">Company Name</Label>
-            <Input
-              id="company_name"
-              value={profile.company_name}
-              onChange={(e) => setProfile({ ...profile, company_name: e.target.value })}
-              placeholder="Acme Corp"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="phone">Phone Number</Label>
-            <Input
-              id="phone"
-              type="tel"
-              value={profile.phone}
-              onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
-              placeholder="+1 (555) 000-0000"
-            />
-          </div>
-
-          <div className="space-y-2 md:col-span-2">
+          <div>
             <Label htmlFor="address">Address</Label>
-            <Input
+            <Textarea
               id="address"
               value={profile.address}
               onChange={(e) => setProfile({ ...profile, address: e.target.value })}
-              placeholder="123 Main Street"
+              rows={2}
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="city">City</Label>
-            <Input
-              id="city"
-              value={profile.city}
-              onChange={(e) => setProfile({ ...profile, city: e.target.value })}
-              placeholder="New York"
-            />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <Label htmlFor="city">City</Label>
+              <Input
+                id="city"
+                value={profile.city}
+                onChange={(e) => setProfile({ ...profile, city: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label htmlFor="postal_code">Postal Code</Label>
+              <Input
+                id="postal_code"
+                value={profile.postal_code}
+                onChange={(e) => setProfile({ ...profile, postal_code: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label htmlFor="country">Country</Label>
+              <Input
+                id="country"
+                value={profile.country}
+                onChange={(e) => setProfile({ ...profile, country: e.target.value })}
+              />
+            </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="country">Country</Label>
-            <Input
-              id="country"
-              value={profile.country}
-              onChange={(e) => setProfile({ ...profile, country: e.target.value })}
-              placeholder="United States"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="postal_code">Postal Code</Label>
-            <Input
-              id="postal_code"
-              value={profile.postal_code}
-              onChange={(e) => setProfile({ ...profile, postal_code: e.target.value })}
-              placeholder="10001"
-            />
-          </div>
-        </div>
-
-        <Button onClick={handleSave} disabled={saving} className="w-full">
-          {saving ? "Saving..." : "Save Profile"}
-        </Button>
+          <Button type="submit" disabled={loading}>
+            <Save className="h-4 w-4 mr-2" />
+            Save Changes
+          </Button>
+        </form>
       </CardContent>
     </Card>
   );
