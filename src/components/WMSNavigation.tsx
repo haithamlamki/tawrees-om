@@ -12,7 +12,8 @@ import {
   Users,
   Truck,
   ClipboardCheck,
-  Workflow
+  Workflow,
+  BarChart3
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -52,6 +53,12 @@ const navigationItems: NavigationItem[] = [
     name: "Invoices",
     href: "/warehouse/invoices",
     icon: FileBarChart,
+    roles: ["store_customer"],
+  },
+  {
+    name: "Reports",
+    href: "/warehouse/reports",
+    icon: BarChart3,
     roles: ["store_customer"],
   },
   {
