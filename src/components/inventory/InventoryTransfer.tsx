@@ -16,6 +16,8 @@ interface InventoryTransferProps {
   onTransferComplete: () => void;
 }
 
+// Using any type since wms_inventory table types haven't been regenerated yet
+
 export const InventoryTransfer = ({
   inventoryId,
   currentQuantity,
@@ -50,49 +52,58 @@ export const InventoryTransfer = ({
     setIsLoading(true);
 
     try {
-      const currentItemResult: any = await supabase
+      // Fetch current item
+      const { data: items, error: fetchError } = await supabase
         .from('wms_inventory')
         .select('*')
-        .eq('id', inventoryId)
-        .single();
+        .eq('id', inventoryId);
 
-      const currentItem = currentItemResult.data;
-      if (!currentItem) throw new Error("Inventory item not found");
-
+      if (fetchError) throw fetchError;
+      if (!items || items.length === 0) throw new Error("Inventory item not found");
+      
+      const currentItem: any = items[0];
       const remainingQty = currentQuantity - transferQty;
       
+      // Update or delete current location item
       if (remainingQty === 0) {
-        await supabase
+        const { error: deleteError } = await supabase
           .from('wms_inventory')
           .delete()
           .eq('id', inventoryId);
+        if (deleteError) throw deleteError;
       } else {
-        await supabase
+        const { error: updateError } = await supabase
           .from('wms_inventory')
           .update({ quantity: remainingQty })
           .eq('id', inventoryId);
+        if (updateError) throw updateError;
       }
 
-      const existingItemResult: any = await supabase
-        .from('wms_inventory')
-        .select('*')
+      // Check if item exists at new location - using explicit type casting to avoid TS recursion
+      const checkQuery: any = supabase.from('wms_inventory').select('*');
+      const checkResult = await checkQuery
         .eq('customer_id', currentItem.customer_id)
         .eq('sku', currentItem.sku)
-        .eq('location', newLocation)
-        .maybeSingle();
+        .eq('location', newLocation);
       
-      const existingItem = existingItemResult.data;
+      const existing = checkResult.data;
+      const checkError = checkResult.error;
 
-      if (existingItem) {
-        await supabase
+      if (checkError) throw checkError;
+
+      if (existing && existing.length > 0) {
+        // Update existing item at new location
+        const existingItem: any = existing[0];
+        const { error: updateError } = await supabase
           .from('wms_inventory')
           .update({ 
             quantity: existingItem.quantity + transferQty,
-            updated_at: new Date().toISOString(),
           })
           .eq('id', existingItem.id);
+        if (updateError) throw updateError;
       } else {
-        await supabase
+        // Create new item at new location
+        const { error: insertError } = await supabase
           .from('wms_inventory')
           .insert({
             customer_id: currentItem.customer_id,
@@ -104,6 +115,7 @@ export const InventoryTransfer = ({
             notes: notes || null,
             status: 'available',
           });
+        if (insertError) throw insertError;
       }
 
       toast.success(`Transferred ${transferQty} units to ${newLocation}`);
