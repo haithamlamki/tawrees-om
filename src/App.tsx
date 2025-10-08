@@ -18,6 +18,16 @@ import AdminProducts from "./pages/admin/Products";
 import ProductForm from "./pages/admin/ProductForm";
 import AlibabaImport from "./pages/admin/AlibabaImport";
 import QuoteManagement from "./pages/admin/QuoteManagement";
+import { WMSCustomerLayout } from "./layouts/WMSCustomerLayout";
+import CustomerDashboard from "./pages/warehouse/CustomerDashboard";
+import WMSInventory from "./pages/warehouse/Inventory";
+import WMSOrders from "./pages/warehouse/Orders";
+import WMSInvoices from "./pages/warehouse/Invoices";
+import WMSContract from "./pages/warehouse/Contract";
+import WMSBranches from "./pages/warehouse/Branches";
+import WMSProductRequests from "./pages/warehouse/ProductRequests";
+import WMSSettings from "./pages/warehouse/Settings";
+import AdminWMSCustomers from "./pages/admin/WMSCustomers";
 
 const queryClient = new QueryClient();
 
@@ -45,6 +55,20 @@ const App = () => (
           <Route path="/admin/products/:id/edit" element={<ProductForm />} />
           <Route path="/admin/products/import/alibaba" element={<AlibabaImport />} />
           <Route path="/admin/quotes" element={<QuoteManagement />} />
+          
+          {/* WMS Routes */}
+          <Route path="/warehouse" element={<WMSCustomerLayout />}>
+            <Route path="dashboard" element={<CustomerDashboard />} />
+            <Route path="inventory" element={<WMSInventory />} />
+            <Route path="orders" element={<WMSOrders />} />
+            <Route path="invoices" element={<WMSInvoices />} />
+            <Route path="contract" element={<WMSContract />} />
+            <Route path="branches" element={<WMSBranches />} />
+            <Route path="product-requests" element={<WMSProductRequests />} />
+            <Route path="settings" element={<WMSSettings />} />
+          </Route>
+          <Route path="/admin/wms-customers" element={<AdminWMSCustomers />} />
+          
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
