@@ -1567,20 +1567,6 @@ export type Database = {
             referencedRelation: "shipping_partners"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "user_roles_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "customer_statistics"
-            referencedColumns: ["customer_id"]
-          },
-          {
-            foreignKeyName: "user_roles_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
         ]
       }
       wms_contracts: {
@@ -2036,6 +2022,7 @@ export type Database = {
       wms_order_items: {
         Row: {
           created_at: string
+          customer_id: string
           id: string
           inventory_id: string
           order_id: string
@@ -2045,6 +2032,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          customer_id: string
           id?: string
           inventory_id: string
           order_id: string
@@ -2054,6 +2042,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          customer_id?: string
           id?: string
           inventory_id?: string
           order_id?: string

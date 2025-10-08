@@ -97,6 +97,7 @@ export default function WMSOrders() {
           quantity: item.quantity,
           unit_price: unitPrice,
           total_price: unitPrice * item.quantity,
+          customer_id: customer.id, // Materialized customer_id for efficient RLS
         };
       });
 

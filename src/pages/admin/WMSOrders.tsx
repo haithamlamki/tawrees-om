@@ -99,32 +99,28 @@ export default function AdminWMSOrders() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalOrders}</div>
-            <p className="text-xs text-muted-foreground">All orders</p>
           </CardContent>
         </Card>
-
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Pending Approval</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{pendingApproval}</div>
-            <p className="text-xs text-muted-foreground">Awaiting review</p>
+            <div className="text-2xl font-bold text-orange-600">{pendingApproval}</div>
+            <p className="text-xs text-muted-foreground">Requires action</p>
           </CardContent>
         </Card>
-
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">In Progress</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{inProgress}</div>
-            <p className="text-xs text-muted-foreground">Active orders</p>
           </CardContent>
         </Card>
       </div>
@@ -210,22 +206,27 @@ export default function AdminWMSOrders() {
                         {order.status === "pending_approval" && (
                           <>
                             <Button
-                              variant="ghost"
+                              variant="default"
                               size="sm"
+                              className="bg-green-600 hover:bg-green-700 text-white"
                               onClick={() =>
                                 updateStatusMutation.mutate({ id: order.id, status: "approved" })
                               }
+                              title="Approve order and deduct inventory"
                             >
-                              <CheckCircle className="h-4 w-4 text-green-600" />
+                              <CheckCircle className="h-4 w-4 mr-1" />
+                              Approve
                             </Button>
                             <Button
-                              variant="ghost"
+                              variant="destructive"
                               size="sm"
                               onClick={() =>
                                 updateStatusMutation.mutate({ id: order.id, status: "cancelled" })
                               }
+                              title="Cancel order"
                             >
-                              <XCircle className="h-4 w-4 text-red-600" />
+                              <XCircle className="h-4 w-4 mr-1" />
+                              Reject
                             </Button>
                           </>
                         )}

@@ -37,19 +37,31 @@ const UserRoleManagement = () => {
 
   const loadData = async () => {
     try {
-      const { data: usersData, error: usersError } = await supabase
+      // Fetch user roles (now references auth.users, not profiles)
+      const { data: rolesData, error: rolesError } = await supabase
         .from("user_roles")
-        .select(`
-          *,
-          profiles (
-            full_name,
-            email
-          )
-        `)
+        .select("*")
         .order("created_at", { ascending: false });
 
-      if (usersError) throw usersError;
-      setUsers(usersData || []);
+      if (rolesError) throw rolesError;
+
+      // Fetch profiles separately
+      const { data: profilesData } = await supabase
+        .from("profiles")
+        .select("id, full_name, email");
+
+      // Create a map for quick lookup (profiles.id matches user_id in both tables)
+      const profilesMap = new Map(
+        profilesData?.map((p) => [p.id, { full_name: p.full_name, email: p.email }]) || []
+      );
+
+      // Manually join the data
+      const usersData = rolesData?.map((role) => ({
+        ...role,
+        profiles: profilesMap.get(role.user_id) || { full_name: "Unknown", email: null },
+      })) || [];
+
+      setUsers(usersData as UserRole[]);
 
       const { data: partnersData, error: partnersError } = await supabase
         .from("shipping_partners")
