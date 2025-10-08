@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/select";
 import { Plus, Search, FileDown, FileUp, Edit, Archive, Eye } from "lucide-react";
 import Navigation from "@/components/Navigation";
+import ProductAnalytics from "@/components/admin/ProductAnalytics";
 
 export default function AdminProducts() {
   const navigate = useNavigate();
@@ -129,6 +130,10 @@ export default function AdminProducts() {
               Create Product
             </Button>
           </div>
+        </div>
+
+        <div className="mb-6">
+          <ProductAnalytics />
         </div>
 
         <div className="flex gap-4 mb-6">

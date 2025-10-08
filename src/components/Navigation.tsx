@@ -70,6 +70,15 @@ const Navigation = ({ isAuthenticated }: NavigationProps) => {
                       </Link>
                     </Button>
                     <Button variant="ghost" asChild>
+                      <Link to="/admin/products">
+                        <Package className="mr-2 h-4 w-4" />
+                        Products
+                      </Link>
+                    </Button>
+                    <Button variant="ghost" asChild>
+                      <Link to="/admin/quotes">Quotes</Link>
+                    </Button>
+                    <Button variant="ghost" asChild>
                       <Link to="/locations">Locations</Link>
                     </Button>
                     <Button variant="ghost" asChild>

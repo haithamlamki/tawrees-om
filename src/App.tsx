@@ -17,6 +17,7 @@ import NotFound from "./pages/NotFound";
 import AdminProducts from "./pages/admin/Products";
 import ProductForm from "./pages/admin/ProductForm";
 import AlibabaImport from "./pages/admin/AlibabaImport";
+import QuoteManagement from "./pages/admin/QuoteManagement";
 
 const queryClient = new QueryClient();
 
@@ -43,6 +44,7 @@ const App = () => (
           <Route path="/admin/products/new" element={<ProductForm />} />
           <Route path="/admin/products/:id/edit" element={<ProductForm />} />
           <Route path="/admin/products/import/alibaba" element={<AlibabaImport />} />
+          <Route path="/admin/quotes" element={<QuoteManagement />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
