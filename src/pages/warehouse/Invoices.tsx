@@ -1,6 +1,7 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -14,13 +15,57 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
+import { useToast } from "@/hooks/use-toast";
 
 export default function WMSInvoices() {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [searchParams] = useSearchParams();
   const { data: customer, isLoading: customerLoading } = useWMSCustomer();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedInvoice, setSelectedInvoice] = useState<WMSInvoiceWithDetails | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [payingInvoice, setPayingInvoice] = useState<string | null>(null);
+
+  // Check for payment success/failure
+  useEffect(() => {
+    const payment = searchParams.get("payment");
+    const sessionId = searchParams.get("session_id");
+
+    if (payment === "success" && sessionId) {
+      // Verify payment
+      supabase.functions
+        .invoke("verify-invoice-payment", {
+          body: { session_id: sessionId },
+        })
+        .then(({ data, error }) => {
+          if (error) {
+            toast({
+              title: "Payment verification failed",
+              description: error.message,
+              variant: "destructive",
+            });
+          } else if (data?.success) {
+            toast({
+              title: "Payment successful!",
+              description: "Your invoice has been paid.",
+            });
+            queryClient.invalidateQueries({ queryKey: ["wms-invoices"] });
+          }
+        });
+      
+      // Clean up URL
+      window.history.replaceState({}, "", "/warehouse/invoices");
+    } else if (payment === "cancelled") {
+      toast({
+        title: "Payment cancelled",
+        description: "You cancelled the payment process.",
+        variant: "destructive",
+      });
+      window.history.replaceState({}, "", "/warehouse/invoices");
+    }
+  }, [searchParams, queryClient, toast]);
 
   const { data: invoices, isLoading: invoicesLoading } = useQuery({
     queryKey: ["wms-invoices", customer?.id],
@@ -101,6 +146,36 @@ export default function WMSInvoices() {
   const handleDownloadInvoice = (invoice: WMSInvoiceWithDetails) => {
     // Placeholder for download functionality
     console.log("Download invoice:", invoice.invoice_number);
+  };
+
+  const payInvoiceMutation = useMutation({
+    mutationFn: async (invoiceId: string) => {
+      const { data, error } = await supabase.functions.invoke("create-invoice-payment", {
+        body: { invoice_id: invoiceId },
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (data) => {
+      if (data?.url) {
+        window.open(data.url, "_blank");
+      }
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Payment failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+    onSettled: () => {
+      setPayingInvoice(null);
+    },
+  });
+
+  const handlePayInvoice = (invoiceId: string) => {
+    setPayingInvoice(invoiceId);
+    payInvoiceMutation.mutate(invoiceId);
   };
 
   return (
@@ -251,9 +326,14 @@ export default function WMSInvoices() {
                             <Download className="h-4 w-4" />
                           </Button>
                           {invoice.status === "pending" && (
-                            <Button size="sm" variant="default">
+                            <Button 
+                              size="sm" 
+                              variant="default"
+                              onClick={() => handlePayInvoice(invoice.id)}
+                              disabled={payingInvoice === invoice.id}
+                            >
                               <CreditCard className="h-4 w-4 mr-1" />
-                              Pay
+                              {payingInvoice === invoice.id ? "Processing..." : "Pay"}
                             </Button>
                           )}
                         </div>
@@ -361,9 +441,13 @@ export default function WMSInvoices() {
                     Download
                   </Button>
                   {selectedInvoice.status === "pending" && (
-                    <Button className="flex-1">
+                    <Button 
+                      className="flex-1"
+                      onClick={() => handlePayInvoice(selectedInvoice.id)}
+                      disabled={payingInvoice === selectedInvoice.id}
+                    >
                       <CreditCard className="h-4 w-4 mr-2" />
-                      Pay Invoice
+                      {payingInvoice === selectedInvoice.id ? "Processing..." : "Pay Invoice"}
                     </Button>
                   )}
                 </div>

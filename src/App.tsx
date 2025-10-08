@@ -37,6 +37,7 @@ import AdminWMSDrivers from "./pages/admin/WMSDrivers";
 import AdminWMSWorkflow from "./pages/admin/WMSWorkflow";
 import AdminWMSDashboard from "./pages/admin/WMSDashboard";
 import WMSAuth from "./pages/warehouse/Auth";
+import WMSCustomerOrders from "./components/admin/WMSCustomerOrders";
 
 const queryClient = new QueryClient();
 
@@ -82,6 +83,7 @@ const App = () => (
           </Route>
           <Route path="/admin/wms" element={<AdminWMSDashboard />} />
           <Route path="/admin/wms-customers" element={<AdminWMSCustomers />} />
+          <Route path="/admin/wms-customer-orders" element={<WMSCustomerOrders />} />
           <Route path="/admin/wms-contracts" element={<AdminWMSContracts />} />
           <Route path="/admin/wms-inventory" element={<AdminWMSInventory />} />
           <Route path="/admin/wms-orders" element={<AdminWMSOrders />} />
