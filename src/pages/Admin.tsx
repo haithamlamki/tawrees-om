@@ -224,27 +224,21 @@ const Admin = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background">
-        <Navigation isAuthenticated={true} />
-        <div className="flex items-center justify-center h-[calc(100vh-4rem)]">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-        </div>
+      <div className="flex items-center justify-center min-h-[calc(100vh-4rem)]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navigation isAuthenticated={true} />
-      
-      <main className="container mx-auto px-4 py-8">
-        <div className="mb-8 flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">Admin Dashboard</h1>
-            <p className="text-muted-foreground">Manage rates and approve shipment requests</p>
-          </div>
-          <div className="flex gap-2">
-            <CSVImportDialog />
+    <>
+      <div className="mb-8 flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold mb-2">Admin Dashboard</h1>
+          <p className="text-muted-foreground">Manage rates and approve shipment requests</p>
+        </div>
+        <div className="flex gap-2">
+          <CSVImportDialog />
             <CSVExportButtons />
           </div>
         </div>
@@ -689,9 +683,8 @@ const Admin = () => {
             </div>
           </TabsContent>
         </Tabs>
-      </main>
-    </div>
-  );
-};
-
-export default Admin;
+      </>
+    );
+  };
+  
+  export default Admin;
