@@ -45,9 +45,12 @@ export const TwoFactorSetup = ({ userId }: TwoFactorSetupProps) => {
       
       toast.info("Scan this QR code with your authenticator app");
     } catch (error: any) {
-      // Log without sensitive data
-      console.error('[2FA] Failed to generate secret');
-      toast.error("Failed to generate 2FA secret");
+      // Log structured error without sensitive data
+      console.error('[2FA Setup] Generate secret failed:', {
+        timestamp: new Date().toISOString(),
+        errorType: error?.name
+      });
+      toast.error("Unable to set up two-factor authentication. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -80,9 +83,12 @@ export const TwoFactorSetup = ({ userId }: TwoFactorSetupProps) => {
       setQrCode("");
       setVerificationCode("");
     } catch (error: any) {
-      // Log without sensitive data or detailed error info
-      console.error('[2FA] Failed to enable authentication');
-      toast.error("Failed to enable 2FA. Please try again.");
+      // Log structured error without sensitive data
+      console.error('[2FA Setup] Enable failed:', {
+        timestamp: new Date().toISOString(),
+        errorType: error?.name
+      });
+      toast.error("Unable to enable two-factor authentication. Please try again.");
     } finally {
       setIsLoading(false);
     }
