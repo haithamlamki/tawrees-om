@@ -119,6 +119,7 @@ export type Database = {
           created_at: string
           id: string
           ip_address: string | null
+          module: string | null
           new_data: Json | null
           old_data: Json | null
           record_id: string
@@ -133,6 +134,7 @@ export type Database = {
           created_at?: string
           id?: string
           ip_address?: string | null
+          module?: string | null
           new_data?: Json | null
           old_data?: Json | null
           record_id: string
@@ -147,6 +149,7 @@ export type Database = {
           created_at?: string
           id?: string
           ip_address?: string | null
+          module?: string | null
           new_data?: Json | null
           old_data?: Json | null
           record_id?: string
@@ -737,6 +740,7 @@ export type Database = {
           postal_code: string | null
           preferred_language: string
           updated_at: string
+          wms_customer_id: string | null
         }
         Insert: {
           address?: string | null
@@ -753,6 +757,7 @@ export type Database = {
           postal_code?: string | null
           preferred_language?: string
           updated_at?: string
+          wms_customer_id?: string | null
         }
         Update: {
           address?: string | null
@@ -769,6 +774,7 @@ export type Database = {
           postal_code?: string | null
           preferred_language?: string
           updated_at?: string
+          wms_customer_id?: string | null
         }
         Relationships: []
       }
@@ -1567,6 +1573,655 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wms_contracts: {
+        Row: {
+          contract_number: string
+          contract_type: string
+          created_at: string
+          customer_id: string
+          duration_months: number
+          end_date: string
+          free_transfer_count: number
+          id: string
+          monthly_fee: number
+          start_date: string
+          status: string
+          storage_conditions: string | null
+          storage_space_sqm: number | null
+          total_amount: number
+          transfer_price_after_limit: number
+          updated_at: string
+        }
+        Insert: {
+          contract_number: string
+          contract_type: string
+          created_at?: string
+          customer_id: string
+          duration_months: number
+          end_date: string
+          free_transfer_count?: number
+          id?: string
+          monthly_fee: number
+          start_date: string
+          status?: string
+          storage_conditions?: string | null
+          storage_space_sqm?: number | null
+          total_amount: number
+          transfer_price_after_limit?: number
+          updated_at?: string
+        }
+        Update: {
+          contract_number?: string
+          contract_type?: string
+          created_at?: string
+          customer_id?: string
+          duration_months?: number
+          end_date?: string
+          free_transfer_count?: number
+          id?: string
+          monthly_fee?: number
+          start_date?: string
+          status?: string
+          storage_conditions?: string | null
+          storage_space_sqm?: number | null
+          total_amount?: number
+          transfer_price_after_limit?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wms_contracts_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "wms_customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wms_customer_branches: {
+        Row: {
+          address: string
+          branch_code: string
+          branch_name: string
+          city: string
+          created_at: string
+          customer_id: string
+          id: string
+          is_main_branch: boolean
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          address: string
+          branch_code: string
+          branch_name: string
+          city: string
+          created_at?: string
+          customer_id: string
+          id?: string
+          is_main_branch?: boolean
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          branch_code?: string
+          branch_name?: string
+          city?: string
+          created_at?: string
+          customer_id?: string
+          id?: string
+          is_main_branch?: boolean
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wms_customer_branches_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "wms_customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wms_customer_users: {
+        Row: {
+          branch_id: string | null
+          created_at: string
+          customer_id: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          branch_id?: string | null
+          created_at?: string
+          customer_id: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          branch_id?: string | null
+          created_at?: string
+          customer_id?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_branch"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "wms_customer_branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wms_customer_users_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "wms_customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wms_customers: {
+        Row: {
+          address: string | null
+          city: string | null
+          company_name: string
+          contact_person: string | null
+          created_at: string
+          customer_code: string
+          email: string | null
+          id: string
+          is_active: boolean
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          company_name: string
+          contact_person?: string | null
+          created_at?: string
+          customer_code: string
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          company_name?: string
+          contact_person?: string | null
+          created_at?: string
+          customer_code?: string
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      wms_drivers: {
+        Row: {
+          created_at: string
+          id: string
+          license_number: string | null
+          name: string
+          phone: string
+          status: string
+          updated_at: string
+          user_id: string | null
+          vehicle_number: string | null
+          vehicle_type: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          license_number?: string | null
+          name: string
+          phone: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+          vehicle_number?: string | null
+          vehicle_type?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          license_number?: string | null
+          name?: string
+          phone?: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+          vehicle_number?: string | null
+          vehicle_type?: string | null
+        }
+        Relationships: []
+      }
+      wms_inventory: {
+        Row: {
+          category: string | null
+          consumed_quantity: number
+          created_at: string
+          customer_id: string
+          description: string | null
+          id: string
+          image_url: string | null
+          minimum_quantity: number
+          price_per_unit: number | null
+          product_name: string
+          quantity: number
+          sku: string
+          status: string
+          unit: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          consumed_quantity?: number
+          created_at?: string
+          customer_id: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          minimum_quantity?: number
+          price_per_unit?: number | null
+          product_name: string
+          quantity?: number
+          sku: string
+          status?: string
+          unit?: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          consumed_quantity?: number
+          created_at?: string
+          customer_id?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          minimum_quantity?: number
+          price_per_unit?: number | null
+          product_name?: string
+          quantity?: number
+          sku?: string
+          status?: string
+          unit?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wms_inventory_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "wms_customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wms_invoices: {
+        Row: {
+          created_at: string
+          customer_id: string
+          due_date: string
+          id: string
+          invoice_date: string
+          invoice_number: string
+          notes: string | null
+          order_id: string | null
+          paid_at: string | null
+          status: string
+          subtotal: number
+          tax_amount: number
+          tax_rate: number
+          total_amount: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          due_date: string
+          id?: string
+          invoice_date: string
+          invoice_number: string
+          notes?: string | null
+          order_id?: string | null
+          paid_at?: string | null
+          status?: string
+          subtotal: number
+          tax_amount: number
+          tax_rate?: number
+          total_amount: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          due_date?: string
+          id?: string
+          invoice_date?: string
+          invoice_number?: string
+          notes?: string | null
+          order_id?: string | null
+          paid_at?: string | null
+          status?: string
+          subtotal?: number
+          tax_amount?: number
+          tax_rate?: number
+          total_amount?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wms_invoices_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "wms_customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wms_invoices_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "wms_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wms_order_approvals: {
+        Row: {
+          approver_id: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          order_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          approver_id?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          order_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          approver_id?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          order_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wms_order_approvals_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "wms_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wms_order_branch_items: {
+        Row: {
+          branch_id: string
+          created_at: string
+          id: string
+          order_id: string
+          order_item_id: string
+          quantity: number
+        }
+        Insert: {
+          branch_id: string
+          created_at?: string
+          id?: string
+          order_id: string
+          order_item_id: string
+          quantity: number
+        }
+        Update: {
+          branch_id?: string
+          created_at?: string
+          id?: string
+          order_id?: string
+          order_item_id?: string
+          quantity?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wms_order_branch_items_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "wms_customer_branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wms_order_branch_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "wms_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wms_order_branch_items_order_item_id_fkey"
+            columns: ["order_item_id"]
+            isOneToOne: false
+            referencedRelation: "wms_order_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wms_order_items: {
+        Row: {
+          created_at: string
+          id: string
+          inventory_id: string
+          order_id: string
+          quantity: number
+          total_price: number
+          unit_price: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          inventory_id: string
+          order_id: string
+          quantity: number
+          total_price: number
+          unit_price: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          inventory_id?: string
+          order_id?: string
+          quantity?: number
+          total_price?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wms_order_items_inventory_id_fkey"
+            columns: ["inventory_id"]
+            isOneToOne: false
+            referencedRelation: "wms_inventory"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wms_order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "wms_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wms_orders: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          customer_id: string
+          delivery_branch_id: string | null
+          id: string
+          notes: string | null
+          order_number: string
+          status: string
+          total_amount: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          customer_id: string
+          delivery_branch_id?: string | null
+          id?: string
+          notes?: string | null
+          order_number: string
+          status?: string
+          total_amount?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string
+          delivery_branch_id?: string | null
+          id?: string
+          notes?: string | null
+          order_number?: string
+          status?: string
+          total_amount?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wms_orders_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "wms_customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wms_orders_delivery_branch_id_fkey"
+            columns: ["delivery_branch_id"]
+            isOneToOne: false
+            referencedRelation: "wms_customer_branches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wms_product_requests: {
+        Row: {
+          created_at: string
+          customer_id: string
+          description: string | null
+          id: string
+          image_url: string | null
+          product_name: string
+          requested_by: string
+          requested_quantity: number
+          reviewed_at: string | null
+          reviewer_id: string | null
+          reviewer_notes: string | null
+          specifications: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          product_name: string
+          requested_by: string
+          requested_quantity: number
+          reviewed_at?: string | null
+          reviewer_id?: string | null
+          reviewer_notes?: string | null
+          specifications?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          product_name?: string
+          requested_by?: string
+          requested_quantity?: number
+          reviewed_at?: string | null
+          reviewer_id?: string | null
+          reviewer_notes?: string | null
+          specifications?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wms_product_requests_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "wms_customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wms_workflow_settings: {
+        Row: {
+          auto_approve_threshold: number | null
+          created_at: string
+          customer_id: string | null
+          default_approver_id: string | null
+          id: string
+          notification_preferences: Json
+          require_order_approval: boolean
+          updated_at: string
+        }
+        Insert: {
+          auto_approve_threshold?: number | null
+          created_at?: string
+          customer_id?: string | null
+          default_approver_id?: string | null
+          id?: string
+          notification_preferences?: Json
+          require_order_approval?: boolean
+          updated_at?: string
+        }
+        Update: {
+          auto_approve_threshold?: number | null
+          created_at?: string
+          customer_id?: string | null
+          default_approver_id?: string | null
+          id?: string
+          notification_preferences?: Json
+          require_order_approval?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wms_workflow_settings_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "wms_customers"
             referencedColumns: ["id"]
           },
         ]
