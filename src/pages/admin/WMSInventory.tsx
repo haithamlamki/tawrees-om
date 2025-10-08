@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Pencil, Search } from "lucide-react";
+import { Plus, Pencil, Search, Eye, Trash2, Settings } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type { WMSInventory, WMSCustomer } from "@/types/wms";
 
@@ -20,6 +20,7 @@ export default function AdminWMSInventory() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCustomer, setSelectedCustomer] = useState<string>("all");
   const [editingItem, setEditingItem] = useState<WMSInventory | null>(null);
+  const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [formData, setFormData] = useState({
     customer_id: "",
     sku: "",
@@ -33,6 +34,24 @@ export default function AdminWMSInventory() {
     description: "",
     status: "available" as "available" | "low" | "out_of_stock",
   });
+
+  const toggleSelectAll = () => {
+    if (selectedItems.size === filteredInventory?.length) {
+      setSelectedItems(new Set());
+    } else {
+      setSelectedItems(new Set(filteredInventory?.map((item: any) => item.id) || []));
+    }
+  };
+
+  const toggleSelectItem = (id: string) => {
+    const newSelected = new Set(selectedItems);
+    if (newSelected.has(id)) {
+      newSelected.delete(id);
+    } else {
+      newSelected.add(id);
+    }
+    setSelectedItems(newSelected);
+  };
 
   const { data: inventory, isLoading } = useQuery({
     queryKey: ["admin-wms-inventory", selectedCustomer],
@@ -327,36 +346,68 @@ export default function AdminWMSInventory() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Customer</TableHead>
+                  <TableHead className="w-12">
+                    <input
+                      type="checkbox"
+                      checked={selectedItems.size === filteredInventory?.length && filteredInventory?.length > 0}
+                      onChange={toggleSelectAll}
+                      className="rounded border-input"
+                    />
+                  </TableHead>
+                  <TableHead className="w-12"></TableHead>
                   <TableHead>SKU</TableHead>
-                  <TableHead>Product</TableHead>
+                  <TableHead>Product Name</TableHead>
                   <TableHead>Category</TableHead>
-                  <TableHead>Qty</TableHead>
-                  <TableHead>Unit</TableHead>
+                  <TableHead>Warehouse</TableHead>
                   <TableHead>Price</TableHead>
+                  <TableHead>Quantity</TableHead>
+                  <TableHead>Unit</TableHead>
+                  <TableHead>Consumed</TableHead>
+                  <TableHead>Minimum</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Actions</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredInventory?.map((item: any) => (
                   <TableRow key={item.id}>
-                    <TableCell>{item.customer?.company_name}</TableCell>
+                    <TableCell>
+                      <input
+                        type="checkbox"
+                        checked={selectedItems.has(item.id)}
+                        onChange={() => toggleSelectItem(item.id)}
+                        className="rounded border-input"
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Settings className="h-4 w-4 text-muted-foreground" />
+                    </TableCell>
                     <TableCell className="font-mono text-sm">{item.sku}</TableCell>
                     <TableCell className="font-medium">{item.product_name}</TableCell>
                     <TableCell>{item.category || "-"}</TableCell>
+                    <TableCell>{item.customer?.company_name || "-"}</TableCell>
+                    <TableCell>{item.price_per_unit ? `${item.price_per_unit.toFixed(2)} OMR` : "-"}</TableCell>
                     <TableCell>{item.quantity}</TableCell>
                     <TableCell>{item.unit}</TableCell>
-                    <TableCell>{item.price_per_unit ? `${item.price_per_unit} OMR` : "-"}</TableCell>
+                    <TableCell>{item.consumed_quantity}</TableCell>
+                    <TableCell>{item.minimum_quantity}</TableCell>
                     <TableCell>
                       <Badge className={getStatusColor(item.status)}>
-                        {item.status.replace("_", " ")}
+                        {item.status === 'available' ? 'Available' : item.status === 'low' ? 'Low' : 'Out of Stock'}
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <Button variant="ghost" size="sm" onClick={() => handleEdit(item)}>
-                        <Pencil className="h-4 w-4" />
-                      </Button>
+                      <div className="flex items-center justify-end gap-1">
+                        <Button variant="ghost" size="sm">
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={() => handleEdit(item)}>
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="sm">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
