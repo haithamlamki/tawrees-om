@@ -17,6 +17,9 @@ const languages = [
 
 export const LanguageSelector = () => {
   const { i18n } = useTranslation();
+  
+  // Ensure we always have a valid language value (never empty string)
+  const currentLanguage = i18n.language || 'en';
 
   const handleLanguageChange = async (languageCode: string) => {
     await i18n.changeLanguage(languageCode);
@@ -32,7 +35,7 @@ export const LanguageSelector = () => {
   };
 
   return (
-    <Select value={i18n.language} onValueChange={handleLanguageChange}>
+    <Select value={currentLanguage} onValueChange={handleLanguageChange}>
       <SelectTrigger className="w-[160px]">
         <Globe className="h-4 w-4 mr-2" />
         <SelectValue />
