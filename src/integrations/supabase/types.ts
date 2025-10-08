@@ -1863,10 +1863,90 @@ export type Database = {
           },
         ]
       }
+      wms_invoice_items: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          invoice_id: string
+          quantity: number
+          total_price: number
+          unit_price: number
+          vat_exempt: boolean | null
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          invoice_id: string
+          quantity: number
+          total_price: number
+          unit_price: number
+          vat_exempt?: boolean | null
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          invoice_id?: string
+          quantity?: number
+          total_price?: number
+          unit_price?: number
+          vat_exempt?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wms_invoice_items_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "wms_invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wms_invoice_sequences: {
+        Row: {
+          created_at: string
+          current_number: number
+          customer_id: string
+          id: string
+          prefix: string
+          updated_at: string
+          year: number
+        }
+        Insert: {
+          created_at?: string
+          current_number?: number
+          customer_id: string
+          id?: string
+          prefix?: string
+          updated_at?: string
+          year?: number
+        }
+        Update: {
+          created_at?: string
+          current_number?: number
+          customer_id?: string
+          id?: string
+          prefix?: string
+          updated_at?: string
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wms_invoice_sequences_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "wms_customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       wms_invoices: {
         Row: {
           created_at: string
           customer_id: string
+          customer_vatin: string | null
           due_date: string
           id: string
           invoice_date: string
@@ -1880,10 +1960,14 @@ export type Database = {
           tax_rate: number
           total_amount: number
           updated_at: string
+          vat_exempt: boolean | null
+          vat_rate: number | null
+          vendor_vatin: string | null
         }
         Insert: {
           created_at?: string
           customer_id: string
+          customer_vatin?: string | null
           due_date: string
           id?: string
           invoice_date: string
@@ -1897,10 +1981,14 @@ export type Database = {
           tax_rate?: number
           total_amount: number
           updated_at?: string
+          vat_exempt?: boolean | null
+          vat_rate?: number | null
+          vendor_vatin?: string | null
         }
         Update: {
           created_at?: string
           customer_id?: string
+          customer_vatin?: string | null
           due_date?: string
           id?: string
           invoice_date?: string
@@ -1914,6 +2002,9 @@ export type Database = {
           tax_rate?: number
           total_amount?: number
           updated_at?: string
+          vat_exempt?: boolean | null
+          vat_rate?: number | null
+          vendor_vatin?: string | null
         }
         Relationships: [
           {
@@ -2264,6 +2355,10 @@ export type Database = {
       }
     }
     Functions: {
+      calculate_invoice_totals: {
+        Args: { p_invoice_id: string }
+        Returns: Json
+      }
       create_notification: {
         Args: {
           p_message: string
@@ -2272,6 +2367,10 @@ export type Database = {
           p_type: string
           p_user_id: string
         }
+        Returns: string
+      }
+      generate_invoice_number: {
+        Args: { p_customer_id: string }
         Returns: string
       }
       generate_tracking_number: {
