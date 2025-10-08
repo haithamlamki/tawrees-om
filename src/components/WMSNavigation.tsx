@@ -41,44 +41,37 @@ interface NavigationItem {
 }
 
 const navigationItems: NavigationItem[] = [
-  // Main Navigation
+  // ===== REGULAR USER / CUSTOMER PAGES =====
   {
     name: "Home",
     href: "/",
     icon: Home,
-    roles: ["store_customer", "branch_manager", "admin"],
+    roles: ["user", "store_customer", "branch_manager", "admin"],
     group: "Main"
   },
   {
     name: "Dashboard",
     href: "/dashboard",
     icon: LayoutDashboard,
-    roles: ["store_customer", "branch_manager", "admin"],
-    group: "Main"
-  },
-  {
-    name: "Tracking",
-    href: "/tracking/:trackingNumber",
-    icon: MapPin,
-    roles: ["store_customer", "branch_manager", "admin"],
+    roles: ["user", "store_customer", "branch_manager", "admin"],
     group: "Main"
   },
   {
     name: "Locations",
     href: "/locations",
     icon: MapPin,
-    roles: ["store_customer", "branch_manager", "admin"],
+    roles: ["user", "store_customer", "branch_manager", "admin", "shipping_partner"],
     group: "Main"
   },
   {
     name: "Rates",
     href: "/rates",
     icon: DollarSign,
-    roles: ["store_customer", "branch_manager", "admin"],
+    roles: ["user", "store_customer", "branch_manager", "admin"],
     group: "Main"
   },
   
-  // WMS Customer
+  // ===== WMS CUSTOMER PAGES =====
   {
     name: "WMS Dashboard",
     href: "/warehouse/dashboard",
@@ -143,7 +136,7 @@ const navigationItems: NavigationItem[] = [
     group: "WMS"
   },
   
-  // Admin - Main
+  // ===== ADMIN PAGES =====
   {
     name: "Admin Dashboard",
     href: "/admin",
@@ -179,8 +172,15 @@ const navigationItems: NavigationItem[] = [
     roles: ["admin"],
     group: "Admin"
   },
+  {
+    name: "Admin Locations",
+    href: "/admin/locations",
+    icon: MapPin,
+    roles: ["admin"],
+    group: "Admin"
+  },
   
-  // Admin - WMS
+  // ===== ADMIN WMS PAGES =====
   {
     name: "WMS Dashboard",
     href: "/admin/wms",
@@ -189,42 +189,42 @@ const navigationItems: NavigationItem[] = [
     group: "Admin WMS"
   },
   {
-    name: "WMS Customers",
+    name: "Customers",
     href: "/admin/wms-customers",
     icon: Users,
     roles: ["admin"],
     group: "Admin WMS"
   },
   {
-    name: "WMS Customer Orders",
+    name: "Customer Orders",
     href: "/admin/wms-customer-orders",
     icon: ShoppingCart,
     roles: ["admin"],
     group: "Admin WMS"
   },
   {
-    name: "WMS Contracts",
+    name: "Contracts",
     href: "/admin/wms-contracts",
     icon: FileText,
     roles: ["admin"],
     group: "Admin WMS"
   },
   {
-    name: "WMS Inventory",
+    name: "Inventory",
     href: "/admin/wms-inventory",
     icon: Package,
     roles: ["admin"],
     group: "Admin WMS"
   },
   {
-    name: "WMS Orders",
+    name: "Orders",
     href: "/admin/wms-orders",
     icon: ShoppingCart,
     roles: ["admin"],
     group: "Admin WMS"
   },
   {
-    name: "WMS Invoices",
+    name: "Invoices",
     href: "/admin/wms-invoices",
     icon: FileBarChart,
     roles: ["admin"],
@@ -252,27 +252,38 @@ const navigationItems: NavigationItem[] = [
     group: "Admin WMS"
   },
   
-  // Other Dashboards
+  // ===== EMPLOYEE DASHBOARD =====
   {
     name: "Employee Dashboard",
     href: "/employee",
     icon: UserCog,
-    roles: ["admin"],
-    group: "Dashboards"
+    roles: ["employee", "admin"],
+    group: "Employee"
   },
+  
+  // ===== PARTNER DASHBOARD =====
   {
     name: "Partner Dashboard",
     href: "/partner",
     icon: Users,
-    roles: ["admin"],
-    group: "Dashboards"
+    roles: ["shipping_partner", "admin"],
+    group: "Partner"
   },
+  {
+    name: "Partner Locations",
+    href: "/partner/locations",
+    icon: MapPin,
+    roles: ["shipping_partner", "admin"],
+    group: "Partner"
+  },
+  
+  // ===== FINANCE/ACCOUNTANT DASHBOARD =====
   {
     name: "Finance Dashboard",
     href: "/finance",
     icon: DollarSign,
-    roles: ["admin"],
-    group: "Dashboards"
+    roles: ["accountant", "admin"],
+    group: "Finance"
   },
 ];
 

@@ -69,7 +69,20 @@ export const WMSCustomerLayout = () => {
     return <Navigate to="/" replace />;
   }
 
-  const role = userRoles.includes("admin") ? "admin" : userRoles.includes("branch_manager") ? "branch_manager" : "store_customer";
+  // Determine user role with priority order
+  const role = userRoles?.includes("admin")
+    ? "admin"
+    : userRoles?.includes("employee")
+    ? "employee"
+    : userRoles?.includes("shipping_partner")
+    ? "shipping_partner"
+    : userRoles?.includes("accountant")
+    ? "accountant"
+    : userRoles?.includes("branch_manager")
+    ? "branch_manager"
+    : userRoles?.includes("store_customer")
+    ? "store_customer"
+    : "user";
 
   return (
     <SidebarProvider>

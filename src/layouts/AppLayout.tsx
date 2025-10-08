@@ -66,9 +66,15 @@ export const AppLayout = () => {
     return <Navigate to="/auth" replace />;
   }
 
-  // Determine user role for navigation
+  // Determine user role for navigation (priority order)
   const role = userRoles?.includes("admin") 
     ? "admin" 
+    : userRoles?.includes("employee")
+    ? "employee"
+    : userRoles?.includes("shipping_partner")
+    ? "shipping_partner"
+    : userRoles?.includes("accountant")
+    ? "accountant"
     : userRoles?.includes("branch_manager") 
     ? "branch_manager" 
     : userRoles?.includes("store_customer")
