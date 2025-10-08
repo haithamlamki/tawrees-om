@@ -7,6 +7,15 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { z } from "zod";
+
+const updatePasswordSchema = z.object({
+  password: z.string().min(6, "Password must be at least 6 characters").max(128, "Password too long"),
+  confirmPassword: z.string().min(6, "Password must be at least 6 characters").max(128, "Password too long"),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+});
 
 const UpdatePassword = () => {
   const [loading, setLoading] = useState(false);
@@ -17,13 +26,10 @@ const UpdatePassword = () => {
   const handleUpdatePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (password !== confirmPassword) {
-      toast.error("Passwords do not match");
-      return;
-    }
-
-    if (password.length < 6) {
-      toast.error("Password must be at least 6 characters");
+    const validation = updatePasswordSchema.safeParse({ password, confirmPassword });
+    if (!validation.success) {
+      const firstError = validation.error.errors[0];
+      toast.error(firstError.message);
       return;
     }
 
@@ -31,7 +37,7 @@ const UpdatePassword = () => {
 
     try {
       const { error } = await supabase.auth.updateUser({
-        password: password,
+        password: validation.data.password,
       });
 
       if (error) throw error;
@@ -39,7 +45,8 @@ const UpdatePassword = () => {
       toast.success("Password updated successfully!");
       setTimeout(() => navigate("/dashboard"), 2000);
     } catch (error: any) {
-      toast.error(error.message || "Failed to update password");
+      toast.error("An error occurred. Please try again.");
+      console.error("[Update Password] Error:", error);
     } finally {
       setLoading(false);
     }

@@ -8,6 +8,22 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Package } from "lucide-react";
+import { z } from "zod";
+
+const signInSchema = z.object({
+  email: z.string().email("Invalid email address").max(255, "Email too long"),
+  password: z.string().min(6, "Password must be at least 6 characters").max(128, "Password too long"),
+});
+
+const signUpSchema = z.object({
+  email: z.string().email("Invalid email address").max(255, "Email too long"),
+  password: z.string().min(6, "Password must be at least 6 characters").max(128, "Password too long"),
+  confirmPassword: z.string().min(6, "Password must be at least 6 characters").max(128, "Password too long"),
+  fullName: z.string().trim().min(1, "Name is required").max(100, "Name too long"),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+});
 
 export default function WMSAuth() {
   const navigate = useNavigate();
@@ -40,12 +56,24 @@ export default function WMSAuth() {
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    const validation = signInSchema.safeParse(signInData);
+    if (!validation.success) {
+      const firstError = validation.error.errors[0];
+      toast({
+        title: "Validation error",
+        description: firstError.message,
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
       const { error } = await supabase.auth.signInWithPassword({
-        email: signInData.email,
-        password: signInData.password,
+        email: validation.data.email,
+        password: validation.data.password,
       });
 
       if (error) throw error;
@@ -54,9 +82,10 @@ export default function WMSAuth() {
     } catch (error: any) {
       toast({
         title: "Sign in failed",
-        description: error.message,
+        description: "Invalid credentials. Please try again.",
         variant: "destructive",
       });
+      console.error("[WMS Auth] Sign in error:", error);
     } finally {
       setLoading(false);
     }
@@ -65,19 +94,12 @@ export default function WMSAuth() {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (signUpData.password !== signUpData.confirmPassword) {
+    const validation = signUpSchema.safeParse(signUpData);
+    if (!validation.success) {
+      const firstError = validation.error.errors[0];
       toast({
-        title: "Passwords don't match",
-        description: "Please make sure your passwords match",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (signUpData.password.length < 6) {
-      toast({
-        title: "Password too short",
-        description: "Password must be at least 6 characters",
+        title: "Validation error",
+        description: firstError.message,
         variant: "destructive",
       });
       return;
@@ -88,12 +110,12 @@ export default function WMSAuth() {
     try {
       const redirectUrl = `${window.location.origin}/warehouse/dashboard`;
       const { error } = await supabase.auth.signUp({
-        email: signUpData.email,
-        password: signUpData.password,
+        email: validation.data.email,
+        password: validation.data.password,
         options: {
           emailRedirectTo: redirectUrl,
           data: {
-            full_name: signUpData.fullName,
+            full_name: validation.data.fullName,
           },
         },
       });
@@ -107,9 +129,10 @@ export default function WMSAuth() {
     } catch (error: any) {
       toast({
         title: "Sign up failed",
-        description: error.message,
+        description: "An error occurred. Please try again.",
         variant: "destructive",
       });
+      console.error("[WMS Auth] Sign up error:", error);
     } finally {
       setLoading(false);
     }

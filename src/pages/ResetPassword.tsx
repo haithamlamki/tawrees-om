@@ -7,6 +7,11 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Loader2, ArrowLeft } from "lucide-react";
+import { z } from "zod";
+
+const resetPasswordSchema = z.object({
+  email: z.string().email("Invalid email address").max(255, "Email too long"),
+});
 
 const ResetPassword = () => {
   const [loading, setLoading] = useState(false);
@@ -15,10 +20,18 @@ const ResetPassword = () => {
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    const validation = resetPasswordSchema.safeParse({ email });
+    if (!validation.success) {
+      const firstError = validation.error.errors[0];
+      toast.error(firstError.message);
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      const { error } = await supabase.auth.resetPasswordForEmail(validation.data.email, {
         redirectTo: `${window.location.origin}/update-password`,
       });
 
@@ -27,7 +40,8 @@ const ResetPassword = () => {
       toast.success("Password reset email sent! Check your inbox.");
       setTimeout(() => navigate("/auth"), 2000);
     } catch (error: any) {
-      toast.error(error.message || "Failed to send reset email");
+      toast.error("An error occurred. Please try again.");
+      console.error("[Reset Password] Error:", error);
     } finally {
       setLoading(false);
     }

@@ -2359,6 +2359,10 @@ export type Database = {
         Args: { p_invoice_id: string }
         Returns: Json
       }
+      can_view_customer_statistics: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       create_notification: {
         Args: {
           p_message: string

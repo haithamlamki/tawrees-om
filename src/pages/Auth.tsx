@@ -8,6 +8,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { z } from "zod";
+
+const signInSchema = z.object({
+  email: z.string().email("Invalid email address").max(255, "Email too long"),
+  password: z.string().min(6, "Password must be at least 6 characters").max(128, "Password too long"),
+});
+
+const signUpSchema = z.object({
+  email: z.string().email("Invalid email address").max(255, "Email too long"),
+  password: z.string().min(6, "Password must be at least 6 characters").max(128, "Password too long"),
+  fullName: z.string().trim().min(1, "Name is required").max(100, "Name too long"),
+});
 import logo from "@/assets/tawreed-logo.png";
 
 const Auth = () => {
@@ -29,16 +41,24 @@ const Auth = () => {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    const validation = signUpSchema.safeParse({ email, password, fullName });
+    if (!validation.success) {
+      const firstError = validation.error.errors[0];
+      toast.error(firstError.message);
+      return;
+    }
+
     setLoading(true);
 
     try {
       const { error } = await supabase.auth.signUp({
-        email,
-        password,
+        email: validation.data.email,
+        password: validation.data.password,
         options: {
           emailRedirectTo: `${window.location.origin}/`,
           data: {
-            full_name: fullName,
+            full_name: validation.data.fullName,
           },
         },
       });
@@ -50,15 +70,16 @@ const Auth = () => {
       // Auto login after signup
       setTimeout(async () => {
         const { error: signInError } = await supabase.auth.signInWithPassword({
-          email,
-          password,
+          email: validation.data.email,
+          password: validation.data.password,
         });
         if (!signInError) {
           navigate("/dashboard");
         }
       }, 1000);
     } catch (error: any) {
-      toast.error(error.message || "Failed to create account");
+      toast.error("An error occurred. Please try again.");
+      console.error("[Auth] Sign up error:", error);
     } finally {
       setLoading(false);
     }
@@ -66,12 +87,20 @@ const Auth = () => {
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    const validation = signInSchema.safeParse({ email, password });
+    if (!validation.success) {
+      const firstError = validation.error.errors[0];
+      toast.error(firstError.message);
+      return;
+    }
+
     setLoading(true);
 
     try {
       const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+        email: validation.data.email,
+        password: validation.data.password,
       });
 
       if (error) throw error;
@@ -79,7 +108,8 @@ const Auth = () => {
       toast.success("Logged in successfully!");
       navigate("/dashboard");
     } catch (error: any) {
-      toast.error(error.message || "Failed to sign in");
+      toast.error("Invalid credentials. Please try again.");
+      console.error("[Auth] Sign in error:", error);
     } finally {
       setLoading(false);
     }
