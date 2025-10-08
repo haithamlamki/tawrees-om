@@ -9,7 +9,15 @@ const corsHeaders = {
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
+// Helpers
+function toNumber(val: unknown): number {
+  if (val === null || val === undefined || val === '') return NaN;
+  const n = Number(val);
+  return Number.isFinite(n) ? n : NaN;
+}
+
 serve(async (req) => {
+  // CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -38,7 +46,8 @@ serve(async (req) => {
     const workbook = XLSX.read(new Uint8Array(arrayBuffer), { type: 'array' });
     const sheetName = workbook.SheetNames[0];
     const worksheet = workbook.Sheets[sheetName];
-    const data = XLSX.utils.sheet_to_json(worksheet);
+    // defval keeps empty cells as null so keys exist; helps validation
+    const data = XLSX.utils.sheet_to_json(worksheet, { defval: null });
 
     console.log(`Found ${data.length} rows in Excel file`);
 
@@ -49,47 +58,61 @@ serve(async (req) => {
       errors: [] as Array<{ row: number; error: string; data: any }>,
     };
 
-    // Validate and import each row
     for (let i = 0; i < data.length; i++) {
       const row = data[i] as any;
-      const rowNumber = i + 2; // Excel row number (accounting for header)
+      const rowNumber = i + 2; // 1 header row
 
       try {
-        // Validate required fields - accept both 'price' and 'price_per_unit'
-        const price = row.price || row.price_per_unit;
-        if (!row.product_name || !row.sku || !row.quantity || !price) {
-          throw new Error('Missing required fields: product_name, sku, quantity, price (or price_per_unit)');
+        // Accept both price and price_per_unit; allow zero values but require numeric
+        const rawPrice = row.price ?? row.price_per_unit;
+        const hasPriceField = !(rawPrice === null || rawPrice === undefined || rawPrice === '');
+        const price = hasPriceField ? toNumber(rawPrice) : NaN;
+        const quantity = toNumber(row.quantity);
+
+        if (!row.product_name || !row.sku) {
+          throw new Error('Missing required fields: product_name and/or sku');
+        }
+        if (Number.isNaN(quantity)) {
+          throw new Error('Invalid quantity: must be a number (0 allowed)');
+        }
+        if (!hasPriceField || Number.isNaN(price)) {
+          throw new Error('Invalid price: provide price or price_per_unit as a number (0 allowed)');
         }
 
-        // Check for duplicate SKU
+        // Check for duplicate SKU for the customer (ignore not-found errors)
         const { data: existing } = await supabase
           .from('wms_inventory')
           .select('id')
           .eq('customer_id', customerId)
           .eq('sku', row.sku)
-          .single();
+          .maybeSingle();
 
         if (existing) {
           throw new Error(`Duplicate SKU: ${row.sku} already exists`);
         }
 
-        // Insert inventory item
+        // Insert minimal safe set of columns known to exist in schema
         const { error: insertError } = await supabase
           .from('wms_inventory')
           .insert({
             customer_id: customerId,
-            product_name: row.product_name,
-            sku: row.sku,
-            quantity: Number(row.quantity),
-            unit_price: Number(price),
-            description: row.description || null,
-            location: row.location || null,
-            min_stock_level: row.minimum_quantity ? Number(row.minimum_quantity) : null,
-            max_stock_level: row.max_stock_level ? Number(row.max_stock_level) : null,
+            product_name: String(row.product_name),
+            sku: String(row.sku),
+            quantity: quantity,
+            unit_price: price,
+            description: row.description ?? null,
+            location: row.location ?? null,
+            min_stock_level: row.minimum_quantity !== null && row.minimum_quantity !== undefined && row.minimum_quantity !== ''
+              ? toNumber(row.minimum_quantity)
+              : null,
+            max_stock_level: row.max_stock_level !== null && row.max_stock_level !== undefined && row.max_stock_level !== ''
+              ? toNumber(row.max_stock_level)
+              : null,
           });
 
         if (insertError) {
-          throw insertError;
+          // Bubble up a clean error message so the UI can show it
+          throw new Error(insertError.message || JSON.stringify(insertError));
         }
 
         results.success++;
@@ -97,13 +120,9 @@ serve(async (req) => {
 
       } catch (error) {
         results.failed++;
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        results.errors.push({
-          row: rowNumber,
-          error: errorMessage,
-          data: row,
-        });
-        console.error(`Row ${rowNumber}: Failed to import - ${errorMessage}`);
+        const msg = error instanceof Error ? error.message : 'Unknown error';
+        results.errors.push({ row: rowNumber, error: msg, data: row });
+        console.error(`Row ${rowNumber}: Failed to import - ${msg}`);
       }
     }
 
@@ -121,10 +140,10 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error importing Excel file:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-    
+
     return new Response(
       JSON.stringify({ error: errorMessage }),
-      { 
+      {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       }
