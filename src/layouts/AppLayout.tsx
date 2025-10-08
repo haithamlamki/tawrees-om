@@ -2,7 +2,7 @@ import { Outlet, Navigate, useNavigate } from "react-router-dom";
 import { WMSNavigation } from "@/components/WMSNavigation";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Package, LogOut } from "lucide-react";
+import { Loader2, Package, LogOut, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { 
@@ -114,7 +114,18 @@ export const AppLayout = () => {
 
         <div className="flex-1 flex flex-col">
           <header className="h-14 border-b flex items-center justify-between px-4 bg-background sticky top-0 z-10">
-            <SidebarTrigger />
+            <div className="flex items-center gap-2">
+              <SidebarTrigger />
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => navigate(-1)}
+                className="h-9 w-9"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                <span className="sr-only">Go back</span>
+              </Button>
+            </div>
             <div className="flex items-center gap-2">
               <NotificationBell />
               <LanguageSelector />
