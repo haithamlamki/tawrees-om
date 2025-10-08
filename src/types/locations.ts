@@ -27,6 +27,8 @@ export type RateType =
   | "SEA_CONTAINER_40HC"
   | "SEA_CONTAINER_45HC";
 
+export type ApprovalStatus = 'pending_admin' | 'pending_partner' | 'approved' | 'rejected';
+
 export interface Agreement {
   id: string;
   partner_id: string | null;
@@ -45,6 +47,10 @@ export interface Agreement {
   created_at: string;
   updated_at: string;
   created_by: string | null;
+  approval_status: ApprovalStatus;
+  approved_by: string | null;
+  approved_at: string | null;
+  rejection_reason: string | null;
   // Relations populated by joins
   origins?: Origin;
   destinations?: Destination;

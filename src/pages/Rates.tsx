@@ -10,14 +10,17 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon, TrendingUp } from "lucide-react";
+import { CalendarIcon, TrendingUp, CheckCircle, XCircle, Clock } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import type { Origin, Destination, Agreement, RateType } from "@/types/locations";
+import type { Origin, Destination, Agreement, RateType, ApprovalStatus } from "@/types/locations";
 import { RATE_TYPE_LABELS } from "@/types/locations";
+import { Badge } from "@/components/ui/badge";
 
 export default function Rates() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [partnerId, setPartnerId] = useState<string | null>(null);
   const [origins, setOrigins] = useState<Origin[]>([]);
   const [destinations, setDestinations] = useState<Destination[]>([]);
   const [agreements, setAgreements] = useState<Agreement[]>([]);
@@ -42,6 +45,18 @@ export default function Rates() {
   const checkAuth = async () => {
     const { data: { session } } = await supabase.auth.getSession();
     setIsAuthenticated(!!session);
+    
+    if (session) {
+      const { data: roles } = await supabase
+        .from("user_roles")
+        .select("role, shipping_partner_id")
+        .eq("user_id", session.user.id);
+      
+      if (roles && roles.length > 0) {
+        setUserRole(roles[0].role);
+        setPartnerId(roles[0].shipping_partner_id);
+      }
+    }
   };
 
   const loadData = async () => {
@@ -100,6 +115,20 @@ export default function Rates() {
       return;
     }
 
+    // Determine approval status based on who creates it
+    let approval_status: ApprovalStatus = 'approved';
+    let partner_id_value = partnerId;
+    
+    if (userRole === 'shipping_partner') {
+      // Partner creates -> needs admin approval
+      approval_status = 'pending_admin';
+    } else if (userRole === 'admin') {
+      // Admin creates -> needs partner approval if partner_id is set
+      if (partnerId) {
+        approval_status = 'pending_partner';
+      }
+    }
+
     const { error } = await supabase.from("agreements").insert({
       origin_id: formData.origin_id,
       destination_id: formData.destination_id,
@@ -111,6 +140,8 @@ export default function Rates() {
       valid_from: formData.valid_from.toISOString(),
       valid_to: formData.valid_to?.toISOString() || null,
       notes: formData.notes || null,
+      partner_id: partner_id_value,
+      approval_status,
     });
 
     if (error) {
@@ -118,7 +149,10 @@ export default function Rates() {
       return;
     }
 
-    toast.success("Agreement created successfully");
+    const message = approval_status === 'approved' 
+      ? "Agreement created successfully"
+      : "Agreement created and pending approval";
+    toast.success(message);
     loadData();
     // Reset form
     setFormData({
@@ -133,6 +167,66 @@ export default function Rates() {
       valid_to: null,
       notes: "",
     });
+  };
+
+  const handleApprove = async (agreementId: string) => {
+    const { error } = await supabase
+      .from("agreements")
+      .update({
+        approval_status: 'approved',
+        approved_by: (await supabase.auth.getUser()).data.user?.id,
+        approved_at: new Date().toISOString(),
+      })
+      .eq("id", agreementId);
+
+    if (error) {
+      toast.error(`Failed to approve: ${error.message}`);
+      return;
+    }
+
+    toast.success("Agreement approved successfully");
+    loadData();
+  };
+
+  const handleReject = async (agreementId: string, reason: string) => {
+    const { error } = await supabase
+      .from("agreements")
+      .update({
+        approval_status: 'rejected',
+        approved_by: (await supabase.auth.getUser()).data.user?.id,
+        approved_at: new Date().toISOString(),
+        rejection_reason: reason,
+      })
+      .eq("id", agreementId);
+
+    if (error) {
+      toast.error(`Failed to reject: ${error.message}`);
+      return;
+    }
+
+    toast.success("Agreement rejected");
+    loadData();
+  };
+
+  const getApprovalBadge = (status: ApprovalStatus) => {
+    switch (status) {
+      case 'approved':
+        return <Badge className="bg-green-500"><CheckCircle className="h-3 w-3 mr-1" />Approved</Badge>;
+      case 'pending_admin':
+        return <Badge variant="outline"><Clock className="h-3 w-3 mr-1" />Pending Admin</Badge>;
+      case 'pending_partner':
+        return <Badge variant="outline"><Clock className="h-3 w-3 mr-1" />Pending Partner</Badge>;
+      case 'rejected':
+        return <Badge variant="destructive"><XCircle className="h-3 w-3 mr-1" />Rejected</Badge>;
+    }
+  };
+
+  const canApprove = (agreement: Agreement) => {
+    if (userRole === 'admin' && agreement.approval_status === 'pending_admin') return true;
+    if (userRole === 'shipping_partner' && agreement.approval_status === 'pending_partner') {
+      return agreement.partner_id === partnerId;
+    }
+    return false;
   };
 
   return (
@@ -339,7 +433,7 @@ export default function Rates() {
                     <Card key={agreement.id} className={isExpired ? "opacity-50" : ""}>
                       <CardContent className="p-4">
                         <div className="flex justify-between items-start mb-2">
-                          <div>
+                          <div className="flex-1">
                             <p className="font-semibold">
                               {agreement.origins?.name} → {agreement.destinations?.name}
                             </p>
@@ -347,11 +441,14 @@ export default function Rates() {
                               {RATE_TYPE_LABELS[agreement.rate_type]}
                             </p>
                           </div>
-                          {isExpired && (
-                            <span className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded">
-                              Expired
-                            </span>
-                          )}
+                          <div className="flex flex-col gap-1 items-end">
+                            {getApprovalBadge(agreement.approval_status)}
+                            {isExpired && (
+                              <span className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded">
+                                Expired
+                              </span>
+                            )}
+                          </div>
                         </div>
 
                         <div className="grid grid-cols-2 gap-2 text-sm">
@@ -379,6 +476,37 @@ export default function Rates() {
 
                         {agreement.notes && (
                           <p className="text-xs text-muted-foreground mt-2">{agreement.notes}</p>
+                        )}
+
+                        {canApprove(agreement) && (
+                          <div className="flex gap-2 mt-3">
+                            <Button
+                              size="sm"
+                              onClick={() => handleApprove(agreement.id)}
+                              className="flex-1"
+                            >
+                              <CheckCircle className="h-4 w-4 mr-1" />
+                              Approve
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => {
+                                const reason = prompt("Rejection reason:");
+                                if (reason) handleReject(agreement.id, reason);
+                              }}
+                              className="flex-1"
+                            >
+                              <XCircle className="h-4 w-4 mr-1" />
+                              Reject
+                            </Button>
+                          </div>
+                        )}
+
+                        {agreement.rejection_reason && (
+                          <p className="text-xs text-red-600 mt-2">
+                            Rejected: {agreement.rejection_reason}
+                          </p>
                         )}
                       </CardContent>
                     </Card>

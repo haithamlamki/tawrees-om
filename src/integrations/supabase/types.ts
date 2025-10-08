@@ -17,6 +17,9 @@ export type Database = {
       agreements: {
         Row: {
           active: boolean
+          approval_status: Database["public"]["Enums"]["approval_status"] | null
+          approved_at: string | null
+          approved_by: string | null
           buy_price: number
           created_at: string
           created_by: string | null
@@ -29,6 +32,7 @@ export type Database = {
           origin_id: string
           partner_id: string | null
           rate_type: Database["public"]["Enums"]["rate_type"]
+          rejection_reason: string | null
           sell_price: number
           updated_at: string
           valid_from: string
@@ -36,6 +40,11 @@ export type Database = {
         }
         Insert: {
           active?: boolean
+          approval_status?:
+            | Database["public"]["Enums"]["approval_status"]
+            | null
+          approved_at?: string | null
+          approved_by?: string | null
           buy_price: number
           created_at?: string
           created_by?: string | null
@@ -48,6 +57,7 @@ export type Database = {
           origin_id: string
           partner_id?: string | null
           rate_type: Database["public"]["Enums"]["rate_type"]
+          rejection_reason?: string | null
           sell_price: number
           updated_at?: string
           valid_from?: string
@@ -55,6 +65,11 @@ export type Database = {
         }
         Update: {
           active?: boolean
+          approval_status?:
+            | Database["public"]["Enums"]["approval_status"]
+            | null
+          approved_at?: string | null
+          approved_by?: string | null
           buy_price?: number
           created_at?: string
           created_by?: string | null
@@ -67,6 +82,7 @@ export type Database = {
           origin_id?: string
           partner_id?: string | null
           rate_type?: Database["public"]["Enums"]["rate_type"]
+          rejection_reason?: string | null
           sell_price?: number
           updated_at?: string
           valid_from?: string
@@ -1345,6 +1361,11 @@ export type Database = {
         | "employee"
         | "shipping_partner"
         | "accountant"
+      approval_status:
+        | "pending_admin"
+        | "pending_partner"
+        | "approved"
+        | "rejected"
       rate_type:
         | "AIR_KG"
         | "SEA_CBM"
@@ -1495,6 +1516,12 @@ export const Constants = {
         "employee",
         "shipping_partner",
         "accountant",
+      ],
+      approval_status: [
+        "pending_admin",
+        "pending_partner",
+        "approved",
+        "rejected",
       ],
       rate_type: [
         "AIR_KG",
