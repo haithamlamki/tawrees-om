@@ -237,6 +237,59 @@ export type Database = {
         }
         Relationships: []
       }
+      last_mile_rates: {
+        Row: {
+          active: boolean | null
+          base_fee: number
+          city: string | null
+          created_at: string | null
+          created_by: string | null
+          destination_id: string | null
+          id: string
+          per_cbm_fee: number | null
+          per_kg_fee: number | null
+          updated_at: string | null
+          valid_from: string | null
+          valid_to: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          base_fee: number
+          city?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          destination_id?: string | null
+          id?: string
+          per_cbm_fee?: number | null
+          per_kg_fee?: number | null
+          updated_at?: string | null
+          valid_from?: string | null
+          valid_to?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          base_fee?: number
+          city?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          destination_id?: string | null
+          id?: string
+          per_cbm_fee?: number | null
+          per_kg_fee?: number | null
+          updated_at?: string | null
+          valid_from?: string | null
+          valid_to?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "last_mile_rates_destination_id_fkey"
+            columns: ["destination_id"]
+            isOneToOne: false
+            referencedRelation: "destinations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notification_preferences: {
         Row: {
           created_at: string
@@ -560,18 +613,29 @@ export type Database = {
       }
       shipment_requests: {
         Row: {
+          actual_delivery_date: string | null
           calculated_cost: number
           calculation_method: string | null
           cbm_volume: number | null
           container_type_id: string | null
           created_at: string
           customer_id: string
+          delivery_address: string | null
+          delivery_city: string | null
+          delivery_contact_name: string | null
+          delivery_contact_phone: string | null
+          delivery_country: string | null
+          delivery_notes: string | null
+          delivery_postal_code: string | null
+          delivery_type: string | null
           height_cm: number | null
           id: string
           items: Json | null
+          last_mile_fee: number | null
           length_cm: number | null
           notes: string | null
           payment_timing: string | null
+          requested_delivery_date: string | null
           shipping_type: string
           status: string
           updated_at: string
@@ -579,18 +643,29 @@ export type Database = {
           width_cm: number | null
         }
         Insert: {
+          actual_delivery_date?: string | null
           calculated_cost: number
           calculation_method?: string | null
           cbm_volume?: number | null
           container_type_id?: string | null
           created_at?: string
           customer_id: string
+          delivery_address?: string | null
+          delivery_city?: string | null
+          delivery_contact_name?: string | null
+          delivery_contact_phone?: string | null
+          delivery_country?: string | null
+          delivery_notes?: string | null
+          delivery_postal_code?: string | null
+          delivery_type?: string | null
           height_cm?: number | null
           id?: string
           items?: Json | null
+          last_mile_fee?: number | null
           length_cm?: number | null
           notes?: string | null
           payment_timing?: string | null
+          requested_delivery_date?: string | null
           shipping_type: string
           status?: string
           updated_at?: string
@@ -598,18 +673,29 @@ export type Database = {
           width_cm?: number | null
         }
         Update: {
+          actual_delivery_date?: string | null
           calculated_cost?: number
           calculation_method?: string | null
           cbm_volume?: number | null
           container_type_id?: string | null
           created_at?: string
           customer_id?: string
+          delivery_address?: string | null
+          delivery_city?: string | null
+          delivery_contact_name?: string | null
+          delivery_contact_phone?: string | null
+          delivery_country?: string | null
+          delivery_notes?: string | null
+          delivery_postal_code?: string | null
+          delivery_type?: string | null
           height_cm?: number | null
           id?: string
           items?: Json | null
+          last_mile_fee?: number | null
           length_cm?: number | null
           notes?: string | null
           payment_timing?: string | null
+          requested_delivery_date?: string | null
           shipping_type?: string
           status?: string
           updated_at?: string
@@ -733,6 +819,11 @@ export type Database = {
           assigned_to: string | null
           created_at: string
           current_location: string | null
+          delivery_confirmed: boolean | null
+          delivery_confirmed_at: string | null
+          delivery_confirmed_by: string | null
+          delivery_photo_url: string | null
+          delivery_signature_url: string | null
           estimated_delivery: string | null
           id: string
           notes: string | null
@@ -747,6 +838,11 @@ export type Database = {
           assigned_to?: string | null
           created_at?: string
           current_location?: string | null
+          delivery_confirmed?: boolean | null
+          delivery_confirmed_at?: string | null
+          delivery_confirmed_by?: string | null
+          delivery_photo_url?: string | null
+          delivery_signature_url?: string | null
           estimated_delivery?: string | null
           id?: string
           notes?: string | null
@@ -761,6 +857,11 @@ export type Database = {
           assigned_to?: string | null
           created_at?: string
           current_location?: string | null
+          delivery_confirmed?: boolean | null
+          delivery_confirmed_at?: string | null
+          delivery_confirmed_by?: string | null
+          delivery_photo_url?: string | null
+          delivery_signature_url?: string | null
           estimated_delivery?: string | null
           id?: string
           notes?: string | null

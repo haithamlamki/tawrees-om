@@ -23,6 +23,7 @@ import UserRoleManagement from "@/components/admin/UserRoleManagement";
 import PartnerManagement from "@/components/admin/PartnerManagement";
 import { SurchargeManagement } from "@/components/admin/SurchargeManagement";
 import { AuditLogViewer } from "@/components/admin/AuditLogViewer";
+import { LastMileRateManagement } from "@/components/admin/LastMileRateManagement";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { sendRequestApprovedNotification } from "@/utils/notificationUtils";
 
@@ -267,6 +268,10 @@ const Admin = () => {
               <Settings className="mr-2 h-4 w-4" />
               Surcharges
             </TabsTrigger>
+            <TabsTrigger value="delivery">
+              <Package className="mr-2 h-4 w-4" />
+              Delivery
+            </TabsTrigger>
             <TabsTrigger value="audit">
               <FileText className="mr-2 h-4 w-4" />
               Audit
@@ -392,6 +397,10 @@ const Admin = () => {
 
           <TabsContent value="surcharges">
             <SurchargeManagement />
+          </TabsContent>
+
+          <TabsContent value="delivery">
+            <LastMileRateManagement />
           </TabsContent>
 
           <TabsContent value="audit">

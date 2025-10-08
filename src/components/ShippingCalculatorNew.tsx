@@ -10,6 +10,7 @@ import { Plane, Ship, Package, Calculator as CalcIcon, Plus } from "lucide-react
 import { useNavigate } from "react-router-dom";
 import ItemRow from "./calculator/ItemRow";
 import { ContainerCard } from "./calculator/ContainerCard";
+import { DeliveryOptions } from "./calculator/DeliveryOptions";
 import type { Origin, Destination, Agreement, RateType } from "@/types/locations";
 import { CONTAINER_DIMENSIONS } from "@/types/locations";
 import type { ShipmentItem } from "@/types/calculator";
@@ -49,6 +50,15 @@ export const ShippingCalculatorNew = () => {
     totalPrice: number;
   } | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [deliveryType, setDeliveryType] = useState<"pickup" | "door_delivery">("pickup");
+  const [deliveryAddress, setDeliveryAddress] = useState({
+    address: "",
+    city: "",
+    postalCode: "",
+    country: "",
+    contactName: "",
+    contactPhone: "",
+  });
 
   useEffect(() => {
     checkAuth();
@@ -230,7 +240,17 @@ export const ShippingCalculatorNew = () => {
       shipping_type: mode === "air" ? "air" : "sea",
       calculated_cost: quote.totalPrice,
       status: "pending",
+      delivery_type: deliveryType,
     };
+
+    if (deliveryType === "door_delivery") {
+      requestData.delivery_address = deliveryAddress.address;
+      requestData.delivery_city = deliveryAddress.city;
+      requestData.delivery_postal_code = deliveryAddress.postalCode;
+      requestData.delivery_country = deliveryAddress.country;
+      requestData.delivery_contact_name = deliveryAddress.contactName;
+      requestData.delivery_contact_phone = deliveryAddress.contactPhone;
+    }
 
     if (mode === "sea_fcl") {
       requestData.calculation_method = "container";
@@ -463,6 +483,26 @@ export const ShippingCalculatorNew = () => {
               </div>
             </TabsContent>
           </Tabs>
+
+          {/* Delivery Options */}
+          <div className="mt-6">
+            <DeliveryOptions
+              deliveryType={deliveryType}
+              onDeliveryTypeChange={setDeliveryType}
+              deliveryAddress={deliveryAddress.address}
+              deliveryCity={deliveryAddress.city}
+              deliveryPostalCode={deliveryAddress.postalCode}
+              deliveryCountry={deliveryAddress.country}
+              deliveryContactName={deliveryAddress.contactName}
+              deliveryContactPhone={deliveryAddress.contactPhone}
+              onAddressChange={(field, value) => {
+                setDeliveryAddress(prev => {
+                  const key = field.replace("delivery", "").charAt(0).toLowerCase() + field.replace("delivery", "").slice(1);
+                  return { ...prev, [key]: value };
+                });
+              }}
+            />
+          </div>
 
           {/* Calculate Button */}
           <Button
