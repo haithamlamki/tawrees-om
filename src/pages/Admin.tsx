@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { DollarSign, Settings, Package, CheckCircle, XCircle, Users, Ship, BarChart3, UserCog, Building2 } from "lucide-react";
+import { DollarSign, Settings, Package, CheckCircle, XCircle, Users, Ship, BarChart3, UserCog, Building2, FileText } from "lucide-react";
 import CustomerManagement from "@/components/admin/CustomerManagement";
 import ShipmentManagement from "@/components/admin/ShipmentManagement";
 import DashboardMetrics from "@/components/admin/DashboardMetrics";
@@ -21,6 +21,8 @@ import QuoteManagement from "@/components/admin/QuoteManagement";
 import AnalyticsExport from "@/components/admin/AnalyticsExport";
 import UserRoleManagement from "@/components/admin/UserRoleManagement";
 import PartnerManagement from "@/components/admin/PartnerManagement";
+import { SurchargeManagement } from "@/components/admin/SurchargeManagement";
+import { AuditLogViewer } from "@/components/admin/AuditLogViewer";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { sendRequestApprovedNotification } from "@/utils/notificationUtils";
 
@@ -261,6 +263,14 @@ const Admin = () => {
               <Building2 className="mr-2 h-4 w-4" />
               Partners
             </TabsTrigger>
+            <TabsTrigger value="surcharges">
+              <Settings className="mr-2 h-4 w-4" />
+              Surcharges
+            </TabsTrigger>
+            <TabsTrigger value="audit">
+              <FileText className="mr-2 h-4 w-4" />
+              Audit
+            </TabsTrigger>
             <TabsTrigger value="rates">
               <DollarSign className="mr-2 h-4 w-4" />
               Rates
@@ -378,6 +388,14 @@ const Admin = () => {
 
           <TabsContent value="partners">
             <PartnerManagement />
+          </TabsContent>
+
+          <TabsContent value="surcharges">
+            <SurchargeManagement />
+          </TabsContent>
+
+          <TabsContent value="audit">
+            <AuditLogViewer />
           </TabsContent>
 
           <TabsContent value="rates">

@@ -96,6 +96,51 @@ export type Database = {
           },
         ]
       }
+      audit_logs: {
+        Row: {
+          action: string
+          changed_fields: string[] | null
+          created_at: string
+          id: string
+          ip_address: string | null
+          new_data: Json | null
+          old_data: Json | null
+          record_id: string
+          table_name: string
+          user_agent: string | null
+          user_email: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          changed_fields?: string[] | null
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          new_data?: Json | null
+          old_data?: Json | null
+          record_id: string
+          table_name: string
+          user_agent?: string | null
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          changed_fields?: string[] | null
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          new_data?: Json | null
+          old_data?: Json | null
+          record_id?: string
+          table_name?: string
+          user_agent?: string | null
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       container_types: {
         Row: {
           cbm_capacity: number
@@ -401,33 +446,60 @@ export type Database = {
           buy_cost: number | null
           created_at: string
           id: string
+          margin_override_at: string | null
+          margin_override_by: string | null
+          margin_override_percentage: number | null
+          margin_override_reason: string | null
+          paid_at: string | null
+          payment_due_date: string | null
           profit_amount: number | null
           profit_margin_percentage: number | null
+          sent_at: string | null
           shipment_request_id: string | null
+          status: string
           total_sell_price: number
           valid_until: string
+          viewed_at: string | null
         }
         Insert: {
           breakdown: Json
           buy_cost?: number | null
           created_at?: string
           id?: string
+          margin_override_at?: string | null
+          margin_override_by?: string | null
+          margin_override_percentage?: number | null
+          margin_override_reason?: string | null
+          paid_at?: string | null
+          payment_due_date?: string | null
           profit_amount?: number | null
           profit_margin_percentage?: number | null
+          sent_at?: string | null
           shipment_request_id?: string | null
+          status?: string
           total_sell_price: number
           valid_until: string
+          viewed_at?: string | null
         }
         Update: {
           breakdown?: Json
           buy_cost?: number | null
           created_at?: string
           id?: string
+          margin_override_at?: string | null
+          margin_override_by?: string | null
+          margin_override_percentage?: number | null
+          margin_override_reason?: string | null
+          paid_at?: string | null
+          payment_due_date?: string | null
           profit_amount?: number | null
           profit_margin_percentage?: number | null
+          sent_at?: string | null
           shipment_request_id?: string | null
+          status?: string
           total_sell_price?: number
           valid_until?: string
+          viewed_at?: string | null
         }
         Relationships: [
           {
@@ -606,6 +678,54 @@ export type Database = {
           },
         ]
       }
+      shipment_surcharges: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          is_percentage: boolean
+          name: string
+          shipment_request_id: string
+          surcharge_id: string | null
+          type: Database["public"]["Enums"]["surcharge_type"]
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          is_percentage?: boolean
+          name: string
+          shipment_request_id: string
+          surcharge_id?: string | null
+          type: Database["public"]["Enums"]["surcharge_type"]
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          is_percentage?: boolean
+          name?: string
+          shipment_request_id?: string
+          surcharge_id?: string | null
+          type?: Database["public"]["Enums"]["surcharge_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shipment_surcharges_shipment_request_id_fkey"
+            columns: ["shipment_request_id"]
+            isOneToOne: false
+            referencedRelation: "shipment_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shipment_surcharges_surcharge_id_fkey"
+            columns: ["surcharge_id"]
+            isOneToOne: false
+            referencedRelation: "surcharges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shipments: {
         Row: {
           actual_delivery: string | null
@@ -752,6 +872,72 @@ export type Database = {
           },
         ]
       }
+      surcharges: {
+        Row: {
+          active: boolean
+          amount: number
+          created_at: string
+          created_by: string | null
+          destination_id: string | null
+          id: string
+          is_percentage: boolean
+          name: string
+          origin_id: string | null
+          rate_type: Database["public"]["Enums"]["rate_type"] | null
+          type: Database["public"]["Enums"]["surcharge_type"]
+          updated_at: string
+          valid_from: string
+          valid_to: string | null
+        }
+        Insert: {
+          active?: boolean
+          amount: number
+          created_at?: string
+          created_by?: string | null
+          destination_id?: string | null
+          id?: string
+          is_percentage?: boolean
+          name: string
+          origin_id?: string | null
+          rate_type?: Database["public"]["Enums"]["rate_type"] | null
+          type: Database["public"]["Enums"]["surcharge_type"]
+          updated_at?: string
+          valid_from?: string
+          valid_to?: string | null
+        }
+        Update: {
+          active?: boolean
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          destination_id?: string | null
+          id?: string
+          is_percentage?: boolean
+          name?: string
+          origin_id?: string | null
+          rate_type?: Database["public"]["Enums"]["rate_type"] | null
+          type?: Database["public"]["Enums"]["surcharge_type"]
+          updated_at?: string
+          valid_from?: string
+          valid_to?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "surcharges_destination_id_fkey"
+            columns: ["destination_id"]
+            isOneToOne: false
+            referencedRelation: "destinations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "surcharges_origin_id_fkey"
+            columns: ["origin_id"]
+            isOneToOne: false
+            referencedRelation: "origins"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -852,6 +1038,16 @@ export type Database = {
         | "SEA_CONTAINER_40"
         | "SEA_CONTAINER_40HC"
         | "SEA_CONTAINER_45HC"
+      surcharge_type:
+        | "fuel"
+        | "handling"
+        | "customs"
+        | "insurance"
+        | "qc"
+        | "storage"
+        | "demurrage"
+        | "documentation"
+        | "other"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -993,6 +1189,17 @@ export const Constants = {
         "SEA_CONTAINER_40",
         "SEA_CONTAINER_40HC",
         "SEA_CONTAINER_45HC",
+      ],
+      surcharge_type: [
+        "fuel",
+        "handling",
+        "customs",
+        "insurance",
+        "qc",
+        "storage",
+        "demurrage",
+        "documentation",
+        "other",
       ],
     },
   },
