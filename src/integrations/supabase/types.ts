@@ -464,6 +464,263 @@ export type Database = {
           },
         ]
       }
+      product_quotes: {
+        Row: {
+          breakdown: Json | null
+          created_at: string | null
+          customer_email: string
+          customer_name: string
+          customer_phone: string | null
+          delivery_city: string
+          delivery_country: string
+          discount_amount: number | null
+          discount_name: string | null
+          eta_days: number | null
+          id: string
+          notes: string | null
+          opened_at: string | null
+          preferred_channel: string | null
+          product_id: string | null
+          quantity: number
+          quote_id: string
+          sent_at: string | null
+          shipping_fee: number
+          status: string | null
+          subtotal: number
+          total_amount: number
+          unit_price: number
+          updated_at: string | null
+          valid_until: string
+          won_at: string | null
+        }
+        Insert: {
+          breakdown?: Json | null
+          created_at?: string | null
+          customer_email: string
+          customer_name: string
+          customer_phone?: string | null
+          delivery_city: string
+          delivery_country: string
+          discount_amount?: number | null
+          discount_name?: string | null
+          eta_days?: number | null
+          id?: string
+          notes?: string | null
+          opened_at?: string | null
+          preferred_channel?: string | null
+          product_id?: string | null
+          quantity: number
+          quote_id: string
+          sent_at?: string | null
+          shipping_fee: number
+          status?: string | null
+          subtotal: number
+          total_amount: number
+          unit_price: number
+          updated_at?: string | null
+          valid_until: string
+          won_at?: string | null
+        }
+        Update: {
+          breakdown?: Json | null
+          created_at?: string | null
+          customer_email?: string
+          customer_name?: string
+          customer_phone?: string | null
+          delivery_city?: string
+          delivery_country?: string
+          discount_amount?: number | null
+          discount_name?: string | null
+          eta_days?: number | null
+          id?: string
+          notes?: string | null
+          opened_at?: string | null
+          preferred_channel?: string | null
+          product_id?: string | null
+          quantity?: number
+          quote_id?: string
+          sent_at?: string | null
+          shipping_fee?: number
+          status?: string | null
+          subtotal?: number
+          total_amount?: number
+          unit_price?: number
+          updated_at?: string | null
+          valid_until?: string
+          won_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_quotes_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      products: {
+        Row: {
+          base_unit_price: number
+          canonical_url: string | null
+          category: string | null
+          created_at: string | null
+          created_by: string | null
+          currency: string | null
+          default_quote_note: string | null
+          delivery_options: string[] | null
+          description: string | null
+          dims_cm: Json | null
+          extraction_metadata: Json | null
+          gallery_images: Json | null
+          hero_thumbnail: string
+          highlight_bullets: Json | null
+          hs_code: string | null
+          html_snapshot_id: string | null
+          id: string
+          lead_time_days: number | null
+          meta_description: string | null
+          meta_title: string | null
+          min_order_qty: number
+          msrp: number | null
+          name: string
+          og_image: string | null
+          origin_city: string | null
+          origin_country: string | null
+          origin_province: string | null
+          pricing_tiers: Json | null
+          published_at: string | null
+          quote_validity_days: number | null
+          shipping_template_id: string | null
+          short_name: string
+          sku: string
+          slug: string
+          source_hash: string | null
+          source_type: string | null
+          source_url: string | null
+          specs: Json | null
+          status: string | null
+          summary: string | null
+          supplier_data: Json | null
+          tags: string[] | null
+          updated_at: string | null
+          updated_by: string | null
+          version_note: string | null
+          volume_cbm: number | null
+          weight_kg: number | null
+          whatsapp_number: string | null
+          youtube_duration: number | null
+          youtube_id: string
+          youtube_title: string | null
+        }
+        Insert: {
+          base_unit_price: number
+          canonical_url?: string | null
+          category?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          currency?: string | null
+          default_quote_note?: string | null
+          delivery_options?: string[] | null
+          description?: string | null
+          dims_cm?: Json | null
+          extraction_metadata?: Json | null
+          gallery_images?: Json | null
+          hero_thumbnail: string
+          highlight_bullets?: Json | null
+          hs_code?: string | null
+          html_snapshot_id?: string | null
+          id?: string
+          lead_time_days?: number | null
+          meta_description?: string | null
+          meta_title?: string | null
+          min_order_qty: number
+          msrp?: number | null
+          name: string
+          og_image?: string | null
+          origin_city?: string | null
+          origin_country?: string | null
+          origin_province?: string | null
+          pricing_tiers?: Json | null
+          published_at?: string | null
+          quote_validity_days?: number | null
+          shipping_template_id?: string | null
+          short_name: string
+          sku: string
+          slug: string
+          source_hash?: string | null
+          source_type?: string | null
+          source_url?: string | null
+          specs?: Json | null
+          status?: string | null
+          summary?: string | null
+          supplier_data?: Json | null
+          tags?: string[] | null
+          updated_at?: string | null
+          updated_by?: string | null
+          version_note?: string | null
+          volume_cbm?: number | null
+          weight_kg?: number | null
+          whatsapp_number?: string | null
+          youtube_duration?: number | null
+          youtube_id: string
+          youtube_title?: string | null
+        }
+        Update: {
+          base_unit_price?: number
+          canonical_url?: string | null
+          category?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          currency?: string | null
+          default_quote_note?: string | null
+          delivery_options?: string[] | null
+          description?: string | null
+          dims_cm?: Json | null
+          extraction_metadata?: Json | null
+          gallery_images?: Json | null
+          hero_thumbnail?: string
+          highlight_bullets?: Json | null
+          hs_code?: string | null
+          html_snapshot_id?: string | null
+          id?: string
+          lead_time_days?: number | null
+          meta_description?: string | null
+          meta_title?: string | null
+          min_order_qty?: number
+          msrp?: number | null
+          name?: string
+          og_image?: string | null
+          origin_city?: string | null
+          origin_country?: string | null
+          origin_province?: string | null
+          pricing_tiers?: Json | null
+          published_at?: string | null
+          quote_validity_days?: number | null
+          shipping_template_id?: string | null
+          short_name?: string
+          sku?: string
+          slug?: string
+          source_hash?: string | null
+          source_type?: string | null
+          source_url?: string | null
+          specs?: Json | null
+          status?: string | null
+          summary?: string | null
+          supplier_data?: Json | null
+          tags?: string[] | null
+          updated_at?: string | null
+          updated_by?: string | null
+          version_note?: string | null
+          volume_cbm?: number | null
+          weight_kg?: number | null
+          whatsapp_number?: string | null
+          youtube_duration?: number | null
+          youtube_id?: string
+          youtube_title?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           address: string | null

@@ -14,6 +14,8 @@ import Tracking from "./pages/Tracking";
 import Locations from "./pages/Locations";
 import Rates from "./pages/Rates";
 import NotFound from "./pages/NotFound";
+import AdminProducts from "./pages/admin/Products";
+import ProductForm from "./pages/admin/ProductForm";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +38,9 @@ const App = () => (
           <Route path="/admin/locations" element={<Locations />} />
           <Route path="/partner/locations" element={<Locations />} />
           <Route path="/rates" element={<Rates />} />
+          <Route path="/admin/products" element={<AdminProducts />} />
+          <Route path="/admin/products/new" element={<ProductForm />} />
+          <Route path="/admin/products/:id/edit" element={<ProductForm />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
