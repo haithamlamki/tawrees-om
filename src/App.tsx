@@ -43,6 +43,7 @@ import WMSAuth from "./pages/warehouse/Auth";
 import WMSCustomerOrders from "./components/admin/WMSCustomerOrders";
 import ProductRequestApproval from "./components/admin/ProductRequestApproval";
 import Analytics from "./pages/admin/Analytics";
+import { LiveChatWidget } from "./components/chat/LiveChatWidget";
 
 const queryClient = new QueryClient();
 
@@ -100,9 +101,10 @@ const App = () => (
           <Route path="/admin/wms-drivers" element={<AdminWMSDrivers />} />
           <Route path="/admin/wms-workflow" element={<AdminWMSWorkflow />} />
           
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="/warehouse/product-requests" element={<WMSProductRequests />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <LiveChatWidget />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
