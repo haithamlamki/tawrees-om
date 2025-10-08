@@ -122,6 +122,12 @@ const navigationItems: NavigationItem[] = [
     icon: Workflow,
     roles: ["admin"],
   },
+  {
+    name: "MIS Report",
+    href: "/admin/wms-mis-report",
+    icon: ClipboardCheck,
+    roles: ["admin"],
+  },
 ];
 
 interface WMSNavigationProps {

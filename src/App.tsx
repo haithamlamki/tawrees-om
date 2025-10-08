@@ -38,6 +38,8 @@ import AdminWMSOrders from "./pages/admin/WMSOrders";
 import AdminWMSInvoices from "./pages/admin/WMSInvoices";
 import AdminWMSDrivers from "./pages/admin/WMSDrivers";
 import AdminWMSWorkflow from "./pages/admin/WMSWorkflow";
+import WMSWorkflow from "./pages/admin/WMSWorkflow";
+import WMSMISReport from "./pages/admin/WMSMISReport";
 import AdminWMSDashboard from "./pages/admin/WMSDashboard";
 import WMSAuth from "./pages/warehouse/Auth";
 import WMSCustomerOrders from "./components/admin/WMSCustomerOrders";
@@ -99,7 +101,8 @@ const App = () => (
           <Route path="/admin/wms-orders" element={<AdminWMSOrders />} />
           <Route path="/admin/wms-invoices" element={<AdminWMSInvoices />} />
           <Route path="/admin/wms-drivers" element={<AdminWMSDrivers />} />
-          <Route path="/admin/wms-workflow" element={<AdminWMSWorkflow />} />
+          <Route path="/admin/wms-workflow" element={<WMSWorkflow />} />
+          <Route path="/admin/wms-mis-report" element={<WMSMISReport />} />
           
           <Route path="/warehouse/product-requests" element={<WMSProductRequests />} />
           <Route path="*" element={<NotFound />} />
