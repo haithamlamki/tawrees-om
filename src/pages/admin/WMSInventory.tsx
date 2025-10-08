@@ -18,7 +18,7 @@ export default function AdminWMSInventory() {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCustomer, setSelectedCustomer] = useState<string>("");
+  const [selectedCustomer, setSelectedCustomer] = useState<string>("all");
   const [editingItem, setEditingItem] = useState<WMSInventory | null>(null);
   const [formData, setFormData] = useState({
     customer_id: "",
@@ -307,8 +307,8 @@ export default function AdminWMSInventory() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All customers</SelectItem>
-            {customers?.map((customer) => (
-              <SelectItem key={customer.id} value={customer.id}>
+            {customers?.filter((c) => !!c.id).map((customer) => (
+              <SelectItem key={customer.id} value={customer.id!}>
                 {customer.company_name}
               </SelectItem>
             ))}

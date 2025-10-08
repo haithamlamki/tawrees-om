@@ -15,8 +15,8 @@ export default function AdminWMSInvoices() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCustomer, setSelectedCustomer] = useState<string>("");
-  const [statusFilter, setStatusFilter] = useState<string>("");
+  const [selectedCustomer, setSelectedCustomer] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
 
   const { data: invoices, isLoading } = useQuery({
     queryKey: ["admin-wms-invoices", selectedCustomer, statusFilter],
@@ -145,8 +145,8 @@ export default function AdminWMSInvoices() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All customers</SelectItem>
-            {customers?.map((customer) => (
-              <SelectItem key={customer.id} value={customer.id}>
+            {customers?.filter((c) => !!c.id).map((customer) => (
+              <SelectItem key={customer.id} value={customer.id!}>
                 {customer.company_name}
               </SelectItem>
             ))}
