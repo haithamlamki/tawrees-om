@@ -129,6 +129,16 @@ const Auth = () => {
                     required
                   />
                 </div>
+                <div className="flex justify-end">
+                  <Button
+                    type="button"
+                    variant="link"
+                    className="px-0 text-sm"
+                    onClick={() => navigate("/reset-password")}
+                  >
+                    Forgot password?
+                  </Button>
+                </div>
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Sign In
