@@ -16,6 +16,13 @@ import {
   BarChart3
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { 
+  SidebarGroup, 
+  SidebarGroupContent, 
+  SidebarMenu, 
+  SidebarMenuItem, 
+  SidebarMenuButton 
+} from "@/components/ui/sidebar";
 
 interface NavigationItem {
   name: string;
@@ -143,27 +150,26 @@ export const WMSNavigation = ({ userRole }: WMSNavigationProps) => {
   );
 
   return (
-    <nav className="space-y-1">
-      {filteredItems.map((item) => {
-        const Icon = item.icon;
-        const isActive = location.pathname === item.href || location.pathname.startsWith(item.href + "/");
+    <SidebarGroup>
+      <SidebarGroupContent>
+        <SidebarMenu>
+          {filteredItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = location.pathname === item.href || location.pathname.startsWith(item.href + "/");
 
-        return (
-          <Link
-            key={item.name}
-            to={item.href}
-            className={cn(
-              "flex items-center gap-3 px-3 py-2 rounded-lg transition-colors",
-              isActive
-                ? "bg-primary text-primary-foreground"
-                : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-            )}
-          >
-            <Icon className="h-5 w-5" />
-            <span>{item.name}</span>
-          </Link>
-        );
-      })}
-    </nav>
+            return (
+              <SidebarMenuItem key={item.name}>
+                <SidebarMenuButton asChild isActive={isActive}>
+                  <Link to={item.href}>
+                    <Icon className="h-5 w-5" />
+                    <span>{item.name}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            );
+          })}
+        </SidebarMenu>
+      </SidebarGroupContent>
+    </SidebarGroup>
   );
 };

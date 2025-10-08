@@ -6,6 +6,14 @@ import { Loader2, Package, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import { 
+  SidebarProvider, 
+  Sidebar, 
+  SidebarContent, 
+  SidebarFooter, 
+  SidebarHeader,
+  SidebarTrigger 
+} from "@/components/ui/sidebar";
 
 export const WMSCustomerLayout = () => {
   const { toast } = useToast();
@@ -64,33 +72,45 @@ export const WMSCustomerLayout = () => {
   const role = userRoles.includes("admin") ? "admin" : userRoles.includes("branch_manager") ? "branch_manager" : "store_customer";
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="flex">
-        <aside className="w-64 border-r min-h-screen bg-card p-6 flex flex-col">
-          <div className="mb-6 flex items-center gap-2">
-            <Package className="h-6 w-6 text-primary" />
-            <div>
-              <h2 className="text-lg font-semibold">Warehouse</h2>
-              <p className="text-xs text-muted-foreground">WMS Portal</p>
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full bg-background">
+        <Sidebar collapsible="icon">
+          <SidebarHeader className="border-b">
+            <div className="flex items-center gap-2 px-2 py-4">
+              <Package className="h-6 w-6 text-primary shrink-0" />
+              <div className="group-data-[collapsible=icon]:hidden">
+                <h2 className="text-lg font-semibold">Warehouse</h2>
+                <p className="text-xs text-muted-foreground">WMS Portal</p>
+              </div>
             </div>
-          </div>
-          <WMSNavigation userRole={role} />
-          <div className="mt-auto pt-6">
+          </SidebarHeader>
+          
+          <SidebarContent>
+            <WMSNavigation userRole={role} />
+          </SidebarContent>
+          
+          <SidebarFooter className="border-t">
             <Button 
-              variant="outline" 
+              variant="ghost" 
               size="sm" 
               className="w-full justify-start" 
               onClick={handleSignOut}
             >
-              <LogOut className="h-4 w-4 mr-2" />
-              Sign Out
+              <LogOut className="h-4 w-4 mr-2 shrink-0" />
+              <span className="group-data-[collapsible=icon]:hidden">Sign Out</span>
             </Button>
-          </div>
-        </aside>
-        <main className="flex-1 p-8">
-          <Outlet />
-        </main>
+          </SidebarFooter>
+        </Sidebar>
+
+        <div className="flex-1 flex flex-col">
+          <header className="h-14 border-b flex items-center px-4 bg-background sticky top-0 z-10">
+            <SidebarTrigger />
+          </header>
+          <main className="flex-1 p-8">
+            <Outlet />
+          </main>
+        </div>
       </div>
-    </div>
+    </SidebarProvider>
   );
 };
