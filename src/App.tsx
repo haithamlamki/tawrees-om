@@ -42,6 +42,7 @@ import AdminWMSDashboard from "./pages/admin/WMSDashboard";
 import WMSAuth from "./pages/warehouse/Auth";
 import WMSCustomerOrders from "./components/admin/WMSCustomerOrders";
 import ProductRequestApproval from "./components/admin/ProductRequestApproval";
+import Analytics from "./pages/admin/Analytics";
 
 const queryClient = new QueryClient();
 
@@ -58,6 +59,7 @@ const App = () => (
           <Route path="/update-password" element={<UpdatePassword />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/admin/analytics" element={<Analytics />} />
           <Route path="/employee" element={<EmployeeDashboard />} />
           <Route path="/partner" element={<PartnerDashboard />} />
           <Route path="/finance" element={<FinanceDashboard />} />

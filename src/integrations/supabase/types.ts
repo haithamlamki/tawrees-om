@@ -739,6 +739,8 @@ export type Database = {
           phone: string | null
           postal_code: string | null
           preferred_language: string
+          two_factor_enabled: boolean | null
+          two_factor_secret: string | null
           updated_at: string
           wms_customer_id: string | null
         }
@@ -756,6 +758,8 @@ export type Database = {
           phone?: string | null
           postal_code?: string | null
           preferred_language?: string
+          two_factor_enabled?: boolean | null
+          two_factor_secret?: string | null
           updated_at?: string
           wms_customer_id?: string | null
         }
@@ -773,6 +777,8 @@ export type Database = {
           phone?: string | null
           postal_code?: string | null
           preferred_language?: string
+          two_factor_enabled?: boolean | null
+          two_factor_secret?: string | null
           updated_at?: string
           wms_customer_id?: string | null
         }

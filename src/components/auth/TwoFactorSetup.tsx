@@ -67,7 +67,7 @@ export const TwoFactorSetup = ({ userId }: TwoFactorSetupProps) => {
         .update({ 
           two_factor_secret: secret,
           two_factor_enabled: true 
-        })
+        } as any)
         .eq('id', userId);
 
       if (error) throw error;
