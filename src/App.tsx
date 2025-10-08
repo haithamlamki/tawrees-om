@@ -29,6 +29,7 @@ import WMSProductRequests from "./pages/warehouse/ProductRequests";
 import WMSSettings from "./pages/warehouse/Settings";
 import AdminWMSCustomers from "./pages/admin/WMSCustomers";
 import AdminWMSContracts from "./pages/admin/WMSContracts";
+import AdminWMSInventory from "./pages/admin/WMSInventory";
 
 const queryClient = new QueryClient();
 
@@ -70,6 +71,7 @@ const App = () => (
           </Route>
           <Route path="/admin/wms-customers" element={<AdminWMSCustomers />} />
           <Route path="/admin/wms-contracts" element={<AdminWMSContracts />} />
+          <Route path="/admin/wms-inventory" element={<AdminWMSInventory />} />
           
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
