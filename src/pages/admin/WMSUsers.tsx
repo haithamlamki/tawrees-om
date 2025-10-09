@@ -10,8 +10,9 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
-import { UserPlus, Search, Trash2, Mail } from "lucide-react";
+import { UserPlus, Search, Trash2, Mail, Plus } from "lucide-react";
 import type { WMSCustomer } from "@/types/wms";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface WMSCustomerUser {
   id: string;
@@ -38,9 +39,16 @@ export default function WMSUsers() {
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<string>("");
   const [selectedCustomer, setSelectedCustomer] = useState<string>("");
   const [selectedBranch, setSelectedBranch] = useState<string>("");
+  const [newUserEmail, setNewUserEmail] = useState("");
+  const [newUserName, setNewUserName] = useState("");
+  const [newUserPhone, setNewUserPhone] = useState("");
+  const [newUserCustomer, setNewUserCustomer] = useState("");
+  const [newUserBranch, setNewUserBranch] = useState("");
+  const [createdPassword, setCreatedPassword] = useState<string | null>(null);
 
   // Fetch all WMS customer users with details
   const { data: customerUsers, isLoading } = useQuery({
@@ -185,6 +193,50 @@ export default function WMSUsers() {
     setSelectedBranch("");
   };
 
+  const resetCreateForm = () => {
+    setNewUserEmail("");
+    setNewUserName("");
+    setNewUserPhone("");
+    setNewUserCustomer("");
+    setNewUserBranch("");
+    setCreatedPassword(null);
+  };
+
+  // Create new user mutation
+  const createUserMutation = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.functions.invoke('create-wms-contract-user', {
+        body: {
+          email: newUserEmail,
+          full_name: newUserName,
+          phone: newUserPhone,
+          customer_id: newUserCustomer,
+        }
+      });
+
+      if (error) throw error;
+      if (!data.success) throw new Error(data.error || 'Failed to create user');
+      
+      return data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["wms-customer-users"] });
+      queryClient.invalidateQueries({ queryKey: ["all-users"] });
+      setCreatedPassword(data.temporary_password);
+      toast({
+        title: "Success",
+        description: "User created successfully. Please save the temporary password.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleAssignUser = () => {
     if (!selectedUser || !selectedCustomer) {
       toast({
@@ -195,6 +247,25 @@ export default function WMSUsers() {
       return;
     }
     assignUserMutation.mutate();
+  };
+
+  const handleCreateUser = () => {
+    if (!newUserEmail || !newUserName || !newUserCustomer) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
+    createUserMutation.mutate();
+  };
+
+  const handleCloseCreateDialog = () => {
+    if (createdPassword) {
+      resetCreateForm();
+    }
+    setIsCreateDialogOpen(false);
   };
 
   const filteredUsers = customerUsers?.filter((user) =>
@@ -216,13 +287,14 @@ export default function WMSUsers() {
             Assign users to WMS customers and manage their access
           </p>
         </div>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <UserPlus className="mr-2 h-4 w-4" />
-              Assign User
-            </Button>
-          </DialogTrigger>
+        <div className="flex gap-2">
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline">
+                <UserPlus className="mr-2 h-4 w-4" />
+                Assign Existing User
+              </Button>
+            </DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Assign User to Customer</DialogTitle>
@@ -289,6 +361,96 @@ export default function WMSUsers() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Create New User
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Create New WMS User</DialogTitle>
+              <DialogDescription>
+                Create a new user account and assign them to a WMS customer
+              </DialogDescription>
+            </DialogHeader>
+            
+            {createdPassword ? (
+              <div className="space-y-4">
+                <Alert>
+                  <AlertDescription className="space-y-2">
+                    <p className="font-semibold">User created successfully!</p>
+                    <p className="text-sm">Please save this temporary password and share it with the user:</p>
+                    <div className="bg-background p-3 rounded-md border font-mono text-sm break-all">
+                      {createdPassword}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      The user should change this password after their first login.
+                    </p>
+                  </AlertDescription>
+                </Alert>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Email *</Label>
+                  <Input
+                    type="email"
+                    placeholder="user@example.com"
+                    value={newUserEmail}
+                    onChange={(e) => setNewUserEmail(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Full Name *</Label>
+                  <Input
+                    placeholder="John Doe"
+                    value={newUserName}
+                    onChange={(e) => setNewUserName(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Phone</Label>
+                  <Input
+                    type="tel"
+                    placeholder="+968 1234 5678"
+                    value={newUserPhone}
+                    onChange={(e) => setNewUserPhone(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Customer *</Label>
+                  <Select value={newUserCustomer} onValueChange={setNewUserCustomer}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select customer" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {customers?.map((customer) => (
+                        <SelectItem key={customer.id} value={customer.id}>
+                          {customer.company_name} ({customer.customer_code})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            )}
+            
+            <DialogFooter>
+              <Button variant="outline" onClick={handleCloseCreateDialog}>
+                {createdPassword ? 'Close' : 'Cancel'}
+              </Button>
+              {!createdPassword && (
+                <Button onClick={handleCreateUser} disabled={createUserMutation.isPending}>
+                  {createUserMutation.isPending ? 'Creating...' : 'Create User'}
+                </Button>
+              )}
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+        </div>
       </div>
 
       <Card>
