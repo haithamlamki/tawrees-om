@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LanguageSelector } from "@/components/LanguageSelector";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import logo from "@/assets/tawreed-logo.png";
 
 interface NavigationProps {
@@ -17,10 +18,12 @@ interface NavigationProps {
 const Navigation = ({ isAuthenticated }: NavigationProps) => {
   const navigate = useNavigate();
   const [userRoles, setUserRoles] = useState<string[]>([]);
+  const [profile, setProfile] = useState<{ full_name: string | null; email: string | null } | null>(null);
 
   useEffect(() => {
     if (isAuthenticated) {
       loadUserRoles();
+      loadUserProfile();
     }
   }, [isAuthenticated]);
 
@@ -33,6 +36,19 @@ const Navigation = ({ isAuthenticated }: NavigationProps) => {
         .eq("user_id", session.user.id);
       
       setUserRoles(data?.map(r => r.role) || []);
+    }
+  };
+
+  const loadUserProfile = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return;
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('full_name, email')
+      .eq('id', session.user.id)
+      .maybeSingle();
+    if (!error) {
+      setProfile({ full_name: data?.full_name ?? null, email: data?.email ?? null });
     }
   };
 
@@ -122,6 +138,25 @@ const Navigation = ({ isAuthenticated }: NavigationProps) => {
                 <NotificationBell />
                 <LanguageSelector />
                 <ThemeToggle />
+                {profile && (
+                  <div className="hidden md:flex items-center gap-2 rounded-md border px-3 py-1 bg-muted/50">
+                    <Avatar className="h-8 w-8">
+                      <AvatarFallback>
+                        {(profile.full_name || 'U')
+                          .split(' ')
+                          .map((s) => s[0])
+                          .join('')
+                          .toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="leading-tight">
+                      <div className="text-sm font-medium">{profile.full_name || 'User'}</div>
+                      {profile.email && (
+                        <div className="text-xs text-muted-foreground">{profile.email}</div>
+                      )}
+                    </div>
+                  </div>
+                )}
                 <Button variant="ghost" onClick={handleLogout}>
                   <LogOut className="mr-2 h-4 w-4" />
                   Logout
