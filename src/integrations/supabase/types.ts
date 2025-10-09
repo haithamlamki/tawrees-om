@@ -2525,6 +2525,10 @@ export type Database = {
         Args: { error_msg: string }
         Returns: string
       }
+      user_wms_customer_id: {
+        Args: { _user_id: string }
+        Returns: string
+      }
     }
     Enums: {
       app_role:
