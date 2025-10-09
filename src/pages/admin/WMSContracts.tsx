@@ -78,9 +78,44 @@ export default function AdminWMSContracts() {
   const createMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
       const totalAmount = data.monthly_fee * data.duration_months;
+      let createdUserId = null;
+
+      // If create_account is checked, create the user first
+      if (data.create_account && data.email && data.responsible_person) {
+        const { data: userData, error: userError } = await supabase.functions.invoke(
+          'create-wms-contract-user',
+          {
+            body: {
+              email: data.email,
+              full_name: data.responsible_person,
+              phone: data.phone || '',
+              customer_id: data.customer_id,
+            }
+          }
+        );
+
+        if (userError || !userData?.success) {
+          throw new Error(userData?.error || 'Failed to create user account');
+        }
+
+        createdUserId = userData.user_id;
+        console.log('Created user:', userData);
+
+        // Show password to admin
+        if (userData.temporary_password) {
+          toast({
+            title: "User Account Created",
+            description: `User created successfully. Temporary password: ${userData.temporary_password}`,
+            duration: 10000,
+          });
+        }
+      }
+
+      // Create the contract
       const { error } = await supabase.from("wms_contracts").insert({
         ...data,
         total_amount: totalAmount,
+        created_user_id: createdUserId,
       });
       if (error) throw error;
     },
@@ -245,12 +280,16 @@ export default function AdminWMSContracts() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="email">{t("contracts.email")}</Label>
+                    <Label htmlFor="email">
+                      {t("contracts.email")}
+                      {formData.create_account && <span className="text-destructive"> *</span>}
+                    </Label>
                     <Input
                       id="email"
                       type="email"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      required={formData.create_account}
                     />
                   </div>
                   <div className="space-y-2">
@@ -262,11 +301,15 @@ export default function AdminWMSContracts() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="responsible_person">{t("contracts.responsiblePerson")}</Label>
+                    <Label htmlFor="responsible_person">
+                      {t("contracts.responsiblePerson")}
+                      {formData.create_account && <span className="text-destructive"> *</span>}
+                    </Label>
                     <Input
                       id="responsible_person"
                       value={formData.responsible_person}
                       onChange={(e) => setFormData({ ...formData, responsible_person: e.target.value })}
+                      required={formData.create_account}
                     />
                   </div>
                   <div className="col-span-2 space-y-2">
@@ -301,17 +344,25 @@ export default function AdminWMSContracts() {
                       onChange={(e) => setFormData({ ...formData, gateway_password: e.target.value })}
                     />
                   </div>
-                  <div className="col-span-2 flex items-center space-x-2">
-                    <Checkbox
-                      id="create_account"
-                      checked={formData.create_account}
-                      onCheckedChange={(checked) => 
-                        setFormData({ ...formData, create_account: checked as boolean })
-                      }
-                    />
-                    <Label htmlFor="create_account" className="cursor-pointer">
-                      {t("contracts.createAccount")}
-                    </Label>
+                  <div className="col-span-2 space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="create_account"
+                        checked={formData.create_account}
+                        onCheckedChange={(checked) => 
+                          setFormData({ ...formData, create_account: checked as boolean })
+                        }
+                      />
+                      <Label htmlFor="create_account" className="cursor-pointer">
+                        {t("contracts.createAccount")}
+                      </Label>
+                    </div>
+                    {formData.create_account && (
+                      <p className="text-sm text-muted-foreground ml-6">
+                        A user account will be automatically created with store_customer access. 
+                        Make sure email and responsible person fields are filled.
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>

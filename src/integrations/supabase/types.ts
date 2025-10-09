@@ -1578,6 +1578,7 @@ export type Database = {
           contract_type: string
           create_account: boolean | null
           created_at: string
+          created_user_id: string | null
           customer_id: string
           duration_months: number
           email: string | null
@@ -1608,6 +1609,7 @@ export type Database = {
           contract_type: string
           create_account?: boolean | null
           created_at?: string
+          created_user_id?: string | null
           customer_id: string
           duration_months: number
           email?: string | null
@@ -1638,6 +1640,7 @@ export type Database = {
           contract_type?: string
           create_account?: boolean | null
           created_at?: string
+          created_user_id?: string | null
           customer_id?: string
           duration_months?: number
           email?: string | null
