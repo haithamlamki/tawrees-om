@@ -28,6 +28,13 @@ interface ChatRoom {
   unread_count: number;
 }
 
+interface CustomerProfile {
+  full_name: string;
+  email: string;
+  phone?: string;
+  company_name?: string;
+}
+
 export default function WMSSupport() {
   const { t } = useTranslation();
   const [chatRooms, setChatRooms] = useState<ChatRoom[]>([]);
@@ -35,6 +42,7 @@ export default function WMSSupport() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [selectedCustomerProfile, setSelectedCustomerProfile] = useState<CustomerProfile | null>(null);
 
   useEffect(() => {
     loadCurrentUser();
@@ -44,6 +52,7 @@ export default function WMSSupport() {
   useEffect(() => {
     if (selectedRoom) {
       loadMessages(selectedRoom);
+      loadCustomerProfile(selectedRoom);
       
       // Subscribe to real-time updates for the selected room
       const channel = supabase
@@ -109,6 +118,22 @@ export default function WMSSupport() {
     });
 
     setChatRooms(Array.from(roomsMap.values()));
+  };
+
+  const loadCustomerProfile = async (userId: string) => {
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('full_name, email, phone, company_name')
+      .eq('id', userId)
+      .single();
+
+    if (profileError) {
+      console.error('Error loading customer profile:', profileError);
+      setSelectedCustomerProfile(null);
+      return;
+    }
+
+    setSelectedCustomerProfile(profile);
   };
 
   const loadMessages = async (roomId: string) => {
@@ -231,10 +256,34 @@ export default function WMSSupport() {
             <CardTitle>
               {selectedRoomData ? (
                 <div>
-                  <div className="font-medium">{selectedRoomData.customer_name}</div>
-                  <div className="text-sm text-muted-foreground font-normal">
-                    Customer Support Chat
-                  </div>
+                  <div className="font-medium text-lg">{selectedCustomerProfile?.full_name || selectedRoomData.customer_name}</div>
+                  {selectedCustomerProfile && (
+                    <div className="space-y-1 mt-2">
+                      {selectedCustomerProfile.email && (
+                        <div className="text-sm text-muted-foreground font-normal flex items-center gap-2">
+                          <span className="font-medium">Email:</span>
+                          <span>{selectedCustomerProfile.email}</span>
+                        </div>
+                      )}
+                      {selectedCustomerProfile.phone && (
+                        <div className="text-sm text-muted-foreground font-normal flex items-center gap-2">
+                          <span className="font-medium">Phone:</span>
+                          <span>{selectedCustomerProfile.phone}</span>
+                        </div>
+                      )}
+                      {selectedCustomerProfile.company_name && (
+                        <div className="text-sm text-muted-foreground font-normal flex items-center gap-2">
+                          <span className="font-medium">Company:</span>
+                          <span>{selectedCustomerProfile.company_name}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  {!selectedCustomerProfile && (
+                    <div className="text-sm text-muted-foreground font-normal">
+                      Customer Support Chat
+                    </div>
+                  )}
                 </div>
               ) : (
                 'Select a conversation'
