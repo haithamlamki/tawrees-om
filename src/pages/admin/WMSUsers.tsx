@@ -266,10 +266,9 @@ export default function WMSUsers() {
                   <Label>Branch (Optional)</Label>
                   <Select value={selectedBranch} onValueChange={setSelectedBranch}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select branch" />
+                      <SelectValue placeholder="All branches (no specific branch)" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">No branch</SelectItem>
                       {branches?.map((branch) => (
                         <SelectItem key={branch.id} value={branch.id}>
                           {branch.branch_name}
