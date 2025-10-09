@@ -70,24 +70,11 @@ serve(async (req) => {
     const userId = authData.user.id;
     console.log('Created auth user:', userId);
 
-    // Create profile
-    const { error: profileError } = await supabaseClient
-      .from('profiles')
-      .insert({
-        id: userId,
-        full_name,
-        email,
-        phone,
-      });
+    // Profile is automatically created by the handle_new_user trigger
+    // Wait a moment for trigger to complete
+    await new Promise(resolve => setTimeout(resolve, 500));
 
-    if (profileError) {
-      console.error('Error creating profile:', profileError);
-      // Rollback: delete the auth user
-      await supabaseClient.auth.admin.deleteUser(userId);
-      throw profileError;
-    }
-
-    console.log('Created profile for user:', userId);
+    console.log('Profile created automatically by trigger');
 
     // Link user to WMS customer (no specific branch - can access all branches)
     const { error: customerUserError } = await supabaseClient
@@ -100,8 +87,7 @@ serve(async (req) => {
 
     if (customerUserError) {
       console.error('Error linking user to customer:', customerUserError);
-      // Rollback: delete profile and auth user
-      await supabaseClient.from('profiles').delete().eq('id', userId);
+      // Rollback: delete auth user (profile will be cascade deleted)
       await supabaseClient.auth.admin.deleteUser(userId);
       throw customerUserError;
     }
@@ -118,9 +104,8 @@ serve(async (req) => {
 
     if (roleError) {
       console.error('Error assigning role:', roleError);
-      // Rollback: delete all created records
+      // Rollback: delete all created records (profile cascades from auth user)
       await supabaseClient.from('wms_customer_users').delete().eq('user_id', userId);
-      await supabaseClient.from('profiles').delete().eq('id', userId);
       await supabaseClient.auth.admin.deleteUser(userId);
       throw roleError;
     }
