@@ -17,7 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 import type { WMSContract, WMSCustomer } from "@/types/wms";
 
 export default function AdminWMSContracts() {
-  const { t } = useTranslation();
+  const { t } = useTranslation("admin");
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
@@ -88,11 +88,11 @@ export default function AdminWMSContracts() {
       queryClient.invalidateQueries({ queryKey: ["admin-wms-contracts"] });
       setOpen(false);
       resetForm();
-      toast({ title: t("admin.contracts.createContract") + " " + t("common.success") });
+      toast({ title: "Contract created successfully" });
     },
     onError: (error) => {
       toast({ 
-        title: t("common.error"), 
+        title: "Error", 
         description: error.message, 
         variant: "destructive" 
       });
@@ -114,7 +114,7 @@ export default function AdminWMSContracts() {
       queryClient.invalidateQueries({ queryKey: ["admin-wms-contracts"] });
       setOpen(false);
       resetForm();
-      toast({ title: t("admin.contracts.editContract") + " " + t("common.success") });
+      toast({ title: "Contract updated successfully" });
     },
   });
 
@@ -196,36 +196,36 @@ export default function AdminWMSContracts() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">{t("admin.contracts.title")}</h1>
-          <p className="text-muted-foreground">{t("admin.contracts.subtitle")}</p>
+          <h1 className="text-3xl font-bold">{t("contracts.title")}</h1>
+          <p className="text-muted-foreground">{t("contracts.subtitle")}</p>
         </div>
         <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) resetForm(); }}>
           <DialogTrigger asChild>
             <Button>
               <Plus className="h-4 w-4 mr-2" />
-              {t("admin.contracts.newContract")}
+              {t("contracts.newContract")}
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
-                {editingContract ? t("admin.contracts.editContract") : t("admin.contracts.createContract")}
+                {editingContract ? t("contracts.editContract") : t("contracts.createContract")}
               </DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Client Details Section */}
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold border-b pb-2">{t("admin.contracts.clientDetails")}</h3>
+                <h3 className="text-lg font-semibold border-b pb-2">{t("contracts.clientDetails")}</h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="col-span-2 space-y-2">
-                    <Label htmlFor="customer_id">{t("admin.contracts.customer")} *</Label>
+                    <Label htmlFor="customer_id">{t("contracts.customer")} *</Label>
                     <Select
                       value={formData.customer_id}
                       onValueChange={(value) => setFormData({ ...formData, customer_id: value })}
                       required
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder={t("admin.contracts.customer")} />
+                        <SelectValue placeholder={t("contracts.customer")} />
                       </SelectTrigger>
                       <SelectContent>
                         {customers?.map((customer) => (
@@ -237,7 +237,7 @@ export default function AdminWMSContracts() {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="network_name">{t("admin.contracts.networkName")}</Label>
+                    <Label htmlFor="network_name">{t("contracts.networkName")}</Label>
                     <Input
                       id="network_name"
                       value={formData.network_name}
@@ -245,7 +245,7 @@ export default function AdminWMSContracts() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="email">{t("admin.contracts.email")}</Label>
+                    <Label htmlFor="email">{t("contracts.email")}</Label>
                     <Input
                       id="email"
                       type="email"
@@ -254,7 +254,7 @@ export default function AdminWMSContracts() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="phone">{t("admin.contracts.phone")}</Label>
+                    <Label htmlFor="phone">{t("contracts.phone")}</Label>
                     <Input
                       id="phone"
                       value={formData.phone}
@@ -262,7 +262,7 @@ export default function AdminWMSContracts() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="responsible_person">{t("admin.contracts.responsiblePerson")}</Label>
+                    <Label htmlFor="responsible_person">{t("contracts.responsiblePerson")}</Label>
                     <Input
                       id="responsible_person"
                       value={formData.responsible_person}
@@ -270,7 +270,7 @@ export default function AdminWMSContracts() {
                     />
                   </div>
                   <div className="col-span-2 space-y-2">
-                    <Label htmlFor="address">{t("admin.contracts.address")}</Label>
+                    <Label htmlFor="address">{t("contracts.address")}</Label>
                     <Input
                       id="address"
                       value={formData.address}
@@ -282,10 +282,10 @@ export default function AdminWMSContracts() {
 
               {/* Gateway Login Section */}
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold border-b pb-2">{t("admin.contracts.gatewayLogin")}</h3>
+                <h3 className="text-lg font-semibold border-b pb-2">{t("contracts.gatewayLogin")}</h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="gateway_username">{t("admin.contracts.username")}</Label>
+                    <Label htmlFor="gateway_username">{t("contracts.username")}</Label>
                     <Input
                       id="gateway_username"
                       value={formData.gateway_username}
@@ -293,7 +293,7 @@ export default function AdminWMSContracts() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="gateway_password">{t("admin.contracts.password")}</Label>
+                    <Label htmlFor="gateway_password">{t("contracts.password")}</Label>
                     <Input
                       id="gateway_password"
                       type="password"
@@ -310,7 +310,7 @@ export default function AdminWMSContracts() {
                       }
                     />
                     <Label htmlFor="create_account" className="cursor-pointer">
-                      {t("admin.contracts.createAccount")}
+                      {t("contracts.createAccount")}
                     </Label>
                   </div>
                 </div>
@@ -318,10 +318,10 @@ export default function AdminWMSContracts() {
 
               {/* Contract Details Section */}
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold border-b pb-2">{t("admin.contracts.contractDetails")}</h3>
+                <h3 className="text-lg font-semibold border-b pb-2">{t("contracts.contractDetails")}</h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="contract_type">{t("admin.contracts.contractType")} *</Label>
+                    <Label htmlFor="contract_type">{t("contracts.contractType")} *</Label>
                     <Input
                       id="contract_type"
                       value={formData.contract_type}
@@ -330,7 +330,7 @@ export default function AdminWMSContracts() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="contract_date">{t("admin.contracts.contractDate")}</Label>
+                    <Label htmlFor="contract_date">{t("contracts.contractDate")}</Label>
                     <Input
                       id="contract_date"
                       type="date"
@@ -339,7 +339,7 @@ export default function AdminWMSContracts() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="contract_number">{t("admin.contracts.contractNumber")} *</Label>
+                    <Label htmlFor="contract_number">{t("contracts.contractNumber")} *</Label>
                     <Input
                       id="contract_number"
                       value={formData.contract_number}
@@ -348,7 +348,7 @@ export default function AdminWMSContracts() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="monthly_fee">{t("admin.contracts.monthlySubscription")} *</Label>
+                    <Label htmlFor="monthly_fee">{t("contracts.monthlySubscription")} *</Label>
                     <Input
                       id="monthly_fee"
                       type="number"
@@ -359,7 +359,7 @@ export default function AdminWMSContracts() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="storage_space_sqm">{t("admin.contracts.storageSpace")}</Label>
+                    <Label htmlFor="storage_space_sqm">{t("contracts.storageSpace")}</Label>
                     <Input
                       id="storage_space_sqm"
                       type="number"
@@ -368,7 +368,7 @@ export default function AdminWMSContracts() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="free_transfer_count">{t("admin.contracts.transferCount")} *</Label>
+                    <Label htmlFor="free_transfer_count">{t("contracts.transferCount")} *</Label>
                     <Input
                       id="free_transfer_count"
                       type="number"
@@ -378,7 +378,7 @@ export default function AdminWMSContracts() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="transfer_price_after_limit">{t("admin.contracts.transferPrice")} *</Label>
+                    <Label htmlFor="transfer_price_after_limit">{t("contracts.transferPrice")} *</Label>
                     <Input
                       id="transfer_price_after_limit"
                       type="number"
@@ -389,7 +389,7 @@ export default function AdminWMSContracts() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="duration_months">{t("admin.contracts.duration")} *</Label>
+                    <Label htmlFor="duration_months">{t("contracts.duration")} *</Label>
                     <Input
                       id="duration_months"
                       type="number"
@@ -399,7 +399,7 @@ export default function AdminWMSContracts() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="start_date">{t("admin.contracts.startDate")} *</Label>
+                    <Label htmlFor="start_date">{t("contracts.startDate")} *</Label>
                     <Input
                       id="start_date"
                       type="date"
@@ -409,7 +409,7 @@ export default function AdminWMSContracts() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="end_date">{t("admin.contracts.endDate")} *</Label>
+                    <Label htmlFor="end_date">{t("contracts.endDate")} *</Label>
                     <Input
                       id="end_date"
                       type="date"
@@ -419,7 +419,7 @@ export default function AdminWMSContracts() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="status">{t("admin.contracts.status")} *</Label>
+                    <Label htmlFor="status">{t("contracts.status")} *</Label>
                     <Select
                       value={formData.status}
                       onValueChange={(value: any) => setFormData({ ...formData, status: value })}
@@ -429,14 +429,14 @@ export default function AdminWMSContracts() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="active">{t("admin.contracts.active")}</SelectItem>
-                        <SelectItem value="inactive">{t("admin.contracts.inactive")}</SelectItem>
-                        <SelectItem value="expired">{t("admin.contracts.expired")}</SelectItem>
+                        <SelectItem value="active">{t("contracts.active")}</SelectItem>
+                        <SelectItem value="inactive">{t("contracts.inactive")}</SelectItem>
+                        <SelectItem value="expired">{t("contracts.expired")}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="col-span-2 space-y-2">
-                    <Label htmlFor="storage_conditions">{t("admin.contracts.storageConditions")}</Label>
+                    <Label htmlFor="storage_conditions">{t("contracts.storageConditions")}</Label>
                     <Textarea
                       id="storage_conditions"
                       value={formData.storage_conditions}
@@ -449,22 +449,22 @@ export default function AdminWMSContracts() {
 
               {/* Notes Section */}
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold border-b pb-2">{t("admin.contracts.notes")}</h3>
+                <h3 className="text-lg font-semibold border-b pb-2">{t("contracts.notes")}</h3>
                 <Textarea
                   id="notes"
                   value={formData.notes}
                   onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                  placeholder={t("admin.contracts.notesPlaceholder")}
+                  placeholder={t("contracts.notesPlaceholder")}
                   rows={4}
                 />
               </div>
 
               <div className="flex justify-end gap-2 pt-4">
                 <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-                  {t("admin.contracts.cancel")}
+                  {t("contracts.cancel")}
                 </Button>
                 <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
-                  {editingContract ? t("admin.contracts.update") : t("admin.contracts.create")}
+                  {editingContract ? t("contracts.update") : t("contracts.create")}
                 </Button>
               </div>
             </form>
@@ -474,7 +474,7 @@ export default function AdminWMSContracts() {
 
       <Card>
         <CardHeader>
-          <CardTitle>{t("admin.contracts.title")}</CardTitle>
+          <CardTitle>{t("contracts.title")}</CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -483,14 +483,14 @@ export default function AdminWMSContracts() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>{t("admin.contracts.contractNumber")}</TableHead>
-                  <TableHead>{t("admin.contracts.customer")}</TableHead>
-                  <TableHead>{t("admin.contracts.type")}</TableHead>
-                  <TableHead>{t("admin.contracts.monthlyFee")}</TableHead>
-                  <TableHead>{t("admin.contracts.duration")}</TableHead>
-                  <TableHead>{t("admin.contracts.startDate")} - {t("admin.contracts.endDate")}</TableHead>
-                  <TableHead>{t("admin.contracts.status")}</TableHead>
-                  <TableHead>{t("admin.contracts.actions")}</TableHead>
+                  <TableHead>{t("contracts.contractNumber")}</TableHead>
+                  <TableHead>{t("contracts.customer")}</TableHead>
+                  <TableHead>{t("contracts.type")}</TableHead>
+                  <TableHead>{t("contracts.monthlyFee")}</TableHead>
+                  <TableHead>{t("contracts.duration")}</TableHead>
+                  <TableHead>{t("contracts.startDate")} - {t("contracts.endDate")}</TableHead>
+                  <TableHead>{t("contracts.status")}</TableHead>
+                  <TableHead>{t("contracts.actions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -500,14 +500,14 @@ export default function AdminWMSContracts() {
                     <TableCell>{contract.customer?.company_name}</TableCell>
                     <TableCell>{contract.contract_type}</TableCell>
                     <TableCell>{contract.monthly_fee} OMR</TableCell>
-                    <TableCell>{contract.duration_months} {t("admin.contracts.months")}</TableCell>
+                    <TableCell>{contract.duration_months} {t("contracts.months")}</TableCell>
                     <TableCell className="text-sm">
                       {new Date(contract.start_date).toLocaleDateString()} -<br />
                       {new Date(contract.end_date).toLocaleDateString()}
                     </TableCell>
                     <TableCell>
                       <Badge className={getStatusColor(contract.status)}>
-                        {t(`admin.contracts.${contract.status}`)}
+                        {t(`contracts.${contract.status}`)}
                       </Badge>
                     </TableCell>
                     <TableCell>
