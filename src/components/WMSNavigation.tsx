@@ -20,7 +20,8 @@ import {
   Store,
   FileCheck,
   Home,
-  UserCog
+  UserCog,
+  MessageSquare
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { 
@@ -255,6 +256,13 @@ const navigationItems: NavigationItem[] = [
     name: "MIS Report",
     href: "/admin/wms-mis-report",
     icon: ClipboardCheck,
+    roles: ["admin"],
+    group: "Admin WMS"
+  },
+  {
+    name: "Support Messages",
+    href: "/admin/wms-support",
+    icon: MessageSquare,
     roles: ["admin"],
     group: "Admin WMS"
   },
