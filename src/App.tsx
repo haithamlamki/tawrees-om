@@ -33,6 +33,7 @@ import WMSProductRequests from "./pages/warehouse/ProductRequests";
 import WMSSettings from "./pages/warehouse/Settings";
 import WMSReports from "./pages/warehouse/Reports";
 import AdminWMSCustomers from "./pages/admin/WMSCustomers";
+import AdminWMSUsers from "./pages/admin/WMSUsers";
 import AdminWMSContracts from "./pages/admin/WMSContracts";
 import AdminWMSInventory from "./pages/admin/WMSInventory";
 import AdminWMSOrders from "./pages/admin/WMSOrders";
@@ -85,6 +86,7 @@ const App = () => (
             {/* Admin WMS Routes */}
             <Route path="/admin/wms" element={<AdminWMSDashboard />} />
             <Route path="/admin/wms-customers" element={<AdminWMSCustomers />} />
+            <Route path="/admin/wms-users" element={<AdminWMSUsers />} />
             <Route path="/admin/wms-customer-orders" element={<WMSCustomerOrders />} />
             <Route path="/admin/wms-contracts" element={<AdminWMSContracts />} />
             <Route path="/admin/wms-inventory" element={<AdminWMSInventory />} />

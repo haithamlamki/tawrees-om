@@ -196,6 +196,13 @@ const navigationItems: NavigationItem[] = [
     group: "Admin WMS"
   },
   {
+    name: "User Management",
+    href: "/admin/wms-users",
+    icon: UserCog,
+    roles: ["admin"],
+    group: "Admin WMS"
+  },
+  {
     name: "Customer Orders",
     href: "/admin/wms-customer-orders",
     icon: ShoppingCart,

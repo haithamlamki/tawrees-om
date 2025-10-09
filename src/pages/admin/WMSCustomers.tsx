@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,13 +9,14 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, Pencil } from "lucide-react";
+import { Plus, Pencil, Users } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type { WMSCustomer } from "@/types/wms";
 
 export default function AdminWMSCustomers() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<WMSCustomer | null>(null);
   const [formData, setFormData] = useState({
@@ -32,10 +34,13 @@ export default function AdminWMSCustomers() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("wms_customers")
-        .select("*")
+        .select(`
+          *,
+          wms_customer_users (count)
+        `)
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return data as WMSCustomer[];
+      return data;
     },
   });
 
@@ -225,6 +230,7 @@ export default function AdminWMSCustomers() {
                   <TableHead>Email</TableHead>
                   <TableHead>Phone</TableHead>
                   <TableHead>City</TableHead>
+                  <TableHead>Users</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
@@ -238,6 +244,17 @@ export default function AdminWMSCustomers() {
                     <TableCell>{customer.email || "-"}</TableCell>
                     <TableCell>{customer.phone || "-"}</TableCell>
                     <TableCell>{customer.city || "-"}</TableCell>
+                    <TableCell>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => navigate("/admin/wms-users")}
+                        className="gap-2"
+                      >
+                        <Users className="h-4 w-4" />
+                        {customer.wms_customer_users?.[0]?.count || 0}
+                      </Button>
+                    </TableCell>
                     <TableCell>
                       <Switch
                         checked={customer.is_active}
