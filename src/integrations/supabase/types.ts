@@ -160,6 +160,36 @@ export type Database = {
         }
         Relationships: []
       }
+      chat_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          is_admin: boolean
+          room_id: string
+          sender_id: string
+          sender_name: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          is_admin?: boolean
+          room_id: string
+          sender_id: string
+          sender_name: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          is_admin?: boolean
+          room_id?: string
+          sender_id?: string
+          sender_name?: string
+        }
+        Relationships: []
+      }
       container_types: {
         Row: {
           cbm_capacity: number
