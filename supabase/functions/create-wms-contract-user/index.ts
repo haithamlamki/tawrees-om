@@ -8,8 +8,8 @@ const corsHeaders = {
 
 interface CreateUserRequest {
   email: string;
-  full_name: string;
-  phone: string;
+  full_name?: string;
+  phone?: string;
   customer_id: string;
 }
 
@@ -20,122 +20,189 @@ serve(async (req) => {
   }
 
   try {
-    const supabaseClient = createClient(
+    const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
       {
-        auth: {
-          autoRefreshToken: false,
-          persistSession: false
-        }
+        auth: { autoRefreshToken: false, persistSession: false },
       }
     );
 
     const { email, full_name, phone, customer_id }: CreateUserRequest = await req.json();
 
-    console.log('Creating WMS contract user:', { email, full_name, customer_id });
-
-    // Validate required fields
     if (!email || !customer_id) {
-      throw new Error('Email and customer_id are required');
+      return new Response(
+        JSON.stringify({ success: false, error: 'Email and customer_id are required' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    // Check if user already exists
-    const { data: existingUser } = await supabaseClient.auth.admin.listUsers();
-    const userExists = existingUser?.users.some(u => u.email === email);
-    
-    if (userExists) {
-      throw new Error(`A user with email ${email} already exists. Please use a different email or link the existing user manually.`);
+    // Require authenticated caller
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(JSON.stringify({ success: false, error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
-    // Generate a secure random password
-    const password = crypto.randomUUID() + crypto.randomUUID();
+    const token = authHeader.replace('Bearer ', '');
+    const { data: userData, error: getUserError } = await supabase.auth.getUser(token);
+    if (getUserError || !userData?.user) {
+      return new Response(JSON.stringify({ success: false, error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
-    // Create user in Supabase Auth
-    const { data: authData, error: authError } = await supabaseClient.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true, // Auto-confirm email
-      user_metadata: {
-        full_name,
-        phone,
+    const requesterId = userData.user.id;
+
+    // Authorization: allow admins or customer owner/admin for this customer
+    const { data: isAdmin } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', requesterId)
+      .eq('role', 'admin')
+      .maybeSingle();
+
+    let authorized = !!isAdmin;
+    if (!authorized) {
+      const { data: custRole } = await supabase
+        .from('wms_customer_users')
+        .select('role')
+        .eq('user_id', requesterId)
+        .eq('customer_id', customer_id)
+        .maybeSingle();
+      authorized = !!custRole && (custRole.role === 'owner' || custRole.role === 'admin');
+    }
+
+    if (!authorized) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Forbidden: insufficient permissions' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    console.log('Creating/linking WMS contract user:', { email, full_name, customer_id });
+
+    // Try to find existing user by email via profiles first (faster than scanning auth users)
+    let userId: string | null = null;
+    const { data: profileMatch } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('email', email)
+      .maybeSingle();
+
+    if (profileMatch?.id) {
+      userId = profileMatch.id;
+    }
+
+    // Fallback to admin listUsers if no profile found
+    if (!userId) {
+      const { data: existingUsers, error: listErr } = await supabase.auth.admin.listUsers();
+      if (listErr) {
+        console.error('Error listing users:', listErr);
       }
-    });
-
-    if (authError) {
-      console.error('Error creating auth user:', authError);
-      throw authError;
+      const match = existingUsers?.users?.find((u) => (u.email ?? '').toLowerCase() === email.toLowerCase());
+      if (match) {
+        userId = match.id;
+      }
     }
 
-    const userId = authData.user.id;
-    console.log('Created auth user:', userId);
+    let temporaryPassword: string | undefined;
 
-    // Profile is automatically created by the handle_new_user trigger
-    // Wait a moment for trigger to complete
-    await new Promise(resolve => setTimeout(resolve, 500));
+    // If not found, create new auth user
+    if (!userId) {
+      const password = crypto.randomUUID() + crypto.randomUUID();
+      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+        user_metadata: { full_name, phone },
+      });
+      if (authError) {
+        console.error('Error creating auth user:', authError);
+        throw authError;
+      }
+      userId = authData.user.id;
+      temporaryPassword = password;
 
-    console.log('Profile created automatically by trigger');
+      // Wait briefly for triggers to run (profile creation)
+      await new Promise((resolve) => setTimeout(resolve, 500));
+    }
 
-    // Link user to WMS customer (no specific branch - can access all branches)
-    const { error: customerUserError } = await supabaseClient
+    // Ensure profile exists/updated
+    const { data: existingProfile } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('id', userId)
+      .maybeSingle();
+
+    if (!existingProfile) {
+      const { error: profileUpsertErr } = await supabase.from('profiles').upsert(
+        {
+          id: userId,
+          full_name: full_name ?? 'User',
+          email,
+          phone: phone ?? null,
+        },
+        { onConflict: 'id' }
+      );
+      if (profileUpsertErr) {
+        console.error('Error upserting profile:', profileUpsertErr);
+        // Non-fatal, continue
+      }
+    }
+
+    // Link user to WMS customer (no specific branch for contract-wide access)
+    const { data: existingLink } = await supabase
       .from('wms_customer_users')
-      .insert({
+      .select('id')
+      .eq('user_id', userId)
+      .eq('customer_id', customer_id)
+      .maybeSingle();
+
+    if (!existingLink) {
+      const { error: linkErr } = await supabase.from('wms_customer_users').insert({
         user_id: userId,
         customer_id,
-        branch_id: null, // No specific branch
+        branch_id: null,
       });
-
-    if (customerUserError) {
-      console.error('Error linking user to customer:', customerUserError);
-      // Rollback: delete auth user (profile will be cascade deleted)
-      await supabaseClient.auth.admin.deleteUser(userId);
-      throw customerUserError;
+      if (linkErr) {
+        console.error('Error linking user to customer:', linkErr);
+        throw linkErr;
+      }
     }
 
-    console.log('Linked user to customer:', customer_id);
-
-    // Assign store_customer role
-    const { error: roleError } = await supabaseClient
+    // Assign store_customer role (idempotent)
+    const { error: roleErr } = await supabase
       .from('user_roles')
-      .insert({
-        user_id: userId,
-        role: 'store_customer',
-      });
-
-    if (roleError) {
-      console.error('Error assigning role:', roleError);
-      // Rollback: delete all created records (profile cascades from auth user)
-      await supabaseClient.from('wms_customer_users').delete().eq('user_id', userId);
-      await supabaseClient.auth.admin.deleteUser(userId);
-      throw roleError;
+      .upsert(
+        { user_id: userId, role: 'store_customer' },
+        { onConflict: 'user_id,role' }
+      );
+    if (roleErr) {
+      console.error('Error assigning role:', roleErr);
+      throw roleErr;
     }
-
-    console.log('Assigned store_customer role to user:', userId);
 
     return new Response(
       JSON.stringify({
         success: true,
         user_id: userId,
         email,
-        message: 'User created successfully',
-        temporary_password: password, // Return for admin to share with customer
+        message: temporaryPassword
+          ? 'User created and linked successfully'
+          : 'Existing user linked successfully',
+        temporary_password: temporaryPassword,
       }),
-      {
-        status: 200,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      }
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error: any) {
     console.error('Error in create-wms-contract-user function:', error);
     return new Response(
-      JSON.stringify({
-        success: false,
-        error: error.message || 'Failed to create user',
-      }),
-      {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      }
+      JSON.stringify({ success: false, error: error?.message || 'Failed to create or link user' }),
+      { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });
