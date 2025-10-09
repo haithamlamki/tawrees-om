@@ -60,14 +60,14 @@ const navigationItems: NavigationItem[] = [
     name: "Locations",
     href: "/locations",
     icon: MapPin,
-    roles: ["user", "store_customer", "branch_manager", "admin", "shipping_partner"],
+    roles: ["admin", "shipping_partner", "employee", "accountant", "branch_manager"],
     group: "Main"
   },
   {
     name: "Rates",
     href: "/rates",
     icon: DollarSign,
-    roles: ["user", "store_customer", "branch_manager", "admin"],
+    roles: ["admin", "employee", "accountant", "branch_manager"],
     group: "Main"
   },
   
