@@ -1571,15 +1571,27 @@ export type Database = {
       }
       wms_contracts: {
         Row: {
+          address: string | null
+          branches: Json | null
+          contract_date: string | null
           contract_number: string
           contract_type: string
+          create_account: boolean | null
           created_at: string
           customer_id: string
           duration_months: number
+          email: string | null
           end_date: string
           free_transfer_count: number
+          gateway_password: string | null
+          gateway_username: string | null
           id: string
           monthly_fee: number
+          network_name: string | null
+          notes: string | null
+          phone: string | null
+          products_included: Json | null
+          responsible_person: string | null
           start_date: string
           status: string
           storage_conditions: string | null
@@ -1589,15 +1601,27 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          address?: string | null
+          branches?: Json | null
+          contract_date?: string | null
           contract_number: string
           contract_type: string
+          create_account?: boolean | null
           created_at?: string
           customer_id: string
           duration_months: number
+          email?: string | null
           end_date: string
           free_transfer_count?: number
+          gateway_password?: string | null
+          gateway_username?: string | null
           id?: string
           monthly_fee: number
+          network_name?: string | null
+          notes?: string | null
+          phone?: string | null
+          products_included?: Json | null
+          responsible_person?: string | null
           start_date: string
           status?: string
           storage_conditions?: string | null
@@ -1607,15 +1631,27 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          address?: string | null
+          branches?: Json | null
+          contract_date?: string | null
           contract_number?: string
           contract_type?: string
+          create_account?: boolean | null
           created_at?: string
           customer_id?: string
           duration_months?: number
+          email?: string | null
           end_date?: string
           free_transfer_count?: number
+          gateway_password?: string | null
+          gateway_username?: string | null
           id?: string
           monthly_fee?: number
+          network_name?: string | null
+          notes?: string | null
+          phone?: string | null
+          products_included?: Json | null
+          responsible_person?: string | null
           start_date?: string
           status?: string
           storage_conditions?: string | null
