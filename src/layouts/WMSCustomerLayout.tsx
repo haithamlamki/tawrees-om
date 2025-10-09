@@ -28,19 +28,30 @@ export const WMSCustomerLayout = () => {
     },
   });
 
-  // Check if user has store_customer role
+  // Check if user has store_customer role OR is a WMS user
   const { data: userRoles, isLoading: rolesLoading } = useQuery({
     queryKey: ["user-wms-roles"],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return null;
 
-      const { data } = await supabase
+      // Check system-wide roles
+      const { data: systemRoles } = await supabase
         .from("user_roles")
         .select("role")
         .eq("user_id", user.id);
 
-      return data?.map((r) => r.role) || [];
+      // Check WMS customer-specific roles
+      const { data: wmsRole } = await supabase
+        .from("wms_customer_users")
+        .select("role")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      return {
+        systemRoles: systemRoles?.map((r) => r.role) || [],
+        wmsRole: wmsRole?.role || null
+      };
     },
     enabled: !!session,
   });
@@ -64,25 +75,36 @@ export const WMSCustomerLayout = () => {
     return <Navigate to="/warehouse/auth" replace />;
   }
 
-  // Redirect if user doesn't have store_customer role
-  if (!userRoles?.includes("store_customer") && !userRoles?.includes("branch_manager") && !userRoles?.includes("admin")) {
+  // Redirect if user doesn't have any WMS access
+  const systemRoles = userRoles?.systemRoles || [];
+  const wmsRole = userRoles?.wmsRole;
+  
+  const hasWMSAccess = 
+    systemRoles.includes("store_customer") || 
+    systemRoles.includes("branch_manager") || 
+    systemRoles.includes("admin") ||
+    systemRoles.includes("wms_employee") ||
+    systemRoles.includes("wms_accountant") ||
+    wmsRole !== null;
+
+  if (!hasWMSAccess) {
     return <Navigate to="/" replace />;
   }
 
   // Determine user role with priority order
-  const role = userRoles?.includes("admin")
-    ? "admin"
-    : userRoles?.includes("employee")
-    ? "employee"
-    : userRoles?.includes("shipping_partner")
-    ? "shipping_partner"
-    : userRoles?.includes("accountant")
-    ? "accountant"
-    : userRoles?.includes("branch_manager")
-    ? "branch_manager"
-    : userRoles?.includes("store_customer")
-    ? "store_customer"
-    : "user";
+  let role = "user";
+  
+  if (systemRoles.includes("admin")) {
+    role = "admin";
+  } else if (systemRoles.includes("wms_employee") || wmsRole === "employee") {
+    role = "wms_employee";
+  } else if (systemRoles.includes("wms_accountant") || wmsRole === "accountant") {
+    role = "wms_accountant";
+  } else if (systemRoles.includes("branch_manager") || wmsRole === "admin") {
+    role = "branch_manager";
+  } else if (systemRoles.includes("store_customer") || wmsRole === "owner") {
+    role = "store_customer";
+  }
 
   return (
     <SidebarProvider>

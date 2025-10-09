@@ -1756,6 +1756,8 @@ export type Database = {
           created_at: string
           customer_id: string
           id: string
+          permissions: Json | null
+          role: string | null
           user_id: string
         }
         Insert: {
@@ -1763,6 +1765,8 @@ export type Database = {
           created_at?: string
           customer_id: string
           id?: string
+          permissions?: Json | null
+          role?: string | null
           user_id: string
         }
         Update: {
@@ -1770,6 +1774,8 @@ export type Database = {
           created_at?: string
           customer_id?: string
           id?: string
+          permissions?: Json | null
+          role?: string | null
           user_id?: string
         }
         Relationships: [
@@ -1869,6 +1875,51 @@ export type Database = {
           vehicle_type?: string | null
         }
         Relationships: []
+      }
+      wms_employee_activities: {
+        Row: {
+          action: string
+          created_at: string | null
+          customer_id: string
+          employee_user_id: string | null
+          id: string
+          metadata: Json | null
+          order_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          customer_id: string
+          employee_user_id?: string | null
+          id?: string
+          metadata?: Json | null
+          order_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          customer_id?: string
+          employee_user_id?: string | null
+          id?: string
+          metadata?: Json | null
+          order_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wms_employee_activities_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "wms_customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wms_employee_activities_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "wms_orders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       wms_inventory: {
         Row: {
@@ -2367,30 +2418,39 @@ export type Database = {
       }
       wms_workflow_settings: {
         Row: {
+          approval_chain: Json | null
           auto_approve_threshold: number | null
           created_at: string
           customer_id: string | null
           default_approver_id: string | null
+          employee_can_view_all_orders: boolean | null
+          employee_restricted_to_branch: boolean | null
           id: string
           notification_preferences: Json
           require_order_approval: boolean
           updated_at: string
         }
         Insert: {
+          approval_chain?: Json | null
           auto_approve_threshold?: number | null
           created_at?: string
           customer_id?: string | null
           default_approver_id?: string | null
+          employee_can_view_all_orders?: boolean | null
+          employee_restricted_to_branch?: boolean | null
           id?: string
           notification_preferences?: Json
           require_order_approval?: boolean
           updated_at?: string
         }
         Update: {
+          approval_chain?: Json | null
           auto_approve_threshold?: number | null
           created_at?: string
           customer_id?: string | null
           default_approver_id?: string | null
+          employee_can_view_all_orders?: boolean | null
+          employee_restricted_to_branch?: boolean | null
           id?: string
           notification_preferences?: Json
           require_order_approval?: boolean
@@ -2475,6 +2535,8 @@ export type Database = {
         | "accountant"
         | "store_customer"
         | "branch_manager"
+        | "wms_employee"
+        | "wms_accountant"
       approval_status:
         | "pending_admin"
         | "pending_partner"
@@ -2632,6 +2694,8 @@ export const Constants = {
         "accountant",
         "store_customer",
         "branch_manager",
+        "wms_employee",
+        "wms_accountant",
       ],
       approval_status: [
         "pending_admin",

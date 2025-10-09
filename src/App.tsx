@@ -32,6 +32,10 @@ import WMSBranches from "./pages/warehouse/Branches";
 import WMSProductRequests from "./pages/warehouse/ProductRequests";
 import WMSSettings from "./pages/warehouse/Settings";
 import WMSReports from "./pages/warehouse/Reports";
+import WMSUsers from "./pages/warehouse/Users";
+import WorkflowSettings from "./pages/warehouse/WorkflowSettings";
+import EmployeeDashboardWMS from "./pages/warehouse/EmployeeDashboard";
+import AccountantDashboard from "./pages/warehouse/AccountantDashboard";
 import AdminWMSCustomers from "./pages/admin/WMSCustomers";
 import AdminWMSUsers from "./pages/admin/WMSUsers";
 import AdminWMSContracts from "./pages/admin/WMSContracts";
@@ -106,6 +110,8 @@ const App = () => (
             
             {/* WMS Customer Routes */}
             <Route path="/warehouse/dashboard" element={<CustomerDashboard />} />
+            <Route path="/warehouse/employee-dashboard" element={<EmployeeDashboardWMS />} />
+            <Route path="/warehouse/accountant-dashboard" element={<AccountantDashboard />} />
             <Route path="/warehouse/inventory" element={<WMSInventory />} />
             <Route path="/warehouse/orders" element={<WMSOrders />} />
             <Route path="/warehouse/invoices" element={<WMSInvoices />} />
@@ -113,6 +119,8 @@ const App = () => (
             <Route path="/warehouse/contract" element={<WMSContract />} />
             <Route path="/warehouse/branches" element={<WMSBranches />} />
             <Route path="/warehouse/product-requests" element={<WMSProductRequests />} />
+            <Route path="/warehouse/users" element={<WMSUsers />} />
+            <Route path="/warehouse/workflow-settings" element={<WorkflowSettings />} />
             <Route path="/warehouse/settings" element={<WMSSettings />} />
           </Route>
           

@@ -81,6 +81,20 @@ const navigationItems: NavigationItem[] = [
     group: "WMS"
   },
   {
+    name: "Employee Dashboard",
+    href: "/warehouse/employee-dashboard",
+    icon: UserCog,
+    roles: ["wms_employee"],
+    group: "WMS"
+  },
+  {
+    name: "Accountant Dashboard",
+    href: "/warehouse/accountant-dashboard",
+    icon: FileBarChart,
+    roles: ["wms_accountant"],
+    group: "WMS"
+  },
+  {
     name: "Contract",
     href: "/warehouse/contract",
     icon: FileText,
@@ -91,21 +105,21 @@ const navigationItems: NavigationItem[] = [
     name: "Inventory",
     href: "/warehouse/inventory",
     icon: Package,
-    roles: ["store_customer", "branch_manager"],
+    roles: ["store_customer", "branch_manager", "wms_employee"],
     group: "WMS"
   },
   {
     name: "Orders",
     href: "/warehouse/orders",
     icon: ShoppingCart,
-    roles: ["store_customer", "branch_manager"],
+    roles: ["store_customer", "branch_manager", "wms_employee"],
     group: "WMS"
   },
   {
     name: "Invoices",
     href: "/warehouse/invoices",
     icon: FileBarChart,
-    roles: ["store_customer"],
+    roles: ["store_customer", "wms_accountant"],
     group: "WMS"
   },
   {
@@ -130,11 +144,25 @@ const navigationItems: NavigationItem[] = [
     group: "WMS"
   },
   {
+    name: "Users",
+    href: "/warehouse/users",
+    icon: Users,
+    roles: ["store_customer"],
+    group: "WMS Management"
+  },
+  {
+    name: "Workflow Settings",
+    href: "/warehouse/workflow-settings",
+    icon: Workflow,
+    roles: ["store_customer"],
+    group: "WMS Management"
+  },
+  {
     name: "Settings",
     href: "/warehouse/settings",
     icon: Settings,
     roles: ["store_customer"],
-    group: "WMS"
+    group: "WMS Management"
   },
   
   // ===== ADMIN PAGES =====
