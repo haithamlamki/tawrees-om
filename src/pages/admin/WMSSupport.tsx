@@ -92,32 +92,54 @@ export default function WMSSupport() {
   };
 
   const loadChatRooms = async () => {
-    const { data: messagesData, error } = await supabase
-      .from('chat_messages')
-      .select('room_id, sender_name, content, created_at')
-      .order('created_at', { ascending: false });
+    // Load all system users from profiles
+    const { data: profilesData, error: profilesError } = await supabase
+      .from('profiles')
+      .select('id, full_name, email, company_name')
+      .order('full_name', { ascending: true });
 
-    if (error) {
-      console.error('Error loading chat rooms:', error);
+    if (profilesError) {
+      console.error('Error loading profiles:', profilesError);
       return;
     }
 
-    // Group messages by room_id and get latest message
-    const roomsMap = new Map<string, ChatRoom>();
+    // Load all messages to get last message and unread count per user
+    const { data: messagesData, error: messagesError } = await supabase
+      .from('chat_messages')
+      .select('room_id, sender_name, content, created_at, is_admin')
+      .order('created_at', { ascending: false });
+
+    if (messagesError) {
+      console.error('Error loading messages:', messagesError);
+    }
+
+    // Group messages by room_id to find the last message and count unread
+    const lastMessageMap = new Map<string, any>();
+    const unreadCountMap = new Map<string, number>();
     
-    messagesData?.forEach((msg) => {
-      if (!roomsMap.has(msg.room_id)) {
-        roomsMap.set(msg.room_id, {
-          room_id: msg.room_id,
-          customer_name: msg.sender_name,
-          last_message: msg.content,
-          last_message_time: msg.created_at,
-          unread_count: 0
-        });
+    messagesData?.forEach((message) => {
+      if (!lastMessageMap.has(message.room_id)) {
+        lastMessageMap.set(message.room_id, message);
+      }
+      // Count unread messages (customer messages only)
+      if (!message.is_admin) {
+        unreadCountMap.set(message.room_id, (unreadCountMap.get(message.room_id) || 0) + 1);
       }
     });
 
-    setChatRooms(Array.from(roomsMap.values()));
+    // Create chat rooms from all system users
+    const rooms: ChatRoom[] = profilesData.map((profile) => {
+      const lastMessage = lastMessageMap.get(profile.id);
+      return {
+        room_id: profile.id,
+        customer_name: profile.full_name || profile.email || 'Unknown User',
+        last_message: lastMessage?.content || 'No messages yet',
+        last_message_time: lastMessage?.created_at || new Date().toISOString(),
+        unread_count: unreadCountMap.get(profile.id) || 0,
+      };
+    });
+
+    setChatRooms(rooms);
   };
 
   const loadCustomerProfile = async (userId: string) => {
