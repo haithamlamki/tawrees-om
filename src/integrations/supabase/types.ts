@@ -1574,7 +1574,7 @@ export type Database = {
           address: string | null
           branches: Json | null
           contract_date: string | null
-          contract_number: string
+          contract_number: string | null
           contract_type: string
           create_account: boolean | null
           created_at: string
@@ -1605,7 +1605,7 @@ export type Database = {
           address?: string | null
           branches?: Json | null
           contract_date?: string | null
-          contract_number: string
+          contract_number?: string | null
           contract_type: string
           create_account?: boolean | null
           created_at?: string
@@ -1636,7 +1636,7 @@ export type Database = {
           address?: string | null
           branches?: Json | null
           contract_date?: string | null
-          contract_number?: string
+          contract_number?: string | null
           contract_type?: string
           create_account?: boolean | null
           created_at?: string
@@ -2417,6 +2417,10 @@ export type Database = {
         Returns: string
       }
       generate_tracking_number: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      generate_wms_contract_number: {
         Args: Record<PropertyKey, never>
         Returns: string
       }
