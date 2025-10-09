@@ -98,8 +98,17 @@ export default function WMSSupport() {
       .select('id, full_name, email, company_name')
       .order('full_name', { ascending: true });
 
+    console.log('Profiles query result:', { profilesData, profilesError });
+
     if (profilesError) {
       console.error('Error loading profiles:', profilesError);
+      toast.error('Failed to load users. Please check your admin permissions.');
+      return;
+    }
+
+    if (!profilesData || profilesData.length === 0) {
+      console.warn('No profiles found in the database');
+      setChatRooms([]);
       return;
     }
 
