@@ -40,6 +40,7 @@ export interface WMSContract {
   customer_id: string;
   contract_number: string;
   contract_type: string;
+  contract_date?: string;
   duration_months: number;
   monthly_fee: number;
   storage_space_sqm?: number;
@@ -50,8 +51,21 @@ export interface WMSContract {
   start_date: string;
   end_date: string;
   status: 'active' | 'inactive' | 'expired';
+  network_name?: string;
+  email?: string;
+  phone?: string;
+  responsible_person?: string;
+  address?: string;
+  gateway_username?: string;
+  gateway_password?: string;
+  create_account?: boolean;
+  notes?: string;
+  created_user_id?: string;
   created_at: string;
   updated_at: string;
+  customer?: {
+    company_name: string;
+  };
 }
 
 export interface WMSInventory {

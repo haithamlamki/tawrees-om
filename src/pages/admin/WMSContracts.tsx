@@ -12,7 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Pencil } from "lucide-react";
+import { Plus, Pencil, Trash2, Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type { WMSContract, WMSCustomer } from "@/types/wms";
 
@@ -21,6 +21,8 @@ export default function AdminWMSContracts() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [viewingContract, setViewingContract] = useState<WMSContract | null>(null);
   const [editingContract, setEditingContract] = useState<WMSContract | null>(null);
   const [formData, setFormData] = useState({
     customer_id: "",
@@ -111,12 +113,20 @@ export default function AdminWMSContracts() {
         }
       }
 
-      // Create the contract
-      const { error } = await supabase.from("wms_contracts").insert({
+      // Generate contract number if not provided (for new contracts)
+      const contractData = {
         ...data,
         total_amount: totalAmount,
         created_user_id: createdUserId,
-      });
+      };
+
+      // Remove contract_number if empty (let database generate it)
+      if (!contractData.contract_number || contractData.contract_number.trim() === '') {
+        delete contractData.contract_number;
+      }
+
+      // Create the contract
+      const { error } = await supabase.from("wms_contracts").insert(contractData);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -150,6 +160,27 @@ export default function AdminWMSContracts() {
       setOpen(false);
       resetForm();
       toast({ title: "Contract updated successfully" });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("wms_contracts")
+        .delete()
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-wms-contracts"] });
+      toast({ title: "Contract deleted successfully" });
+    },
+    onError: (error) => {
+      toast({ 
+        title: "Error", 
+        description: error.message, 
+        variant: "destructive" 
+      });
     },
   });
 
@@ -217,6 +248,17 @@ export default function AdminWMSContracts() {
     } else {
       createMutation.mutate(formData);
     }
+  };
+
+  const handleDelete = (id: string) => {
+    if (confirm("Are you sure you want to delete this contract?")) {
+      deleteMutation.mutate(id);
+    }
+  };
+
+  const handleView = (contract: any) => {
+    setViewingContract(contract);
+    setViewDialogOpen(true);
   };
 
   const getStatusColor = (status: string) => {
@@ -390,13 +432,19 @@ export default function AdminWMSContracts() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="contract_number">{t("contracts.contractNumber")} *</Label>
+                    <Label htmlFor="contract_number">{t("contracts.contractNumber")}</Label>
                     <Input
                       id="contract_number"
-                      value={formData.contract_number}
+                      value={editingContract ? formData.contract_number : "Auto-generated"}
                       onChange={(e) => setFormData({ ...formData, contract_number: e.target.value })}
-                      required
+                      disabled={!editingContract}
+                      placeholder="Will be auto-generated"
                     />
+                    {!editingContract && (
+                      <p className="text-xs text-muted-foreground">
+                        Contract number will be automatically generated
+                      </p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="monthly_fee">{t("contracts.monthlySubscription")} *</Label>
@@ -562,9 +610,22 @@ export default function AdminWMSContracts() {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <Button variant="ghost" size="sm" onClick={() => handleEdit(contract)}>
-                        <Pencil className="h-4 w-4" />
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button variant="ghost" size="sm" onClick={() => handleView(contract)}>
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={() => handleEdit(contract)}>
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => handleDelete(contract.id)}
+                          className="text-destructive hover:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -573,6 +634,134 @@ export default function AdminWMSContracts() {
           )}
         </CardContent>
       </Card>
+
+      {/* View Contract Dialog */}
+      <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Contract Details - {viewingContract?.contract_number}</DialogTitle>
+          </DialogHeader>
+          {viewingContract && (
+            <div className="space-y-6">
+              {/* Client Details */}
+              <div className="space-y-3">
+                <h3 className="text-lg font-semibold border-b pb-2">Client Details</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-muted-foreground">Customer</Label>
+                    <p className="font-medium">{viewingContract.customer?.company_name}</p>
+                  </div>
+                  <div>
+                    <Label className="text-muted-foreground">Network Name</Label>
+                    <p className="font-medium">{viewingContract.network_name || "N/A"}</p>
+                  </div>
+                  <div>
+                    <Label className="text-muted-foreground">Email</Label>
+                    <p className="font-medium">{viewingContract.email || "N/A"}</p>
+                  </div>
+                  <div>
+                    <Label className="text-muted-foreground">Phone</Label>
+                    <p className="font-medium">{viewingContract.phone || "N/A"}</p>
+                  </div>
+                  <div>
+                    <Label className="text-muted-foreground">Responsible Person</Label>
+                    <p className="font-medium">{viewingContract.responsible_person || "N/A"}</p>
+                  </div>
+                  <div>
+                    <Label className="text-muted-foreground">Address</Label>
+                    <p className="font-medium">{viewingContract.address || "N/A"}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Contract Details */}
+              <div className="space-y-3">
+                <h3 className="text-lg font-semibold border-b pb-2">Contract Details</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-muted-foreground">Contract Number</Label>
+                    <p className="font-medium">{viewingContract.contract_number}</p>
+                  </div>
+                  <div>
+                    <Label className="text-muted-foreground">Type</Label>
+                    <p className="font-medium">{viewingContract.contract_type}</p>
+                  </div>
+                  <div>
+                    <Label className="text-muted-foreground">Contract Date</Label>
+                    <p className="font-medium">
+                      {viewingContract.contract_date 
+                        ? new Date(viewingContract.contract_date).toLocaleDateString() 
+                        : "N/A"}
+                    </p>
+                  </div>
+                  <div>
+                    <Label className="text-muted-foreground">Status</Label>
+                    <Badge className={getStatusColor(viewingContract.status)}>
+                      {viewingContract.status}
+                    </Badge>
+                  </div>
+                  <div>
+                    <Label className="text-muted-foreground">Duration</Label>
+                    <p className="font-medium">{viewingContract.duration_months} months</p>
+                  </div>
+                  <div>
+                    <Label className="text-muted-foreground">Monthly Fee</Label>
+                    <p className="font-medium">{viewingContract.monthly_fee} OMR</p>
+                  </div>
+                  <div>
+                    <Label className="text-muted-foreground">Total Amount</Label>
+                    <p className="font-medium">{viewingContract.total_amount} OMR</p>
+                  </div>
+                  <div>
+                    <Label className="text-muted-foreground">Storage Space</Label>
+                    <p className="font-medium">{viewingContract.storage_space_sqm} sqm</p>
+                  </div>
+                  <div>
+                    <Label className="text-muted-foreground">Start Date</Label>
+                    <p className="font-medium">
+                      {new Date(viewingContract.start_date).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <div>
+                    <Label className="text-muted-foreground">End Date</Label>
+                    <p className="font-medium">
+                      {new Date(viewingContract.end_date).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <div>
+                    <Label className="text-muted-foreground">Free Transfers</Label>
+                    <p className="font-medium">{viewingContract.free_transfer_count}</p>
+                  </div>
+                  <div>
+                    <Label className="text-muted-foreground">Transfer Price After Limit</Label>
+                    <p className="font-medium">{viewingContract.transfer_price_after_limit} OMR</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Storage Conditions */}
+              {viewingContract.storage_conditions && (
+                <div className="space-y-3">
+                  <h3 className="text-lg font-semibold border-b pb-2">Storage Conditions</h3>
+                  <p className="whitespace-pre-wrap">{viewingContract.storage_conditions}</p>
+                </div>
+              )}
+
+              {/* Notes */}
+              {viewingContract.notes && (
+                <div className="space-y-3">
+                  <h3 className="text-lg font-semibold border-b pb-2">Notes</h3>
+                  <p className="whitespace-pre-wrap">{viewingContract.notes}</p>
+                </div>
+              )}
+
+              <div className="flex justify-end">
+                <Button onClick={() => setViewDialogOpen(false)}>Close</Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
