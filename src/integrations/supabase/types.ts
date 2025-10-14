@@ -2521,6 +2521,14 @@ export type Database = {
         }
         Returns: boolean
       }
+      has_wms_customer_role: {
+        Args: {
+          _customer_id: string
+          _required_roles: string[]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       sanitize_error_message: {
         Args: { error_msg: string }
         Returns: string
