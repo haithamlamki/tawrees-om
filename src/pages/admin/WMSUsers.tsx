@@ -269,9 +269,9 @@ export default function WMSUsers() {
   };
 
   const filteredUsers = customerUsers?.filter((user) =>
-    user.profiles.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.profiles.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.wms_customers.company_name.toLowerCase().includes(searchTerm.toLowerCase())
+    user.profiles?.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.profiles?.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.wms_customers?.company_name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // Get available users (not already assigned to this customer)
