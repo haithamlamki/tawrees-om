@@ -19,6 +19,7 @@ export interface WMSCustomerUser {
   user_id: string;
   customer_id: string;
   branch_id?: string;
+  role: 'owner' | 'admin' | 'employee' | 'accountant' | 'viewer';
   created_at: string;
 }
 

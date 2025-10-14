@@ -11,6 +11,7 @@ interface CreateUserRequest {
   full_name?: string;
   phone?: string;
   customer_id: string;
+  role?: string;
 }
 
 serve(async (req) => {
@@ -28,7 +29,7 @@ serve(async (req) => {
       }
     );
 
-    const { email, full_name, phone, customer_id }: CreateUserRequest = await req.json();
+    const { email, full_name, phone, customer_id, role }: CreateUserRequest = await req.json();
 
     if (!email || !customer_id) {
       return new Response(
@@ -36,6 +37,10 @@ serve(async (req) => {
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+
+    // Validate role if provided
+    const validRoles = ['owner', 'admin', 'employee', 'accountant', 'viewer'];
+    const userRole = role && validRoles.includes(role) ? role : 'viewer';
 
     // Require authenticated caller
     const authHeader = req.headers.get('Authorization');
@@ -167,6 +172,7 @@ serve(async (req) => {
         user_id: userId,
         customer_id,
         branch_id: null,
+        role: userRole,
       });
       if (linkErr) {
         console.error('Error linking user to customer:', linkErr);

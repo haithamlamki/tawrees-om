@@ -13,12 +13,14 @@ import { useTranslation } from "react-i18next";
 import { UserPlus, Search, Trash2, Mail, Plus } from "lucide-react";
 import type { WMSCustomer } from "@/types/wms";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 
 interface WMSCustomerUser {
   id: string;
   user_id: string;
   customer_id: string;
   branch_id: string | null;
+  role: 'owner' | 'admin' | 'employee' | 'accountant' | 'viewer';
   created_at: string;
   profiles: {
     full_name: string;
@@ -43,11 +45,13 @@ export default function WMSUsers() {
   const [selectedUser, setSelectedUser] = useState<string>("");
   const [selectedCustomer, setSelectedCustomer] = useState<string>("");
   const [selectedBranch, setSelectedBranch] = useState<string>("");
+  const [selectedRole, setSelectedRole] = useState<string>("employee");
   const [newUserEmail, setNewUserEmail] = useState("");
   const [newUserName, setNewUserName] = useState("");
   const [newUserPhone, setNewUserPhone] = useState("");
   const [newUserCustomer, setNewUserCustomer] = useState("");
   const [newUserBranch, setNewUserBranch] = useState("");
+  const [newUserRole, setNewUserRole] = useState<string>("employee");
   const [createdPassword, setCreatedPassword] = useState<string | null>(null);
 
   // Fetch all WMS customer users with details
@@ -139,6 +143,7 @@ export default function WMSUsers() {
           user_id: selectedUser,
           customer_id: selectedCustomer,
           branch_id: selectedBranch || null,
+          role: selectedRole as 'owner' | 'admin' | 'employee' | 'accountant' | 'viewer',
         });
 
       if (error) throw error;
@@ -198,6 +203,7 @@ export default function WMSUsers() {
     setSelectedUser("");
     setSelectedCustomer("");
     setSelectedBranch("");
+    setSelectedRole("employee");
   };
 
   const resetCreateForm = () => {
@@ -206,6 +212,7 @@ export default function WMSUsers() {
     setNewUserPhone("");
     setNewUserCustomer("");
     setNewUserBranch("");
+    setNewUserRole("employee");
     setCreatedPassword(null);
   };
 
@@ -218,6 +225,7 @@ export default function WMSUsers() {
           full_name: newUserName,
           phone: newUserPhone,
           customer_id: newUserCustomer,
+          role: newUserRole,
         }
       });
 
@@ -295,6 +303,21 @@ export default function WMSUsers() {
   const assignedUserIds = new Set(customerUsers?.map(u => u.user_id) || []);
   const availableUsers = allUsers?.filter(u => !assignedUserIds.has(u.id));
 
+  const getRoleBadgeVariant = (role: string) => {
+    switch (role) {
+      case 'owner':
+        return 'default';
+      case 'admin':
+        return 'secondary';
+      case 'employee':
+        return 'outline';
+      case 'accountant':
+        return 'outline';
+      default:
+        return 'outline';
+    }
+  };
+
   return (
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -347,6 +370,21 @@ export default function WMSUsers() {
                         {customer.company_name} ({customer.customer_code})
                       </SelectItem>
                     ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Role *</Label>
+                <Select value={selectedRole} onValueChange={setSelectedRole}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="owner">Owner</SelectItem>
+                    <SelectItem value="admin">Admin</SelectItem>
+                    <SelectItem value="employee">Employee</SelectItem>
+                    <SelectItem value="accountant">Accountant</SelectItem>
+                    <SelectItem value="viewer">Viewer</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -452,6 +490,21 @@ export default function WMSUsers() {
                     </SelectContent>
                   </Select>
                 </div>
+                <div className="space-y-2">
+                  <Label>Role *</Label>
+                  <Select value={newUserRole} onValueChange={setNewUserRole}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="owner">Owner</SelectItem>
+                      <SelectItem value="admin">Admin</SelectItem>
+                      <SelectItem value="employee">Employee</SelectItem>
+                      <SelectItem value="accountant">Accountant</SelectItem>
+                      <SelectItem value="viewer">Viewer</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             )}
             
@@ -499,6 +552,7 @@ export default function WMSUsers() {
                   <TableHead>User Name</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Customer</TableHead>
+                  <TableHead>Role</TableHead>
                   <TableHead>Branch</TableHead>
                   <TableHead>Assigned Date</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
@@ -521,6 +575,11 @@ export default function WMSUsers() {
                       <span className="text-muted-foreground ml-2">
                         ({user.wms_customers.customer_code})
                       </span>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={getRoleBadgeVariant(user.role)}>
+                        {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                      </Badge>
                     </TableCell>
                     <TableCell>
                       {user.wms_customer_branches?.branch_name || (
