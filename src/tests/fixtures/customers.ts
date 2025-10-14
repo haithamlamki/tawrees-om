@@ -1,0 +1,102 @@
+import { generateUUID } from '../utils/testHelpers';
+
+export const mockCustomers = {
+  activeCustomer1: {
+    id: generateUUID(),
+    customer_code: 'CUST001',
+    company_name: 'Test Company A',
+    contact_person: 'John Doe',
+    email: 'john@testcompanya.com',
+    phone: '+96812345678',
+    address: '123 Test Street, Muscat',
+    is_active: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  activeCustomer2: {
+    id: generateUUID(),
+    customer_code: 'CUST002',
+    company_name: 'Test Company B',
+    contact_person: 'Jane Smith',
+    email: 'jane@testcompanyb.com',
+    phone: '+96887654321',
+    address: '456 Demo Avenue, Muscat',
+    is_active: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  inactiveCustomer: {
+    id: generateUUID(),
+    customer_code: 'CUST003',
+    company_name: 'Inactive Company',
+    contact_person: 'Bob Wilson',
+    email: 'bob@inactive.com',
+    phone: '+96811111111',
+    address: '789 Closed Road, Muscat',
+    is_active: false,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+};
+
+export const mockContracts = {
+  contract1: {
+    id: generateUUID(),
+    customer_id: mockCustomers.activeCustomer1.id,
+    contract_number: 'CON-00000000001',
+    start_date: new Date('2025-01-01').toISOString(),
+    end_date: new Date('2025-12-31').toISOString(),
+    status: 'active' as const,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  contract2: {
+    id: generateUUID(),
+    customer_id: mockCustomers.activeCustomer2.id,
+    contract_number: 'CON-00000000002',
+    start_date: new Date('2025-01-01').toISOString(),
+    end_date: new Date('2025-12-31').toISOString(),
+    status: 'active' as const,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+};
+
+export const mockWMSCustomerUsers = {
+  customer1Owner: {
+    id: generateUUID(),
+    user_id: generateUUID(),
+    customer_id: mockCustomers.activeCustomer1.id,
+    role: 'owner' as const,
+    branch_id: null,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  customer1Admin: {
+    id: generateUUID(),
+    user_id: generateUUID(),
+    customer_id: mockCustomers.activeCustomer1.id,
+    role: 'admin' as const,
+    branch_id: null,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  customer1Employee: {
+    id: generateUUID(),
+    user_id: generateUUID(),
+    customer_id: mockCustomers.activeCustomer1.id,
+    role: 'employee' as const,
+    branch_id: null,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  customer2Owner: {
+    id: generateUUID(),
+    user_id: generateUUID(),
+    customer_id: mockCustomers.activeCustomer2.id,
+    role: 'owner' as const,
+    branch_id: null,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+};

@@ -1,0 +1,73 @@
+import { generateUUID } from '../utils/testHelpers';
+import { mockCustomers } from './customers';
+
+export const mockInventoryItems = {
+  customer1Item1: {
+    id: generateUUID(),
+    customer_id: mockCustomers.activeCustomer1.id,
+    product_name: 'Widget A',
+    sku: 'WGT-A-001',
+    category: 'Electronics',
+    quantity: 100,
+    quantity_consumed: 0,
+    minimum_quantity: 10,
+    price_per_unit: 25.500,
+    unit_of_measure: 'pcs',
+    location: 'Warehouse A-1',
+    notes: 'Premium quality widgets',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  customer1Item2: {
+    id: generateUUID(),
+    customer_id: mockCustomers.activeCustomer1.id,
+    product_name: 'Widget B',
+    sku: 'WGT-B-002',
+    category: 'Electronics',
+    quantity: 5,
+    quantity_consumed: 45,
+    minimum_quantity: 10,
+    price_per_unit: 15.250,
+    unit_of_measure: 'pcs',
+    location: 'Warehouse A-2',
+    notes: 'Low stock - reorder soon',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  customer2Item1: {
+    id: generateUUID(),
+    customer_id: mockCustomers.activeCustomer2.id,
+    product_name: 'Gadget X',
+    sku: 'GDG-X-001',
+    category: 'Tools',
+    quantity: 200,
+    quantity_consumed: 0,
+    minimum_quantity: 20,
+    price_per_unit: 45.750,
+    unit_of_measure: 'pcs',
+    location: 'Warehouse B-1',
+    notes: 'High demand item',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+};
+
+export const createMockInventory = (overrides?: Partial<typeof mockInventoryItems.customer1Item1>) => {
+  return {
+    id: generateUUID(),
+    customer_id: mockCustomers.activeCustomer1.id,
+    product_name: 'Test Product',
+    sku: `TEST-${Date.now()}`,
+    category: 'Test Category',
+    quantity: 50,
+    quantity_consumed: 0,
+    minimum_quantity: 5,
+    price_per_unit: 10.000,
+    unit_of_measure: 'pcs',
+    location: 'Test Location',
+    notes: null,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    ...overrides,
+  };
+};
