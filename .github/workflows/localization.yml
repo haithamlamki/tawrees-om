@@ -1,0 +1,59 @@
+name: Localization Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Run weekly on Mondays at 9 AM UTC
+    - cron: '0 9 * * 1'
+
+jobs:
+  localization:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Run localization tests
+      run: npm run test:localization
+      env:
+        VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+        VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+    
+    - name: Check translation completeness
+      run: |
+        echo "Checking translation files..."
+        npm run test:localization -- --reporter=json > translation-report.json
+    
+    - name: Upload translation report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: translation-report
+        path: translation-report.json
+        retention-days: 90
+    
+    - name: Comment PR with translation status
+      if: github.event_name == 'pull_request' && failure()
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: '⚠️ Translation tests failed. Please check for missing or incomplete translations.'
+          })

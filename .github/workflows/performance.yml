@@ -1,0 +1,69 @@
+name: Performance Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  performance:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Run performance tests
+      run: npm run test:performance
+      env:
+        VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+        VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+    
+    - name: Build and analyze bundle
+      run: |
+        npm run build
+        npx vite-bundle-visualizer --open false --output bundle-analysis.html
+    
+    - name: Upload bundle analysis
+      uses: actions/upload-artifact@v4
+      with:
+        name: bundle-analysis
+        path: bundle-analysis.html
+        retention-days: 30
+    
+    - name: Check bundle size
+      run: |
+        BUNDLE_SIZE=$(du -sk dist | cut -f1)
+        echo "Bundle size: ${BUNDLE_SIZE}KB"
+        
+        # Fail if bundle exceeds 2MB
+        if [ $BUNDLE_SIZE -gt 2048 ]; then
+          echo "::error::Bundle size ${BUNDLE_SIZE}KB exceeds 2MB limit"
+          exit 1
+        fi
+    
+    - name: Comment PR with bundle size
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          const fs = require('fs');
+          const bundleSize = Math.round(fs.statSync('dist').size / 1024);
+          
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: `📦 Bundle size: **${bundleSize}KB**`
+          })
