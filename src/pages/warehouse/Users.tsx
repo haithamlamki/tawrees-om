@@ -192,9 +192,12 @@ export default function WMSUsers() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
+                    {permissions?.isOwner && (
+                      <SelectItem value="owner">Owner</SelectItem>
+                    )}
+                    <SelectItem value="admin">Admin</SelectItem>
                     <SelectItem value="employee">Employee</SelectItem>
                     <SelectItem value="accountant">Accountant</SelectItem>
-                    <SelectItem value="admin">Admin</SelectItem>
                     <SelectItem value="viewer">Viewer</SelectItem>
                   </SelectContent>
                 </Select>
