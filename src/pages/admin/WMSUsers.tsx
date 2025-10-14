@@ -506,7 +506,7 @@ export default function WMSUsers() {
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <Mail className="h-4 w-4 text-muted-foreground" />
-                        {user.profiles.email}
+                        {user.profiles.email || <span className="text-muted-foreground italic">No email</span>}
                       </div>
                     </TableCell>
                     <TableCell>
