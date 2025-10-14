@@ -222,11 +222,21 @@ export default function WMSUsers() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["wms-customer-users"] });
       queryClient.invalidateQueries({ queryKey: ["all-users"] });
-      setCreatedPassword(data.temporary_password);
-      toast({
-        title: "Success",
-        description: "User created successfully. Please save the temporary password.",
-      });
+      
+      if (data.temporary_password) {
+        setCreatedPassword(data.temporary_password);
+        toast({
+          title: "Success",
+          description: "User created successfully. Please save the temporary password.",
+        });
+      } else {
+        toast({
+          title: "Success",
+          description: data.message || "User linked successfully",
+        });
+        setIsCreateDialogOpen(false);
+        resetCreateForm();
+      }
     },
     onError: (error: any) => {
       toast({
