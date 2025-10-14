@@ -161,21 +161,28 @@ export default function WMSUsers() {
     },
   });
 
-  // Remove user mutation
-  const removeUserMutation = useMutation({
-    mutationFn: async (userId: string) => {
-      const { error } = await supabase
-        .from("wms_customer_users")
-        .delete()
-        .eq("id", userId);
+  // Delete user mutation
+  const deleteUserMutation = useMutation({
+    mutationFn: async (customerUserId: string) => {
+      // Find the user_id from the wms_customer_users record
+      const customerUser = customerUsers?.find(u => u.id === customerUserId);
+      if (!customerUser) throw new Error('User not found');
+
+      const { data, error } = await supabase.functions.invoke('delete-wms-user', {
+        body: { user_id: customerUser.user_id }
+      });
 
       if (error) throw error;
+      if (!data.success) throw new Error(data.error || 'Failed to delete user');
+      
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["wms-customer-users"] });
+      queryClient.invalidateQueries({ queryKey: ["all-users"] });
       toast({
         title: "Success",
-        description: "User removed from customer",
+        description: "User deleted successfully",
       });
     },
     onError: (error: any) => {
@@ -527,8 +534,8 @@ export default function WMSUsers() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => removeUserMutation.mutate(user.id)}
-                        disabled={removeUserMutation.isPending}
+                        onClick={() => deleteUserMutation.mutate(user.id)}
+                        disabled={deleteUserMutation.isPending}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
