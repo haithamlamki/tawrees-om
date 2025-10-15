@@ -259,7 +259,10 @@ export default function WMSOrders() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Orders</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl font-bold">Orders</h1>
+            <Badge variant="outline">Customer View</Badge>
+          </div>
           <p className="text-muted-foreground">Manage warehouse orders</p>
         </div>
         <Dialog open={orderDialogOpen} onOpenChange={setOrderDialogOpen}>
