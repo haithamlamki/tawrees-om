@@ -1991,6 +1991,7 @@ export type Database = {
           created_at: string
           description: string
           id: string
+          inventory_id: string | null
           invoice_id: string
           quantity: number
           total_price: number
@@ -2001,6 +2002,7 @@ export type Database = {
           created_at?: string
           description: string
           id?: string
+          inventory_id?: string | null
           invoice_id: string
           quantity: number
           total_price: number
@@ -2011,6 +2013,7 @@ export type Database = {
           created_at?: string
           description?: string
           id?: string
+          inventory_id?: string | null
           invoice_id?: string
           quantity?: number
           total_price?: number
@@ -2018,6 +2021,13 @@ export type Database = {
           vat_exempt?: boolean | null
         }
         Relationships: [
+          {
+            foreignKeyName: "wms_invoice_items_inventory_id_fkey"
+            columns: ["inventory_id"]
+            isOneToOne: false
+            referencedRelation: "wms_inventory"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "wms_invoice_items_invoice_id_fkey"
             columns: ["invoice_id"]
