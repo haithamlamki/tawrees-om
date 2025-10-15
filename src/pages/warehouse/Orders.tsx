@@ -266,6 +266,12 @@ export default function WMSOrders() {
     }
   };
 
+  const handleViewOrder = (order: any) => {
+    setSelectedOrder(order);
+    setViewOrderOpen(true);
+    toast({ title: "Opening order", description: order.order_number });
+  };
+
   const pendingCount = orders?.filter((o) => o.status === "pending" || o.status === "pending_approval").length || 0;
   const activeCount = orders?.filter((o) => o.status === "approved" || o.status === "in_progress").length || 0;
   const completedCount = orders?.filter((o) => o.status === "completed" || o.status === "delivered").length || 0;
@@ -484,10 +490,9 @@ export default function WMSOrders() {
                         <Button 
                           variant="ghost" 
                           size="sm"
-                          onClick={() => {
-                            setSelectedOrder(order);
-                            setViewOrderOpen(true);
-                          }}
+                          aria-label={`View order ${order.order_number}`}
+                          onClick={() => handleViewOrder(order)}
+                          data-testid="view-order"
                         >
                           <Eye className="h-4 w-4" />
                         </Button>
