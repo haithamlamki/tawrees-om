@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Search, Eye, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type { WMSInvoice, WMSCustomer } from "@/types/wms";
@@ -17,6 +18,8 @@ export default function AdminWMSInvoices() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCustomer, setSelectedCustomer] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [selectedInvoice, setSelectedInvoice] = useState<any>(null);
+  const [viewInvoiceOpen, setViewInvoiceOpen] = useState(false);
 
   const { data: invoices, isLoading } = useQuery({
     queryKey: ["admin-wms-invoices", selectedCustomer, statusFilter],
@@ -25,7 +28,8 @@ export default function AdminWMSInvoices() {
         .from("wms_invoices")
         .select(`
           *,
-          customer:wms_customers(company_name, customer_code)
+          customer:wms_customers(company_name, customer_code),
+          items:wms_invoice_items(*)
         `)
         .order("created_at", { ascending: false });
       
@@ -73,6 +77,12 @@ export default function AdminWMSInvoices() {
     invoice.invoice_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
     invoice.customer?.company_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const handleViewInvoice = (invoice: any) => {
+    setSelectedInvoice(invoice);
+    setViewInvoiceOpen(true);
+    toast({ title: "Opening invoice", description: invoice.invoice_number });
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -205,7 +215,12 @@ export default function AdminWMSInvoices() {
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-2">
-                        <Button variant="ghost" size="sm">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleViewInvoice(invoice)}
+                          aria-label={`View invoice ${invoice.invoice_number}`}
+                        >
                           <Eye className="h-4 w-4" />
                         </Button>
                         {invoice.status === "pending" && (
@@ -226,6 +241,80 @@ export default function AdminWMSInvoices() {
           )}
         </CardContent>
       </Card>
+
+      <Sheet open={viewInvoiceOpen} onOpenChange={setViewInvoiceOpen}>
+        <SheetContent className="overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle>Invoice Details</SheetTitle>
+            <SheetDescription>
+              View complete invoice information
+            </SheetDescription>
+          </SheetHeader>
+          {selectedInvoice && (
+            <div className="space-y-6 py-4">
+              <div className="space-y-2">
+                <h3 className="font-semibold">Invoice Information</h3>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div className="text-muted-foreground">Invoice Number:</div>
+                  <div className="font-medium">{selectedInvoice.invoice_number}</div>
+                  <div className="text-muted-foreground">Customer:</div>
+                  <div>{selectedInvoice.customer?.company_name}</div>
+                  <div className="text-muted-foreground">Status:</div>
+                  <div>
+                    <Badge className={getStatusColor(selectedInvoice.status)}>
+                      {selectedInvoice.status}
+                    </Badge>
+                  </div>
+                  <div className="text-muted-foreground">Invoice Date:</div>
+                  <div>{new Date(selectedInvoice.invoice_date).toLocaleDateString()}</div>
+                  <div className="text-muted-foreground">Due Date:</div>
+                  <div>{new Date(selectedInvoice.due_date).toLocaleDateString()}</div>
+                  {selectedInvoice.paid_at && (
+                    <>
+                      <div className="text-muted-foreground">Paid At:</div>
+                      <div>{new Date(selectedInvoice.paid_at).toLocaleDateString()}</div>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {selectedInvoice.items && selectedInvoice.items.length > 0 && (
+                <div className="space-y-2">
+                  <h3 className="font-semibold">Items</h3>
+                  <div className="space-y-2">
+                    {selectedInvoice.items.map((item: any, index: number) => (
+                      <div key={index} className="p-3 border rounded-lg">
+                        <div className="grid grid-cols-2 gap-2 text-sm">
+                          <div className="text-muted-foreground">Description:</div>
+                          <div className="font-medium">{item.description}</div>
+                          <div className="text-muted-foreground">Quantity:</div>
+                          <div>{item.quantity}</div>
+                          <div className="text-muted-foreground">Unit Price:</div>
+                          <div>{item.unit_price.toFixed(3)} OMR</div>
+                          <div className="text-muted-foreground">Total:</div>
+                          <div className="font-semibold">{item.total_price.toFixed(3)} OMR</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="space-y-2 pt-4 border-t">
+                <h3 className="font-semibold">Summary</h3>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div className="text-muted-foreground">Subtotal:</div>
+                  <div>{selectedInvoice.subtotal.toFixed(3)} OMR</div>
+                  <div className="text-muted-foreground">Tax ({selectedInvoice.vat_rate}%):</div>
+                  <div>{selectedInvoice.tax_amount.toFixed(3)} OMR</div>
+                  <div className="text-muted-foreground font-semibold">Total Amount:</div>
+                  <div className="font-bold text-lg">{selectedInvoice.total_amount.toFixed(3)} OMR</div>
+                </div>
+              </div>
+            </div>
+          )}
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }

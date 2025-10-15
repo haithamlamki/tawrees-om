@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Search, Eye } from "lucide-react";
 import { toast } from "sonner";
 
@@ -25,6 +26,8 @@ const CustomerManagement = () => {
   const [filteredCustomers, setFilteredCustomers] = useState<CustomerStats[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
+  const [selectedCustomer, setSelectedCustomer] = useState<CustomerStats | null>(null);
+  const [viewCustomerOpen, setViewCustomerOpen] = useState(false);
 
   useEffect(() => {
     loadCustomers();
@@ -59,6 +62,12 @@ const CustomerManagement = () => {
     setCustomers(data || []);
     setFilteredCustomers(data || []);
     setLoading(false);
+  };
+
+  const handleViewCustomer = (customer: CustomerStats) => {
+    setSelectedCustomer(customer);
+    setViewCustomerOpen(true);
+    toast.success(`Opening ${customer.full_name}`);
   };
 
   if (loading) {
@@ -132,7 +141,12 @@ const CustomerManagement = () => {
                       : "Never"}
                   </TableCell>
                   <TableCell>
-                    <Button variant="ghost" size="sm">
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => handleViewCustomer(customer)}
+                      aria-label={`View ${customer.full_name}`}
+                    >
                       <Eye className="h-4 w-4" />
                     </Button>
                   </TableCell>
@@ -142,6 +156,64 @@ const CustomerManagement = () => {
           </Table>
         )}
       </CardContent>
+
+      <Sheet open={viewCustomerOpen} onOpenChange={setViewCustomerOpen}>
+        <SheetContent className="overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle>Customer Details</SheetTitle>
+            <SheetDescription>View complete customer information and statistics</SheetDescription>
+          </SheetHeader>
+          {selectedCustomer && (
+            <div className="space-y-6 py-4">
+              <div className="space-y-2">
+                <h3 className="font-semibold">Basic Information</h3>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div className="text-muted-foreground">Name:</div>
+                  <div className="font-medium">{selectedCustomer.full_name}</div>
+                  <div className="text-muted-foreground">Company:</div>
+                  <div>{selectedCustomer.company_name || "-"}</div>
+                  <div className="text-muted-foreground">Email:</div>
+                  <div className="text-sm break-all">{selectedCustomer.email || "-"}</div>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <h3 className="font-semibold">Activity Statistics</h3>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div className="text-muted-foreground">Total Requests:</div>
+                  <div>
+                    <Badge variant="secondary">{selectedCustomer.total_requests}</Badge>
+                  </div>
+                  <div className="text-muted-foreground">Approved Requests:</div>
+                  <div>
+                    <Badge variant="default">{selectedCustomer.approved_requests}</Badge>
+                  </div>
+                  <div className="text-muted-foreground">Total Shipments:</div>
+                  <div>
+                    <Badge variant="outline">{selectedCustomer.total_shipments}</Badge>
+                  </div>
+                  <div className="text-muted-foreground">Last Activity:</div>
+                  <div>
+                    {selectedCustomer.last_request_date
+                      ? new Date(selectedCustomer.last_request_date).toLocaleDateString()
+                      : "Never"}
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-2 pt-4 border-t">
+                <h3 className="font-semibold">Financial Summary</h3>
+                <div className="p-4 bg-accent/10 rounded-lg">
+                  <div className="text-sm text-muted-foreground">Total Spent</div>
+                  <div className="text-2xl font-bold text-accent">
+                    ${selectedCustomer.total_spent.toFixed(2)}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </SheetContent>
+      </Sheet>
     </Card>
   );
 };

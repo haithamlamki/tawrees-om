@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Pencil, Search, Eye, Trash2, Settings, Package } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -25,6 +26,8 @@ export default function AdminWMSInventory() {
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>("");
+  const [viewItem, setViewItem] = useState<any>(null);
+  const [viewItemOpen, setViewItemOpen] = useState(false);
   const [formData, setFormData] = useState({
     customer_id: "",
     sku: "",
@@ -139,6 +142,12 @@ export default function AdminWMSInventory() {
     setEditingItem(null);
     setImageFile(null);
     setImagePreview("");
+  };
+
+  const handleView = (item: any) => {
+    setViewItem(item);
+    setViewItemOpen(true);
+    toast({ title: "Opening item", description: item.product_name });
   };
 
   const handleEdit = (item: any) => {
@@ -493,7 +502,12 @@ export default function AdminWMSInventory() {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center justify-end gap-1">
-                        <Button variant="ghost" size="sm">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleView(item)}
+                          aria-label={`View ${item.product_name}`}
+                        >
                           <Eye className="h-4 w-4" />
                         </Button>
                         <Button variant="ghost" size="sm" onClick={() => handleEdit(item)}>
@@ -511,6 +525,82 @@ export default function AdminWMSInventory() {
           )}
         </CardContent>
       </Card>
+
+      <Sheet open={viewItemOpen} onOpenChange={setViewItemOpen}>
+        <SheetContent className="overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle>Inventory Item Details</SheetTitle>
+            <SheetDescription>View complete inventory item information</SheetDescription>
+          </SheetHeader>
+          {viewItem && (
+            <div className="space-y-6 py-4">
+              {viewItem.image_url && (
+                <div>
+                  <img 
+                    src={viewItem.image_url} 
+                    alt={viewItem.product_name}
+                    className="w-full h-48 object-cover rounded-lg"
+                  />
+                </div>
+              )}
+              <div className="space-y-2">
+                <h3 className="font-semibold">Product Information</h3>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div className="text-muted-foreground">SKU:</div>
+                  <div className="font-medium">{viewItem.sku}</div>
+                  <div className="text-muted-foreground">Product Name:</div>
+                  <div className="font-medium">{viewItem.product_name}</div>
+                  <div className="text-muted-foreground">Category:</div>
+                  <div>{viewItem.category || "-"}</div>
+                  <div className="text-muted-foreground">Customer:</div>
+                  <div>{viewItem.customer?.company_name}</div>
+                  <div className="text-muted-foreground">Status:</div>
+                  <div>
+                    <Badge className={getStatusColor(viewItem.status)}>
+                      {viewItem.status}
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <h3 className="font-semibold">Inventory Details</h3>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div className="text-muted-foreground">Quantity:</div>
+                  <div className="font-bold">{viewItem.quantity} {viewItem.unit}</div>
+                  <div className="text-muted-foreground">Consumed:</div>
+                  <div>{viewItem.consumed_quantity || 0} {viewItem.unit}</div>
+                  <div className="text-muted-foreground">Minimum:</div>
+                  <div>{viewItem.minimum_quantity} {viewItem.unit}</div>
+                  <div className="text-muted-foreground">Price per Unit:</div>
+                  <div>{viewItem.price_per_unit?.toFixed(3) || '0.000'} OMR</div>
+                  <div className="text-muted-foreground">Total Value:</div>
+                  <div className="font-bold">
+                    {((viewItem.quantity || 0) * (viewItem.price_per_unit || 0)).toFixed(3)} OMR
+                  </div>
+                </div>
+              </div>
+
+              {viewItem.description && (
+                <div className="space-y-2">
+                  <h3 className="font-semibold">Description</h3>
+                  <p className="text-sm text-muted-foreground">{viewItem.description}</p>
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <h3 className="font-semibold">Dates</h3>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div className="text-muted-foreground">Created:</div>
+                  <div>{new Date(viewItem.created_at).toLocaleDateString()}</div>
+                  <div className="text-muted-foreground">Last Updated:</div>
+                  <div>{new Date(viewItem.updated_at).toLocaleDateString()}</div>
+                </div>
+              </div>
+            </div>
+          )}
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
