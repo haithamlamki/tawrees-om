@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Search, Eye, CheckCircle, XCircle, Truck, Package, CheckCircle2, Loader2 } from "lucide-react";
+import { Search, Eye, CheckCircle, XCircle, Truck, Package, CheckCircle2, Loader2, AlertCircle, FileText } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type { WMSOrder, WMSCustomer } from "@/types/wms";
 
@@ -275,9 +275,23 @@ export default function AdminWMSOrders() {
                     <TableCell>{order.customer?.company_name}</TableCell>
                     <TableCell>{new Date(order.created_at).toLocaleDateString()}</TableCell>
                     <TableCell>
-                      <Badge className={getStatusColor(order.status)}>
-                        {order.status.replace("_", " ")}
-                      </Badge>
+                      <div className="flex flex-col gap-1">
+                        <Badge className={getStatusColor(order.status)}>
+                          {order.status.replace("_", " ")}
+                        </Badge>
+                        {order.status === "delivered" && !order.delivery_confirmed_by_customer && (
+                          <Badge variant="outline" className="text-orange-600 border-orange-600">
+                            <AlertCircle className="w-3 h-3 mr-1" />
+                            Awaiting Customer
+                          </Badge>
+                        )}
+                        {order.status === "completed" && (
+                          <Badge variant="outline" className="text-green-600 border-green-600">
+                            <FileText className="w-3 h-3 mr-1" />
+                            Invoice Generated
+                          </Badge>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell>{order.total_amount.toFixed(2)} OMR</TableCell>
                     <TableCell className="max-w-xs truncate">{order.notes || "-"}</TableCell>
@@ -407,9 +421,17 @@ export default function AdminWMSOrders() {
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Status</p>
-                  <Badge className={getStatusColor(selectedOrder.status)}>
-                    {selectedOrder.status.replace("_", " ")}
-                  </Badge>
+                  <div className="flex flex-col gap-1">
+                    <Badge className={getStatusColor(selectedOrder.status)}>
+                      {selectedOrder.status.replace("_", " ")}
+                    </Badge>
+                    {selectedOrder.status === "delivered" && !selectedOrder.delivery_confirmed_by_customer && (
+                      <Badge variant="outline" className="text-orange-600 border-orange-600 w-fit">
+                        <AlertCircle className="w-3 h-3 mr-1" />
+                        Awaiting Customer Confirmation
+                      </Badge>
+                    )}
+                  </div>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Customer</p>
@@ -442,6 +464,22 @@ export default function AdminWMSOrders() {
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Delivery Notes</p>
                   <p className="text-base">{selectedOrder.delivery_notes}</p>
+                </div>
+              )}
+
+              {selectedOrder.delivery_confirmed_by_customer && (
+                <div className="rounded-lg bg-green-50 border border-green-200 p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <CheckCircle className="w-5 h-5 text-green-600" />
+                    <p className="font-medium text-green-800">Delivery Confirmed by Customer</p>
+                  </div>
+                  <div className="text-sm text-green-700">
+                    Confirmed at: {new Date(selectedOrder.customer_confirmed_at!).toLocaleString()}
+                  </div>
+                  <div className="flex items-center gap-2 mt-2">
+                    <FileText className="w-4 h-4 text-green-600" />
+                    <span className="text-sm text-green-700">Invoice has been generated automatically</span>
+                  </div>
                 </div>
               )}
 

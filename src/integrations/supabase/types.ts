@@ -2285,9 +2285,11 @@ export type Database = {
         Row: {
           created_at: string
           created_by: string | null
+          customer_confirmed_at: string | null
           customer_id: string
           delivered_at: string | null
           delivery_branch_id: string | null
+          delivery_confirmed_by_customer: boolean | null
           delivery_notes: string | null
           delivery_proof_photo: string | null
           delivery_signature: string | null
@@ -2302,9 +2304,11 @@ export type Database = {
         Insert: {
           created_at?: string
           created_by?: string | null
+          customer_confirmed_at?: string | null
           customer_id: string
           delivered_at?: string | null
           delivery_branch_id?: string | null
+          delivery_confirmed_by_customer?: boolean | null
           delivery_notes?: string | null
           delivery_proof_photo?: string | null
           delivery_signature?: string | null
@@ -2319,9 +2323,11 @@ export type Database = {
         Update: {
           created_at?: string
           created_by?: string | null
+          customer_confirmed_at?: string | null
           customer_id?: string
           delivered_at?: string | null
           delivery_branch_id?: string | null
+          delivery_confirmed_by_customer?: boolean | null
           delivery_notes?: string | null
           delivery_proof_photo?: string | null
           delivery_signature?: string | null

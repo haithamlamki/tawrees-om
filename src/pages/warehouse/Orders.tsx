@@ -8,12 +8,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useWMSCustomer } from "@/hooks/useWMSCustomer";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, ShoppingCart, Plus, Eye, Trash2 } from "lucide-react";
+import { AlertCircle, ShoppingCart, Plus, Eye, Trash2, CheckCircle, Truck, Package } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type { WMSOrder, WMSInventory } from "@/types/wms";
 
@@ -22,6 +22,8 @@ export default function WMSOrders() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [orderDialogOpen, setOrderDialogOpen] = useState(false);
+  const [confirmDeliveryDialogOpen, setConfirmDeliveryDialogOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [orderItems, setOrderItems] = useState<Array<{ inventory_id: string; quantity: number; inventory?: WMSInventory }>>([]);
   const [orderNotes, setOrderNotes] = useState("");
 
@@ -117,6 +119,36 @@ export default function WMSOrders() {
     },
     onError: () => {
       toast({ title: "Failed to create order", variant: "destructive" });
+    },
+  });
+
+  const confirmDeliveryMutation = useMutation({
+    mutationFn: async (orderId: string) => {
+      const { error } = await supabase
+        .from("wms_orders")
+        .update({
+          delivery_confirmed_by_customer: true,
+          customer_confirmed_at: new Date().toISOString(),
+        })
+        .eq("id", orderId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["wms-orders"] });
+      setConfirmDeliveryDialogOpen(false);
+      setSelectedOrder(null);
+      toast({
+        title: "Delivery confirmed",
+        description: "Invoice will be generated automatically",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error confirming delivery",
+        description: error.message,
+        variant: "destructive",
+      });
     },
   });
 
@@ -375,16 +407,39 @@ export default function WMSOrders() {
                     <TableCell className="font-medium">{order.order_number}</TableCell>
                     <TableCell>{new Date(order.created_at).toLocaleDateString()}</TableCell>
                     <TableCell>
-                      <Badge className={getStatusColor(order.status)}>
-                        {order.status.replace("_", " ")}
-                      </Badge>
+                      <div className="flex flex-col gap-1">
+                        <Badge className={getStatusColor(order.status)}>
+                          {order.status.replace("_", " ")}
+                        </Badge>
+                        {order.status === "delivered" && !order.delivery_confirmed_by_customer && (
+                          <Badge variant="outline" className="text-orange-600 border-orange-600">
+                            <AlertCircle className="w-3 h-3 mr-1" />
+                            Awaiting Confirmation
+                          </Badge>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell>{order.total_amount.toFixed(2)} OMR</TableCell>
                     <TableCell className="max-w-xs truncate">{order.notes || "-"}</TableCell>
                     <TableCell>
-                      <Button variant="ghost" size="sm">
-                        <Eye className="h-4 w-4" />
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button variant="ghost" size="sm">
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        {order.status === "delivered" && !order.delivery_confirmed_by_customer && (
+                          <Button 
+                            size="sm" 
+                            onClick={() => {
+                              setSelectedOrder(order);
+                              setConfirmDeliveryDialogOpen(true);
+                            }}
+                            className="bg-green-600 hover:bg-green-700"
+                          >
+                            <CheckCircle className="w-4 h-4 mr-1" />
+                            Confirm
+                          </Button>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -393,6 +448,73 @@ export default function WMSOrders() {
           )}
         </CardContent>
       </Card>
+
+      {/* Confirm Delivery Dialog */}
+      <Dialog open={confirmDeliveryDialogOpen} onOpenChange={setConfirmDeliveryDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Delivery Receipt</DialogTitle>
+            <DialogDescription>
+              Please confirm that you have received your order
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedOrder && (
+            <div className="space-y-4">
+              <div className="rounded-lg bg-muted p-4 space-y-2">
+                <div className="flex items-center gap-2">
+                  <Package className="w-4 w-4" />
+                  <span className="font-medium">Order: {selectedOrder.order_number}</span>
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  <div>Total Amount: {selectedOrder.total_amount.toFixed(2)} OMR</div>
+                  {selectedOrder.delivered_at && (
+                    <div className="flex items-center gap-2 mt-2">
+                      <Truck className="w-4 h-4" />
+                      Delivered: {new Date(selectedOrder.delivered_at).toLocaleString()}
+                    </div>
+                  )}
+                  {selectedOrder.delivery_notes && (
+                    <div className="mt-2">
+                      <strong>Delivery Notes:</strong> {selectedOrder.delivery_notes}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  By confirming delivery, you acknowledge receipt of all items. An invoice will be automatically generated.
+                </AlertDescription>
+              </Alert>
+
+              <DialogFooter>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setConfirmDeliveryDialogOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={() => confirmDeliveryMutation.mutate(selectedOrder.id)}
+                  disabled={confirmDeliveryMutation.isPending}
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  {confirmDeliveryMutation.isPending ? (
+                    <>Processing...</>
+                  ) : (
+                    <>
+                      <CheckCircle className="w-4 h-4 mr-2" />
+                      Confirm Receipt
+                    </>
+                  )}
+                </Button>
+              </DialogFooter>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

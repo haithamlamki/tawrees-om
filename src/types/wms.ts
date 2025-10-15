@@ -95,6 +95,10 @@ export interface WMSOrder {
   status: 'pending' | 'pending_approval' | 'approved' | 'in_progress' | 'delivered' | 'completed' | 'cancelled';
   total_amount: number;
   notes?: string;
+  delivered_at?: string;
+  delivery_notes?: string;
+  delivery_confirmed_by_customer?: boolean;
+  customer_confirmed_at?: string;
   created_by?: string;
   created_at: string;
   updated_at: string;
