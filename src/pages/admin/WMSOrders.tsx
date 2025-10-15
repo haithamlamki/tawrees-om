@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Search, Eye, CheckCircle, XCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type { WMSOrder, WMSCustomer } from "@/types/wms";
@@ -17,6 +18,8 @@ export default function AdminWMSOrders() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCustomer, setSelectedCustomer] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
 
   const { data: orders, isLoading } = useQuery({
     queryKey: ["admin-wms-orders", selectedCustomer, statusFilter],
@@ -208,7 +211,15 @@ export default function AdminWMSOrders() {
                     <TableCell className="max-w-xs truncate">{order.notes || "-"}</TableCell>
                     <TableCell>
                       <div className="flex gap-2">
-                        <Button variant="ghost" size="sm">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => {
+                            setSelectedOrder(order);
+                            setViewDialogOpen(true);
+                          }}
+                          title="View order details"
+                        >
                           <Eye className="h-4 w-4" />
                         </Button>
                         {order.status === "pending_approval" && (
@@ -249,6 +260,69 @@ export default function AdminWMSOrders() {
           )}
         </CardContent>
       </Card>
+
+      <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
+        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Order Details</DialogTitle>
+          </DialogHeader>
+          {selectedOrder && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Order Number</p>
+                  <p className="text-base font-semibold">{selectedOrder.order_number}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Status</p>
+                  <Badge className={getStatusColor(selectedOrder.status)}>
+                    {selectedOrder.status.replace("_", " ")}
+                  </Badge>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Customer</p>
+                  <p className="text-base">{selectedOrder.customer?.company_name}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Order Date</p>
+                  <p className="text-base">{new Date(selectedOrder.created_at).toLocaleString()}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Total Amount</p>
+                  <p className="text-base font-semibold">{selectedOrder.total_amount.toFixed(3)} OMR</p>
+                </div>
+                {selectedOrder.delivery_branch_id && (
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Delivery Branch</p>
+                    <p className="text-base">{selectedOrder.delivery_branch_id}</p>
+                  </div>
+                )}
+              </div>
+              
+              {selectedOrder.notes && (
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Notes</p>
+                  <p className="text-base">{selectedOrder.notes}</p>
+                </div>
+              )}
+
+              {selectedOrder.delivery_notes && (
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Delivery Notes</p>
+                  <p className="text-base">{selectedOrder.delivery_notes}</p>
+                </div>
+              )}
+
+              {selectedOrder.delivered_at && (
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Delivered At</p>
+                  <p className="text-base">{new Date(selectedOrder.delivered_at).toLocaleString()}</p>
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
