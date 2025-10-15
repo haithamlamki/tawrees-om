@@ -2068,6 +2068,7 @@ export type Database = {
       wms_invoices: {
         Row: {
           created_at: string
+          currency: string
           customer_id: string
           customer_vatin: string | null
           due_date: string
@@ -2089,6 +2090,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          currency?: string
           customer_id: string
           customer_vatin?: string | null
           due_date: string
@@ -2110,6 +2112,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          currency?: string
           customer_id?: string
           customer_vatin?: string | null
           due_date?: string
