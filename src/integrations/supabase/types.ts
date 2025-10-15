@@ -1934,6 +1934,7 @@ export type Database = {
           price_per_unit: number | null
           product_name: string
           quantity: number
+          quantity_consumed: number
           sku: string
           status: string
           unit: string
@@ -1951,6 +1952,7 @@ export type Database = {
           price_per_unit?: number | null
           product_name: string
           quantity?: number
+          quantity_consumed?: number
           sku: string
           status?: string
           unit?: string
@@ -1968,6 +1970,7 @@ export type Database = {
           price_per_unit?: number | null
           product_name?: string
           quantity?: number
+          quantity_consumed?: number
           sku?: string
           status?: string
           unit?: string
