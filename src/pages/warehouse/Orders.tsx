@@ -80,7 +80,6 @@ export default function WMSOrders() {
           status: "pending_approval",
           total_amount: total,
           notes: data.notes,
-          requested_delivery_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
         })
         .select()
         .single();
