@@ -67,6 +67,14 @@ export default function AdminWMSOrders() {
       queryClient.invalidateQueries({ queryKey: ["admin-wms-orders"] });
       toast({ title: "Order status updated successfully" });
     },
+    onError: (error: any) => {
+      console.error("Error updating order status:", error);
+      toast({ 
+        title: "Failed to update order status", 
+        description: error.message || "An error occurred",
+        variant: "destructive" 
+      });
+    },
   });
 
   const filteredOrders = orders?.filter((order: any) =>
@@ -212,6 +220,7 @@ export default function AdminWMSOrders() {
                               onClick={() =>
                                 updateStatusMutation.mutate({ id: order.id, status: "approved" })
                               }
+                              disabled={updateStatusMutation.isPending}
                               title="Approve order and deduct inventory"
                             >
                               <CheckCircle className="h-4 w-4 mr-1" />
@@ -223,8 +232,9 @@ export default function AdminWMSOrders() {
                               onClick={() =>
                                 updateStatusMutation.mutate({ id: order.id, status: "cancelled" })
                               }
+                              disabled={updateStatusMutation.isPending}
                               title="Cancel order"
-                            >
+                >
                               <XCircle className="h-4 w-4 mr-1" />
                               Reject
                             </Button>
