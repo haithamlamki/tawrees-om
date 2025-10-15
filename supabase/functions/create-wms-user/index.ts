@@ -44,63 +44,112 @@ serve(async (req) => {
       throw new Error('Only customer owners/admins can create users');
     }
 
-    // Generate temporary password
-    const tempPassword = crypto.randomUUID();
-
-    // Create auth user
-    const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
-      email,
-      password: tempPassword,
-      email_confirm: true,
-      user_metadata: {
-        full_name,
-        phone
-      }
-    });
-
-    if (createError) throw createError;
-
-    console.log('Auth user created:', newUser.user?.id);
-
-    // Create profile
-    const { error: profileError } = await supabase
+    // Try to find existing user by email via profiles first (faster than scanning auth users)
+    let userId: string | null = null;
+    const { data: profileMatch } = await supabase
       .from('profiles')
-      .insert({
-        id: newUser.user!.id,
-        full_name,
+      .select('id, email')
+      .eq('email', email)
+      .maybeSingle();
+
+    if (profileMatch?.id) {
+      userId = profileMatch.id;
+      console.log('Found existing user via profile:', userId);
+    }
+
+    // Fallback to admin listUsers if no profile found
+    if (!userId) {
+      const { data: existingUsers, error: listErr } = await supabase.auth.admin.listUsers();
+      if (listErr) {
+        console.error('Error listing users:', listErr);
+      }
+      const match = existingUsers?.users?.find((u) => (u.email ?? '').toLowerCase() === email.toLowerCase());
+      if (match) {
+        userId = match.id;
+        console.log('Found existing user via auth:', userId);
+      }
+    }
+
+    let temporaryPassword: string | undefined;
+
+    // If not found, create new auth user
+    if (!userId) {
+      const tempPassword = crypto.randomUUID() + crypto.randomUUID();
+      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
         email,
-        phone
+        password: tempPassword,
+        email_confirm: true,
+        user_metadata: { full_name, phone },
       });
+      if (authError) {
+        console.error('Error creating auth user:', authError);
+        throw authError;
+      }
+      userId = authData.user.id;
+      temporaryPassword = tempPassword;
+      console.log('Created new user:', userId);
 
-    if (profileError) {
-      console.error('Profile creation error:', profileError);
-      throw profileError;
+      // Wait briefly for triggers to run (profile creation)
+      await new Promise((resolve) => setTimeout(resolve, 500));
     }
 
-    // Create wms_customer_users entry
-    const { error: customerUserError } = await supabase
+    // Ensure profile exists/updated
+    const { data: existingProfile } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('id', userId)
+      .maybeSingle();
+
+    if (!existingProfile) {
+      const { error: profileUpsertErr } = await supabase.from('profiles').upsert(
+        {
+          id: userId,
+          full_name: full_name ?? 'User',
+          email,
+          phone: phone ?? null,
+        },
+        { onConflict: 'id' }
+      );
+      if (profileUpsertErr) {
+        console.error('Error upserting profile:', profileUpsertErr);
+        // Non-fatal, continue
+      }
+    }
+
+    // Check if user is already linked to this customer
+    const { data: existingLink } = await supabase
       .from('wms_customer_users')
-      .insert({
-        user_id: newUser.user!.id,
-        customer_id,
-        branch_id,
-        role: role // 'employee', 'accountant', 'viewer'
-      });
+      .select('id')
+      .eq('user_id', userId)
+      .eq('customer_id', customer_id)
+      .maybeSingle();
 
-    if (customerUserError) {
-      console.error('Customer user creation error:', customerUserError);
-      throw customerUserError;
+    if (!existingLink) {
+      // Create wms_customer_users entry
+      const { error: customerUserError } = await supabase
+        .from('wms_customer_users')
+        .insert({
+          user_id: userId,
+          customer_id,
+          branch_id: branch_id || null,
+          role: role || 'employee'
+        });
+
+      if (customerUserError) {
+        console.error('Customer user creation error:', customerUserError);
+        throw customerUserError;
+      }
     }
 
-    // Add system role if applicable
+    // Add system role if applicable (idempotent)
     if (role === 'employee' || role === 'accountant') {
       const systemRole = role === 'employee' ? 'wms_employee' : 'wms_accountant';
       const { error: roleInsertError } = await supabase
         .from('user_roles')
-        .insert({
-          user_id: newUser.user!.id,
-          role: systemRole
-        });
+        .upsert(
+          { user_id: userId, role: systemRole },
+          { onConflict: 'user_id,role' }
+        );
 
       if (roleInsertError) {
         console.error('User role creation error:', roleInsertError);
@@ -108,15 +157,17 @@ serve(async (req) => {
       }
     }
 
-    console.log('WMS user created successfully');
+    console.log('WMS user created/linked successfully');
 
     return new Response(
       JSON.stringify({
         success: true,
-        user_id: newUser.user!.id,
+        user_id: userId,
         email,
-        temporary_password: tempPassword,
-        message: 'User created successfully. Please share the temporary password securely.'
+        message: temporaryPassword
+          ? 'User created and linked successfully'
+          : 'Existing user linked successfully',
+        temporary_password: temporaryPassword,
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

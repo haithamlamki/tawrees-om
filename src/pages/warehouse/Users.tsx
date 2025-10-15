@@ -40,8 +40,8 @@ export default function WMSUsers() {
         .from("wms_customer_users")
         .select(`
           *,
-          profiles:user_id (full_name, email, phone),
-          wms_customer_branches:branch_id (branch_name)
+          profiles!wms_customer_users_user_id_fkey (full_name, email, phone),
+          wms_customer_branches!wms_customer_users_branch_id_fkey (branch_name)
         `)
         .eq("customer_id", customer!.id);
 
