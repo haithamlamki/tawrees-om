@@ -95,6 +95,32 @@ export default function WMSInvoices() {
     enabled: !!customer?.id,
   });
 
+  // Payment mutation - must be declared before any conditional returns
+  const payInvoiceMutation = useMutation({
+    mutationFn: async (invoiceId: string) => {
+      const { data, error } = await supabase.functions.invoke("create-invoice-payment", {
+        body: { invoice_id: invoiceId },
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (data) => {
+      if (data?.url) {
+        window.open(data.url, "_blank");
+      }
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Payment failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+    onSettled: () => {
+      setPayingInvoice(null);
+    },
+  });
+
   if (customerLoading || invoicesLoading) {
     return (
       <div className="space-y-4">
@@ -147,31 +173,6 @@ export default function WMSInvoices() {
     // Placeholder for download functionality
     console.log("Download invoice:", invoice.invoice_number);
   };
-
-  const payInvoiceMutation = useMutation({
-    mutationFn: async (invoiceId: string) => {
-      const { data, error } = await supabase.functions.invoke("create-invoice-payment", {
-        body: { invoice_id: invoiceId },
-      });
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: (data) => {
-      if (data?.url) {
-        window.open(data.url, "_blank");
-      }
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Payment failed",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-    onSettled: () => {
-      setPayingInvoice(null);
-    },
-  });
 
   const handlePayInvoice = (invoiceId: string) => {
     setPayingInvoice(invoiceId);
