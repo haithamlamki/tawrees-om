@@ -40,7 +40,8 @@ export default function WMSUsers() {
         .from("wms_customer_users")
         .select(`
           *,
-          profiles:user_id (full_name, email, phone)
+          profiles:user_id (full_name, email, phone),
+          wms_customer_branches:branch_id (branch_name)
         `)
         .eq("customer_id", customer!.id);
 
@@ -202,15 +203,15 @@ export default function WMSUsers() {
                   </SelectContent>
                 </Select>
               </div>
-              {branches && branches.length > 0 && (
+              {branches && branches.length > 0 && (newUser.role === 'employee' || newUser.role === 'accountant') && (
                 <div className="space-y-2">
-                  <Label>Branch (Optional)</Label>
+                  <Label>Branch Access</Label>
                   <Select value={newUser.branch_id} onValueChange={(value) => setNewUser({ ...newUser, branch_id: value })}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select branch" />
+                      <SelectValue placeholder="All branches" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">No Branch</SelectItem>
+                      <SelectItem value="">All Branches</SelectItem>
                       {branches.map((branch: any) => (
                         <SelectItem key={branch.id} value={branch.id}>
                           {branch.branch_name}
@@ -218,6 +219,9 @@ export default function WMSUsers() {
                       ))}
                     </SelectContent>
                   </Select>
+                  <p className="text-sm text-muted-foreground">
+                    Leave as "All Branches" for full access, or select a specific branch
+                  </p>
                 </div>
               )}
               {tempPassword && (
@@ -266,6 +270,7 @@ export default function WMSUsers() {
                   <TableHead>Email</TableHead>
                   <TableHead>Phone</TableHead>
                   <TableHead>Role</TableHead>
+                  <TableHead>Branch</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -279,6 +284,13 @@ export default function WMSUsers() {
                       <Badge variant={getRoleBadgeVariant(user.role)}>
                         {user.role}
                       </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {user.wms_customer_branches?.branch_name ? (
+                        <Badge variant="outline">{user.wms_customer_branches.branch_name}</Badge>
+                      ) : (
+                        <span className="text-muted-foreground text-sm">All Branches</span>
+                      )}
                     </TableCell>
                     <TableCell>
                       {user.role !== 'owner' && (
