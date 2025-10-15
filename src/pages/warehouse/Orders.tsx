@@ -451,7 +451,7 @@ export default function WMSOrders() {
                         <Badge className={getStatusColor(order.status)}>
                           {order.status.replace("_", " ")}
                         </Badge>
-                        {order.status === "delivered" && !order.delivery_confirmed_by_customer && (
+                        {order.status === "delivered" && (
                           <Badge variant="outline" className="text-orange-600 border-orange-600">
                             <AlertCircle className="w-3 h-3 mr-1" />
                             Awaiting Confirmation
@@ -466,7 +466,7 @@ export default function WMSOrders() {
                         <Button variant="ghost" size="sm">
                           <Eye className="h-4 w-4" />
                         </Button>
-                        {order.status === "delivered" && !order.delivery_confirmed_by_customer && (
+                        {order.status === "delivered" && (
                           <Button 
                             size="sm" 
                             onClick={() => {
