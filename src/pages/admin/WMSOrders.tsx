@@ -7,8 +7,10 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Search, Eye, CheckCircle, XCircle } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Search, Eye, CheckCircle, XCircle, Truck, Package, CheckCircle2, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type { WMSOrder, WMSCustomer } from "@/types/wms";
 
@@ -20,6 +22,9 @@ export default function AdminWMSOrders() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [deliveryDialogOpen, setDeliveryDialogOpen] = useState(false);
+  const [deliveryNotes, setDeliveryNotes] = useState("");
+  const [deliveryBranch, setDeliveryBranch] = useState<string>("");
 
   const { data: orders, isLoading } = useQuery({
     queryKey: ["admin-wms-orders", selectedCustomer, statusFilter],
@@ -66,17 +71,60 @@ export default function AdminWMSOrders() {
     },
   });
 
+  const { data: branches } = useQuery({
+    queryKey: ["wms-branches-list"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("wms_customer_branches")
+        .select("id, branch_name, customer_id")
+        .order("branch_name");
+      if (error) throw error;
+      return data;
+    },
+  });
+
   const updateStatusMutation = useMutation({
-    mutationFn: async ({ id, status }: { id: string; status: string }) => {
+    mutationFn: async ({ 
+      id, 
+      status, 
+      deliveryNotes, 
+      deliveryBranchId 
+    }: { 
+      id: string; 
+      status: string; 
+      deliveryNotes?: string;
+      deliveryBranchId?: string;
+    }) => {
+      const updateData: any = { status };
+      
+      if (status === "delivered") {
+        updateData.delivered_at = new Date().toISOString();
+        if (deliveryNotes) updateData.delivery_notes = deliveryNotes;
+        if (deliveryBranchId) updateData.delivery_branch_id = deliveryBranchId;
+      }
+
       const { error } = await supabase
         .from("wms_orders")
-        .update({ status })
+        .update(updateData)
         .eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["admin-wms-orders"] });
-      toast({ title: "Order status updated successfully" });
+      const statusMessages: Record<string, string> = {
+        approved: "Order approved successfully and inventory deducted",
+        cancelled: "Order cancelled",
+        in_progress: "Order marked as in progress",
+        delivered: "Order marked as delivered",
+        completed: "Order completed successfully"
+      };
+      toast({ title: statusMessages[variables.status] || "Order status updated successfully" });
+      
+      // Reset delivery dialog state
+      setDeliveryDialogOpen(false);
+      setDeliveryNotes("");
+      setDeliveryBranch("");
+      setSelectedOrder(null);
     },
     onError: (error: any) => {
       console.error("Error updating order status:", error);
@@ -87,6 +135,22 @@ export default function AdminWMSOrders() {
       });
     },
   });
+
+  const handleDeliveredClick = (order: any) => {
+    setSelectedOrder(order);
+    setDeliveryDialogOpen(true);
+  };
+
+  const handleDeliverySubmit = () => {
+    if (!selectedOrder) return;
+    
+    updateStatusMutation.mutate({
+      id: selectedOrder.id,
+      status: "delivered",
+      deliveryNotes,
+      deliveryBranchId: deliveryBranch || undefined,
+    });
+  };
 
   const filteredOrders = orders?.filter((order: any) =>
     order.order_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -230,6 +294,7 @@ export default function AdminWMSOrders() {
                         >
                           <Eye className="h-4 w-4" />
                         </Button>
+                        
                         {order.status === "pending_approval" && (
                           <>
                             <Button
@@ -253,11 +318,69 @@ export default function AdminWMSOrders() {
                               }
                               disabled={updateStatusMutation.isPending}
                               title="Cancel order"
-                >
+                            >
                               <XCircle className="h-4 w-4 mr-1" />
                               Reject
                             </Button>
                           </>
+                        )}
+
+                        {order.status === "approved" && (
+                          <Button
+                            variant="default"
+                            size="sm"
+                            onClick={() => updateStatusMutation.mutate({ id: order.id, status: "in_progress" })}
+                            disabled={updateStatusMutation.isPending}
+                            title="Mark as in progress"
+                          >
+                            {updateStatusMutation.isPending ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <>
+                                <Truck className="h-4 w-4 mr-1" />
+                                In Progress
+                              </>
+                            )}
+                          </Button>
+                        )}
+
+                        {order.status === "in_progress" && (
+                          <Button
+                            variant="default"
+                            size="sm"
+                            onClick={() => handleDeliveredClick(order)}
+                            disabled={updateStatusMutation.isPending}
+                            title="Mark as delivered"
+                          >
+                            {updateStatusMutation.isPending ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <>
+                                <Package className="h-4 w-4 mr-1" />
+                                Delivered
+                              </>
+                            )}
+                          </Button>
+                        )}
+
+                        {order.status === "delivered" && (
+                          <Button
+                            variant="default"
+                            size="sm"
+                            className="bg-green-600 hover:bg-green-700 text-white"
+                            onClick={() => updateStatusMutation.mutate({ id: order.id, status: "completed" })}
+                            disabled={updateStatusMutation.isPending}
+                            title="Mark as completed"
+                          >
+                            {updateStatusMutation.isPending ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <>
+                                <CheckCircle2 className="h-4 w-4 mr-1" />
+                                Complete
+                              </>
+                            )}
+                          </Button>
                         )}
                       </div>
                     </TableCell>
@@ -269,6 +392,7 @@ export default function AdminWMSOrders() {
         </CardContent>
       </Card>
 
+      {/* View Order Dialog */}
       <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
         <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
@@ -375,6 +499,60 @@ export default function AdminWMSOrders() {
               )}
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Delivery Dialog */}
+      <Dialog open={deliveryDialogOpen} onOpenChange={setDeliveryDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Mark Order as Delivered</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="delivery-notes">Delivery Notes</Label>
+              <Textarea
+                id="delivery-notes"
+                placeholder="Enter delivery notes (optional)"
+                value={deliveryNotes}
+                onChange={(e) => setDeliveryNotes(e.target.value)}
+                rows={4}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="delivery-branch">Delivery Branch (Optional)</Label>
+              <Select value={deliveryBranch} onValueChange={setDeliveryBranch}>
+                <SelectTrigger id="delivery-branch">
+                  <SelectValue placeholder="Select branch (optional)" />
+                </SelectTrigger>
+                <SelectContent>
+                  {branches?.map((branch: any) => (
+                    <SelectItem key={branch.id} value={branch.id}>
+                      {branch.branch_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Delivered timestamp will be automatically set to current time.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeliveryDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleDeliverySubmit} disabled={updateStatusMutation.isPending}>
+              {updateStatusMutation.isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Updating...
+                </>
+              ) : (
+                "Mark as Delivered"
+              )}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
