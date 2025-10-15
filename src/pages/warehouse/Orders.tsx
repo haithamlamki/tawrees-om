@@ -64,6 +64,22 @@ export default function WMSOrders() {
     }) => {
       if (!customer?.id) throw new Error("No customer");
       
+      // Validate stock availability before creating order
+      for (const item of data.items) {
+        const inv = inventory?.find((i) => i.id === item.inventory_id);
+        if (!inv) {
+          throw new Error(`Inventory item not found`);
+        }
+        if (inv.quantity < item.quantity) {
+          throw new Error(
+            `Insufficient stock for ${inv.product_name}. Available: ${inv.quantity}, Requested: ${item.quantity}`
+          );
+        }
+        if (inv.status === 'out_of_stock') {
+          throw new Error(`${inv.product_name} is out of stock`);
+        }
+      }
+
       // Calculate total
       const total = data.items.reduce((sum, item) => {
         const inv = inventory?.find((i) => i.id === item.inventory_id);
@@ -98,7 +114,7 @@ export default function WMSOrders() {
           quantity: item.quantity,
           unit_price: unitPrice,
           total_price: unitPrice * item.quantity,
-          customer_id: customer.id, // Materialized customer_id for efficient RLS
+          customer_id: customer.id,
         };
       });
 
@@ -117,8 +133,12 @@ export default function WMSOrders() {
       setOrderItems([]);
       setOrderNotes("");
     },
-    onError: () => {
-      toast({ title: "Failed to create order", variant: "destructive" });
+    onError: (error: Error) => {
+      toast({ 
+        title: "Failed to create order", 
+        description: error.message,
+        variant: "destructive" 
+      });
     },
   });
 
@@ -160,6 +180,18 @@ export default function WMSOrders() {
   };
 
   const updateOrderItemQuantity = (index: number, quantity: number) => {
+    const item = orderItems[index];
+    const maxQuantity = item.inventory?.quantity || 0;
+    
+    if (quantity > maxQuantity) {
+      toast({
+        title: "Insufficient stock",
+        description: `Only ${maxQuantity} units available`,
+        variant: "destructive"
+      });
+      return;
+    }
+    
     const newItems = [...orderItems];
     newItems[index].quantity = quantity;
     setOrderItems(newItems);
@@ -253,13 +285,21 @@ export default function WMSOrders() {
                     <SelectValue placeholder="Select inventory item" />
                   </SelectTrigger>
                   <SelectContent>
-                    {inventory?.filter((inv) => inv.status !== "out_of_stock").map((inv) => (
+                    {inventory?.filter((inv) => inv.status !== "out_of_stock" && inv.quantity > 0).map((inv) => (
                       <SelectItem key={inv.id} value={inv.id}>
                         {inv.product_name} ({inv.sku}) - Available: {inv.quantity} {inv.unit}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+                {inventory?.filter((inv) => inv.quantity > 0 && inv.status !== "out_of_stock").length === 0 && (
+                  <Alert>
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>
+                      No items with available stock. Please contact admin to restock inventory.
+                    </AlertDescription>
+                  </Alert>
+                )}
               </div>
 
               {orderItems.length > 0 && (
