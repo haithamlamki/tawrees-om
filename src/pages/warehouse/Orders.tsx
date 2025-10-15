@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useWMSCustomer } from "@/hooks/useWMSCustomer";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -23,6 +24,7 @@ export default function WMSOrders() {
   const queryClient = useQueryClient();
   const [orderDialogOpen, setOrderDialogOpen] = useState(false);
   const [confirmDeliveryDialogOpen, setConfirmDeliveryDialogOpen] = useState(false);
+  const [viewOrderOpen, setViewOrderOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [orderItems, setOrderItems] = useState<Array<{ inventory_id: string; quantity: number; inventory?: WMSInventory }>>([]);
   const [orderNotes, setOrderNotes] = useState("");
@@ -33,7 +35,20 @@ export default function WMSOrders() {
       if (!customer?.id) return [];
       const { data, error } = await supabase
         .from("wms_orders")
-        .select("*")
+        .select(`
+          *,
+          items:wms_order_items(
+            id,
+            quantity,
+            unit_price,
+            total_price,
+            inventory:wms_inventory(
+              product_name,
+              sku,
+              unit
+            )
+          )
+        `)
         .eq("customer_id", customer.id)
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -466,7 +481,14 @@ export default function WMSOrders() {
                     <TableCell className="max-w-xs truncate">{order.notes || "-"}</TableCell>
                     <TableCell>
                       <div className="flex gap-2">
-                        <Button variant="ghost" size="sm">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => {
+                            setSelectedOrder(order);
+                            setViewOrderOpen(true);
+                          }}
+                        >
                           <Eye className="h-4 w-4" />
                         </Button>
                         {order.status === "delivered" && (
@@ -491,6 +513,85 @@ export default function WMSOrders() {
           )}
         </CardContent>
       </Card>
+
+      {/* View Order Details Sheet */}
+      <Sheet open={viewOrderOpen} onOpenChange={setViewOrderOpen}>
+        <SheetContent className="overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle>Order Details</SheetTitle>
+            <SheetDescription>
+              View complete order information
+            </SheetDescription>
+          </SheetHeader>
+
+          {selectedOrder && (
+            <div className="mt-6 space-y-6">
+              <div className="space-y-4">
+                <div>
+                  <Label className="text-sm text-muted-foreground">Order Number</Label>
+                  <p className="font-medium">{selectedOrder.order_number}</p>
+                </div>
+                
+                <div>
+                  <Label className="text-sm text-muted-foreground">Status</Label>
+                  <div className="mt-1">
+                    <Badge className={getStatusColor(selectedOrder.status)}>
+                      {selectedOrder.status.replace("_", " ")}
+                    </Badge>
+                  </div>
+                </div>
+
+                <div>
+                  <Label className="text-sm text-muted-foreground">Created At</Label>
+                  <p className="font-medium">{new Date(selectedOrder.created_at).toLocaleString()}</p>
+                </div>
+
+                {selectedOrder.delivered_at && (
+                  <div>
+                    <Label className="text-sm text-muted-foreground">Delivered At</Label>
+                    <p className="font-medium">{new Date(selectedOrder.delivered_at).toLocaleString()}</p>
+                  </div>
+                )}
+
+                {selectedOrder.delivery_notes && (
+                  <div>
+                    <Label className="text-sm text-muted-foreground">Delivery Notes</Label>
+                    <p className="font-medium">{selectedOrder.delivery_notes}</p>
+                  </div>
+                )}
+
+                {selectedOrder.notes && (
+                  <div>
+                    <Label className="text-sm text-muted-foreground">Order Notes</Label>
+                    <p className="font-medium">{selectedOrder.notes}</p>
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-3">
+                <Label className="text-sm font-semibold">Order Items</Label>
+                {selectedOrder.items?.map((item: any) => (
+                  <div key={item.id} className="border rounded-lg p-3 space-y-1">
+                    <p className="font-medium">{item.inventory?.product_name}</p>
+                    <p className="text-sm text-muted-foreground">SKU: {item.inventory?.sku}</p>
+                    <div className="flex justify-between text-sm">
+                      <span>Quantity: {item.quantity} {item.inventory?.unit}</span>
+                      <span className="font-medium">{item.total_price.toFixed(3)} OMR</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="border-t pt-4">
+                <div className="flex justify-between items-center">
+                  <span className="font-semibold">Total Amount</span>
+                  <span className="text-lg font-bold">{selectedOrder.total_amount.toFixed(3)} OMR</span>
+                </div>
+              </div>
+            </div>
+          )}
+        </SheetContent>
+      </Sheet>
 
       {/* Confirm Delivery Dialog */}
       <Dialog open={confirmDeliveryDialogOpen} onOpenChange={setConfirmDeliveryDialogOpen}>
