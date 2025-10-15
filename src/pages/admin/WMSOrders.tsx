@@ -28,7 +28,15 @@ export default function AdminWMSOrders() {
         .from("wms_orders")
         .select(`
           *,
-          customer:wms_customers(company_name, customer_code)
+          customer:wms_customers(company_name, customer_code),
+          items:wms_order_items(
+            id,
+            inventory_id,
+            quantity,
+            unit_price,
+            total_price,
+            inventory:wms_inventory(product_name, sku, unit)
+          )
         `)
         .order("created_at", { ascending: false });
       
@@ -317,6 +325,52 @@ export default function AdminWMSOrders() {
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Delivered At</p>
                   <p className="text-base">{new Date(selectedOrder.delivered_at).toLocaleString()}</p>
+                </div>
+              )}
+
+              {selectedOrder.items && selectedOrder.items.length > 0 && (
+                <div className="mt-6">
+                  <h3 className="text-lg font-semibold mb-3">Order Items</h3>
+                  <div className="border rounded-lg overflow-hidden">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Product</TableHead>
+                          <TableHead>SKU</TableHead>
+                          <TableHead>Unit</TableHead>
+                          <TableHead className="text-right">Quantity</TableHead>
+                          <TableHead className="text-right">Unit Price</TableHead>
+                          <TableHead className="text-right">Total</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {selectedOrder.items.map((item: any) => (
+                          <TableRow key={item.id}>
+                            <TableCell className="font-medium">
+                              {item.inventory?.product_name || "N/A"}
+                            </TableCell>
+                            <TableCell>{item.inventory?.sku || "N/A"}</TableCell>
+                            <TableCell>{item.inventory?.unit || "N/A"}</TableCell>
+                            <TableCell className="text-right">{item.quantity}</TableCell>
+                            <TableCell className="text-right">
+                              {item.unit_price.toFixed(3)} OMR
+                            </TableCell>
+                            <TableCell className="text-right font-semibold">
+                              {item.total_price.toFixed(3)} OMR
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                        <TableRow className="bg-muted/50">
+                          <TableCell colSpan={5} className="text-right font-semibold">
+                            Total Amount:
+                          </TableCell>
+                          <TableCell className="text-right font-bold">
+                            {selectedOrder.total_amount.toFixed(3)} OMR
+                          </TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                  </div>
                 </div>
               )}
             </div>
