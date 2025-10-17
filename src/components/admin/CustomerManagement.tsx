@@ -17,7 +17,7 @@ interface CustomerStats {
   total_requests: number;
   approved_requests: number;
   total_shipments: number;
-  total_spent: number;
+  total_spent: number | null;
   last_request_date: string | null;
 }
 
@@ -133,7 +133,7 @@ const CustomerManagement = () => {
                     <Badge variant="outline">{customer.total_shipments}</Badge>
                   </TableCell>
                   <TableCell className="text-right font-bold text-accent">
-                    ${customer.total_spent.toFixed(2)}
+                    ${(customer.total_spent || 0).toFixed(2)}
                   </TableCell>
                   <TableCell className="text-sm">
                     {customer.last_request_date
@@ -206,7 +206,7 @@ const CustomerManagement = () => {
                 <div className="p-4 bg-accent/10 rounded-lg">
                   <div className="text-sm text-muted-foreground">Total Spent</div>
                   <div className="text-2xl font-bold text-accent">
-                    ${selectedCustomer.total_spent.toFixed(2)}
+                    ${(selectedCustomer.total_spent || 0).toFixed(2)}
                   </div>
                 </div>
               </div>
