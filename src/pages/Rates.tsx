@@ -21,6 +21,7 @@ export default function Rates() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [partnerId, setPartnerId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
   const [origins, setOrigins] = useState<Origin[]>([]);
   const [destinations, setDestinations] = useState<Destination[]>([]);
   const [agreements, setAgreements] = useState<Agreement[]>([]);
@@ -43,19 +44,30 @@ export default function Rates() {
   }, []);
 
   const checkAuth = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    setIsAuthenticated(!!session);
-    
-    if (session) {
-      const { data: roles } = await supabase
-        .from("user_roles")
-        .select("role, shipping_partner_id")
-        .eq("user_id", session.user.id);
+    try {
+      setLoading(true);
+      const { data: { session } } = await supabase.auth.getSession();
+      setIsAuthenticated(!!session);
       
-      if (roles && roles.length > 0) {
-        setUserRole(roles[0].role);
-        setPartnerId(roles[0].shipping_partner_id);
+      if (session) {
+        const { data: roles } = await supabase
+          .from("user_roles")
+          .select("role, shipping_partner_id")
+          .eq("user_id", session.user.id);
+        
+        console.log("User roles data:", roles);
+        
+        if (roles && roles.length > 0) {
+          setUserRole(roles[0].role);
+          setPartnerId(roles[0].shipping_partner_id);
+          console.log("Partner ID loaded:", roles[0].shipping_partner_id);
+          console.log("User role:", roles[0].role);
+        }
       }
+    } catch (error) {
+      console.error("Error loading auth:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -115,6 +127,14 @@ export default function Rates() {
       return;
     }
 
+    if (loading) {
+      toast.error("Please wait, loading user information...");
+      return;
+    }
+
+    console.log("Submit - User Role:", userRole);
+    console.log("Submit - Partner ID:", partnerId);
+
     // Determine approval status based on who creates it
     let approval_status: ApprovalStatus = 'approved';
     let partner_id_value = partnerId;
@@ -125,10 +145,12 @@ export default function Rates() {
       
       // Ensure partner_id is set for partners - it's required by RLS
       if (!partnerId) {
+        console.error("Partner ID is null for shipping_partner role");
         toast.error("Partner ID not found. Please contact admin.");
         return;
       }
       partner_id_value = partnerId;
+      console.log("Creating agreement with partner_id:", partner_id_value);
     } else if (userRole === 'admin') {
       // Admin creates -> needs partner approval if partner_id is set
       if (partnerId) {
@@ -422,8 +444,8 @@ export default function Rates() {
                   />
                 </div>
 
-                <Button type="submit" className="w-full">
-                  Save Agreement
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? "Loading..." : "Save Agreement"}
                 </Button>
               </form>
             </CardContent>
