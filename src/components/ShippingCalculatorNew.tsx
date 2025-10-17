@@ -595,19 +595,25 @@ export const ShippingCalculatorNew = () => {
                   <h3 className="text-lg font-semibold">Select Container Type</h3>
                   <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <ContainerCard
-                      type="SEA_CONTAINER_20FT"
-                      selected={selectedContainer === "SEA_CONTAINER_20FT"}
-                      onSelect={() => setSelectedContainer("SEA_CONTAINER_20FT")}
+                      name="20' Standard Container"
+                      dimensions="5.9m × 2.35m × 2.39m"
+                      capacity={33}
+                      selected={selectedContainer === "SEA_CONTAINER_20"}
+                      onClick={() => setSelectedContainer("SEA_CONTAINER_20")}
                     />
                     <ContainerCard
-                      type="SEA_CONTAINER_40FT"
-                      selected={selectedContainer === "SEA_CONTAINER_40FT"}
-                      onSelect={() => setSelectedContainer("SEA_CONTAINER_40FT")}
+                      name="40' Standard Container"
+                      dimensions="12.03m × 2.35m × 2.39m"
+                      capacity={67}
+                      selected={selectedContainer === "SEA_CONTAINER_40"}
+                      onClick={() => setSelectedContainer("SEA_CONTAINER_40")}
                     />
                     <ContainerCard
-                      type="SEA_CONTAINER_40HC"
+                      name="40' High Cube Container"
+                      dimensions="12.03m × 2.35m × 2.69m"
+                      capacity={76}
                       selected={selectedContainer === "SEA_CONTAINER_40HC"}
-                      onSelect={() => setSelectedContainer("SEA_CONTAINER_40HC")}
+                      onClick={() => setSelectedContainer("SEA_CONTAINER_40HC")}
                     />
                   </div>
                 </div>
@@ -618,9 +624,19 @@ export const ShippingCalculatorNew = () => {
             <div className="mt-6">
               <DeliveryOptions
                 deliveryType={deliveryType}
-                deliveryAddress={deliveryAddress}
+                deliveryAddress={deliveryAddress.address}
+                deliveryCity={deliveryAddress.city}
+                deliveryPostalCode={deliveryAddress.postalCode}
+                deliveryCountry={deliveryAddress.country}
+                deliveryContactName={deliveryAddress.contactName}
+                deliveryContactPhone={deliveryAddress.contactPhone}
                 onDeliveryTypeChange={setDeliveryType}
-                onDeliveryAddressChange={setDeliveryAddress}
+                onAddressChange={(field, value) => {
+                  setDeliveryAddress((prev) => ({
+                    ...prev,
+                    [field.replace('delivery', '').charAt(0).toLowerCase() + field.replace('delivery', '').slice(1)]: value
+                  }));
+                }}
               />
             </div>
 
