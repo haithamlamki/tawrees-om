@@ -406,53 +406,61 @@ const Admin = () => {
                       </div>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      {/* Customer Contact Info */}
-                      <div className="grid grid-cols-2 gap-4 p-4 bg-muted/50 rounded-lg">
+                      {/* Top Info Row */}
+                      <div className="grid grid-cols-4 gap-4 p-3 bg-muted/50 rounded-lg text-sm">
                         <div>
-                          <p className="text-xs text-muted-foreground">Email</p>
-                          <p className="text-sm font-medium">{request.profiles?.email || "-"}</p>
+                          <p className="text-xs text-muted-foreground mb-1">Email</p>
+                          <p className="font-medium truncate">{request.profiles?.email || "-"}</p>
                         </div>
                         <div>
-                          <p className="text-xs text-muted-foreground">Shipping Method</p>
-                          <p className="text-sm font-medium">{request.calculation_method?.toUpperCase() || "-"}</p>
+                          <p className="text-xs text-muted-foreground mb-1">Shipping Method</p>
+                          <p className="font-medium">{request.calculation_method?.toUpperCase() || "-"}</p>
                         </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground mb-1">Delivery Type</p>
+                          <p className="font-medium capitalize">{request.delivery_type || "-"}</p>
+                        </div>
+                        {request.container_types && (
+                          <div>
+                            <p className="text-xs text-muted-foreground mb-1">Container</p>
+                            <p className="font-medium">{request.container_types.name}</p>
+                          </div>
+                        )}
                       </div>
 
-                      {/* Items Details */}
+                      {/* Items Row */}
                       {request.items && Array.isArray(request.items) && request.items.length > 0 && (
-                        <div className="space-y-3">
-                          <p className="text-sm font-semibold">Items ({request.items.length})</p>
-                          <div className="space-y-2">
+                        <div>
+                          <p className="text-sm font-semibold mb-2">Items ({request.items.length})</p>
+                          <div className="grid gap-2">
                             {request.items.map((item: any, idx: number) => (
-                              <div key={idx} className="p-3 border rounded-lg space-y-2">
-                                <div className="flex items-start gap-3">
-                                  {item.productImage && (
-                                    <img 
-                                      src={item.productImage} 
-                                      alt={item.productName || "Product"} 
-                                      className="w-16 h-16 object-cover rounded border"
-                                    />
-                                  )}
-                                  <div className="flex-1 min-w-0">
-                                    {item.productName && (
-                                      <p className="text-sm font-medium truncate">{item.productName}</p>
-                                    )}
-                                    <div className="grid grid-cols-2 gap-x-4 gap-y-1 mt-1">
-                                      <div className="text-xs">
-                                        <span className="text-muted-foreground">Dimensions: </span>
-                                        <span className="font-medium">
-                                          {item.length} × {item.width} × {item.height} {item.dimensionUnit}
-                                        </span>
-                                      </div>
-                                      <div className="text-xs">
-                                        <span className="text-muted-foreground">Weight: </span>
-                                        <span className="font-medium">{item.weight} {item.weightUnit}</span>
-                                      </div>
-                                      <div className="text-xs">
-                                        <span className="text-muted-foreground">Quantity: </span>
-                                        <span className="font-medium">{item.quantity}</span>
-                                      </div>
+                              <div key={idx} className="flex items-center gap-3 p-2 border rounded-lg">
+                                {item.productImage && (
+                                  <img 
+                                    src={item.productImage} 
+                                    alt={item.productName || "Product"} 
+                                    className="w-12 h-12 object-cover rounded border flex-shrink-0"
+                                  />
+                                )}
+                                <div className="flex-1 min-w-0 grid grid-cols-5 gap-x-3 items-center text-xs">
+                                  {item.productName && (
+                                    <div className="truncate">
+                                      <span className="font-medium">{item.productName}</span>
                                     </div>
+                                  )}
+                                  <div>
+                                    <span className="text-muted-foreground">Dimensions: </span>
+                                    <span className="font-medium">
+                                      {item.length}×{item.width}×{item.height} {item.dimensionUnit}
+                                    </span>
+                                  </div>
+                                  <div>
+                                    <span className="text-muted-foreground">Weight: </span>
+                                    <span className="font-medium">{item.weight} {item.weightUnit}</span>
+                                  </div>
+                                  <div>
+                                    <span className="text-muted-foreground">Qty: </span>
+                                    <span className="font-medium">{item.quantity}</span>
                                   </div>
                                 </div>
                               </div>
@@ -461,37 +469,30 @@ const Admin = () => {
                         </div>
                       )}
 
-                      {/* Shipment Summary */}
-                      <div className="grid grid-cols-3 gap-4 p-4 bg-accent/10 border border-accent/20 rounded-lg">
-                        {request.container_types && (
-                          <div>
-                            <p className="text-xs text-muted-foreground">Container</p>
-                            <p className="text-sm font-medium">{request.container_types.name}</p>
-                          </div>
-                        )}
-                        <div>
-                          <p className="text-xs text-muted-foreground">Total CBM</p>
-                          <p className="text-lg font-bold text-primary">
-                            {request.cbm_volume ? request.cbm_volume.toFixed(3) : '0.000'} m³
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-muted-foreground">Total Weight</p>
-                          <p className="text-lg font-bold text-primary">
-                            {request.weight_kg ? request.weight_kg.toFixed(2) : '0.00'} kg
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Delivery Details */}
-                      {request.delivery_type && (
-                        <div className="space-y-2 p-4 bg-muted/50 rounded-lg">
-                          <p className="text-sm font-semibold">Delivery Information</p>
-                          <div className="grid grid-cols-2 gap-2 text-sm">
+                      {/* Summary & Delivery Row */}
+                      <div className="grid grid-cols-2 gap-4">
+                        {/* Left: Totals */}
+                        <div className="p-3 bg-accent/10 border border-accent/20 rounded-lg">
+                          <div className="grid grid-cols-2 gap-3">
                             <div>
-                              <span className="text-muted-foreground">Type: </span>
-                              <span className="font-medium capitalize">{request.delivery_type}</span>
+                              <p className="text-xs text-muted-foreground mb-1">Total CBM</p>
+                              <p className="text-lg font-bold text-primary">
+                                {request.cbm_volume ? request.cbm_volume.toFixed(3) : '0.000'} m³
+                              </p>
                             </div>
+                            <div>
+                              <p className="text-xs text-muted-foreground mb-1">Total Weight</p>
+                              <p className="text-lg font-bold text-primary">
+                                {request.weight_kg ? request.weight_kg.toFixed(2) : '0.00'} kg
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Right: Delivery Info */}
+                        {request.delivery_type && (
+                          <div className="p-3 bg-muted/50 rounded-lg text-xs space-y-1">
+                            <p className="font-semibold mb-2">Delivery Information</p>
                             {request.delivery_contact_name && (
                               <div>
                                 <span className="text-muted-foreground">Contact: </span>
@@ -505,7 +506,7 @@ const Admin = () => {
                               </div>
                             )}
                             {request.delivery_address && (
-                              <div className="col-span-2">
+                              <div>
                                 <span className="text-muted-foreground">Address: </span>
                                 <span className="font-medium">
                                   {request.delivery_address}, {request.delivery_city}, {request.delivery_country}
@@ -513,50 +514,49 @@ const Admin = () => {
                               </div>
                             )}
                           </div>
-                        </div>
-                      )}
-
-                      {/* Notes */}
-                      {request.notes && (
-                        <div className="p-4 bg-muted/50 rounded-lg">
-                          <p className="text-sm font-semibold mb-1">Customer Notes</p>
-                          <p className="text-sm text-muted-foreground">{request.notes}</p>
-                        </div>
-                      )}
-
-                      {/* Calculated Cost */}
-                      <div className="flex items-center justify-between p-4 bg-primary/5 border border-primary/20 rounded-lg">
-                        <div>
-                          <p className="text-sm text-muted-foreground">Calculated Cost</p>
-                          <p className="text-2xl font-bold">₦{request.calculated_cost.toFixed(2)}</p>
-                        </div>
+                        )}
                       </div>
 
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          variant="default"
-                          onClick={() => setSelectedRequestForQuote(request.id)}
-                        >
-                          <DollarSign className="mr-1 h-3 w-3" />
-                          Create Quote
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="secondary"
-                          onClick={() => handleApproveRequest(request.id, "after")}
-                        >
-                          <CheckCircle className="mr-1 h-3 w-3" />
-                          Quick Approve
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => handleRejectRequest(request.id)}
-                        >
-                          <XCircle className="mr-1 h-3 w-3" />
-                          Reject
-                        </Button>
+                      {/* Notes Row */}
+                      {request.notes && (
+                        <div className="p-3 bg-muted/50 rounded-lg">
+                          <p className="text-xs font-semibold mb-1">Customer Notes</p>
+                          <p className="text-xs text-muted-foreground">{request.notes}</p>
+                        </div>
+                      )}
+
+                      {/* Bottom Action Row */}
+                      <div className="flex items-center justify-between p-3 bg-primary/5 border border-primary/20 rounded-lg">
+                        <div>
+                          <p className="text-xs text-muted-foreground">Calculated Cost</p>
+                          <p className="text-2xl font-bold">₦{request.calculated_cost.toFixed(2)}</p>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            variant="default"
+                            onClick={() => setSelectedRequestForQuote(request.id)}
+                          >
+                            <DollarSign className="mr-1 h-3 w-3" />
+                            Create Quote
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            onClick={() => handleApproveRequest(request.id, "after")}
+                          >
+                            <CheckCircle className="mr-1 h-3 w-3" />
+                            Quick Approve
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => handleRejectRequest(request.id)}
+                          >
+                            <XCircle className="mr-1 h-3 w-3" />
+                            Reject
+                          </Button>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
