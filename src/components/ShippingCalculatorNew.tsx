@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Plane, Ship, Package, Calculator as CalcIcon, Plus } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import ItemRow from "./calculator/ItemRow";
 import { ContainerCard } from "./calculator/ContainerCard";
 import { DeliveryOptions } from "./calculator/DeliveryOptions";
@@ -26,6 +26,7 @@ type ShippingMode = "air" | "sea_lcl" | "sea_fcl";
 
 export const ShippingCalculatorNew = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [mode, setMode] = useState<ShippingMode>("air");
   const [origins, setOrigins] = useState<Origin[]>([]);
   const [destinations, setDestinations] = useState<Destination[]>([]);
@@ -64,6 +65,23 @@ export const ShippingCalculatorNew = () => {
     checkAuth();
     loadLocations();
   }, []);
+
+  // Pre-fill calculator from URL parameters (from Rates page)
+  useEffect(() => {
+    const modeParam = searchParams.get('mode') as ShippingMode | null;
+    const originParam = searchParams.get('origin');
+    const destParam = searchParams.get('dest');
+    const containerParam = searchParams.get('container') as RateType | null;
+
+    if (modeParam && ['air', 'sea_lcl', 'sea_fcl'].includes(modeParam)) {
+      setMode(modeParam);
+    }
+    if (originParam) setSelectedOrigin(originParam);
+    if (destParam) setSelectedDestination(destParam);
+    if (containerParam && modeParam === 'sea_fcl') {
+      setSelectedContainer(containerParam);
+    }
+  }, [searchParams]);
 
   const checkAuth = async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -119,14 +137,24 @@ export const ShippingCalculatorNew = () => {
       return null;
     }
 
-    if (!data) return null;
+    // RPC returns an array, extract first element
+    if (!data || (Array.isArray(data) && data.length === 0)) {
+      console.log("No active agreement found for:", { selectedOrigin, selectedDestination, rateType });
+      return null;
+    }
 
-    // Enrich with names for display using already-loaded lists
-    const agreement = {
-      ...(data as any),
+    const rawAgreement = Array.isArray(data) ? data[0] : data;
+
+    // Coerce numeric fields to numbers and enrich with names
+    const agreement: Agreement = {
+      ...rawAgreement,
+      buy_price: Number(rawAgreement.buy_price),
+      sell_price: Number(rawAgreement.sell_price),
+      margin_percent: Number(rawAgreement.margin_percent),
+      min_charge: rawAgreement.min_charge ? Number(rawAgreement.min_charge) : null,
       origins: origins.find((o) => o.id === selectedOrigin),
       destinations: destinations.find((d) => d.id === selectedDestination),
-    } as unknown as Agreement;
+    } as Agreement;
 
     return agreement;
   };
@@ -173,8 +201,8 @@ export const ShippingCalculatorNew = () => {
         return;
       }
 
-      if (!agreement.sell_price) {
-        toast.error("Rate configuration error: Missing sell price");
+      if (!Number.isFinite(agreement.sell_price) || agreement.sell_price <= 0) {
+        toast.error("Rate configuration error: Invalid or missing sell price");
         return;
       }
 
@@ -199,8 +227,8 @@ export const ShippingCalculatorNew = () => {
         return;
       }
 
-      if (!agreement.sell_price) {
-        toast.error("Rate configuration error: Missing sell price");
+      if (!Number.isFinite(agreement.sell_price) || agreement.sell_price <= 0) {
+        toast.error("Rate configuration error: Invalid or missing sell price");
         return;
       }
 
@@ -227,8 +255,8 @@ export const ShippingCalculatorNew = () => {
         return;
       }
 
-      if (!agreement.sell_price) {
-        toast.error("Rate configuration error: Missing sell price");
+      if (!Number.isFinite(agreement.sell_price) || agreement.sell_price <= 0) {
+        toast.error("Rate configuration error: Invalid or missing sell price");
         return;
       }
 

@@ -10,14 +10,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon, TrendingUp, CheckCircle, XCircle, Clock } from "lucide-react";
+import { CalendarIcon, TrendingUp, CheckCircle, XCircle, Clock, Calculator } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import type { Origin, Destination, Agreement, RateType, ApprovalStatus } from "@/types/locations";
 import { RATE_TYPE_LABELS } from "@/types/locations";
 import { Badge } from "@/components/ui/badge";
+import { useNavigate } from "react-router-dom";
 
 export default function Rates() {
+  const navigate = useNavigate();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [partnerId, setPartnerId] = useState<string | null>(null);
@@ -127,6 +129,25 @@ export default function Rates() {
 
     if (!formData.rate_type || !formData.origin_id || !formData.destination_id) {
       toast.error("Please fill in all required fields");
+      return;
+    }
+
+    // Validate pricing
+    const buyPrice = parseFloat(formData.buy_price);
+    const sellPrice = parseFloat(formData.sell_price);
+    
+    if (!buyPrice || buyPrice <= 0) {
+      toast.error("Buy price must be greater than 0");
+      return;
+    }
+    
+    if (!sellPrice || sellPrice <= 0) {
+      toast.error("Sell price must be greater than 0");
+      return;
+    }
+    
+    if (sellPrice <= buyPrice) {
+      toast.error("Sell price must be greater than buy price");
       return;
     }
 
@@ -281,6 +302,34 @@ export default function Rates() {
       return agreement.partner_id === partnerId;
     }
     return false;
+  };
+
+  const testInCalculator = (agreement: Agreement) => {
+    let mode = 'air';
+    let container = '';
+    
+    // Map rate_type to calculator mode and container
+    if (agreement.rate_type === 'AIR_KG') {
+      mode = 'air';
+    } else if (agreement.rate_type === 'SEA_CBM') {
+      mode = 'sea_lcl';
+    } else if (agreement.rate_type.startsWith('SEA_CONTAINER_')) {
+      mode = 'sea_fcl';
+      container = agreement.rate_type;
+    }
+    
+    // Build query string
+    const params = new URLSearchParams({
+      mode,
+      origin: agreement.origin_id,
+      dest: agreement.destination_id,
+    });
+    
+    if (container) {
+      params.append('container', container);
+    }
+    
+    navigate(`/?${params.toString()}`);
   };
 
   return (
@@ -530,6 +579,21 @@ export default function Rates() {
 
                         {agreement.notes && (
                           <p className="text-xs text-muted-foreground mt-2">{agreement.notes}</p>
+                        )}
+
+                        {/* Test in Calculator button - always show for approved rates */}
+                        {agreement.approval_status === 'approved' && !isExpired && (
+                          <div className="mt-3">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => testInCalculator(agreement)}
+                              className="w-full"
+                            >
+                              <Calculator className="h-4 w-4 mr-2" />
+                              Test in Calculator
+                            </Button>
+                          </div>
                         )}
 
                         {canApprove(agreement) && (
