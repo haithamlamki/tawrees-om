@@ -13,10 +13,34 @@ interface ItemRowProps {
 
 const ItemRow = ({ item, onUpdate, onRemove, canRemove }: ItemRowProps) => {
   return (
-    <div className="grid grid-cols-12 gap-2 items-end bg-secondary/20 p-3 rounded-lg">
-      {/* Dimensions */}
-      <div className="col-span-2">
-        <label className="text-xs text-muted-foreground mb-1 block">Length</label>
+    <div className="space-y-3 bg-secondary/20 p-4 rounded-lg">
+      {/* Product Info Row (Optional) */}
+      <div className="grid grid-cols-12 gap-2">
+        <div className="col-span-6">
+          <label className="text-xs text-muted-foreground mb-1 block">Product Name (Optional)</label>
+          <Input
+            type="text"
+            value={item.productName || ""}
+            onChange={(e) => onUpdate(item.id, "productName", e.target.value)}
+            placeholder="e.g., Laptop, T-Shirts, etc."
+          />
+        </div>
+        <div className="col-span-6">
+          <label className="text-xs text-muted-foreground mb-1 block">Product Image URL (Optional)</label>
+          <Input
+            type="text"
+            value={item.productImage || ""}
+            onChange={(e) => onUpdate(item.id, "productImage", e.target.value)}
+            placeholder="https://example.com/image.jpg"
+          />
+        </div>
+      </div>
+
+      {/* Dimensions Row */}
+      <div className="grid grid-cols-12 gap-2 items-end">
+        {/* Dimensions */}
+        <div className="col-span-2">
+          <label className="text-xs text-muted-foreground mb-1 block">Length</label>
         <Input
           type="number"
           step="0.01"
@@ -105,18 +129,19 @@ const ItemRow = ({ item, onUpdate, onRemove, canRemove }: ItemRowProps) => {
         />
       </div>
 
-      {/* Remove button */}
-      <div className="col-span-1 flex items-end">
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          onClick={() => onRemove(item.id)}
-          disabled={!canRemove}
-          className="h-10 w-10"
-        >
-          <X className="h-4 w-4" />
-        </Button>
+        {/* Remove button */}
+        <div className="col-span-1 flex items-end">
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={() => onRemove(item.id)}
+            disabled={!canRemove}
+            className="h-10 w-10"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
     </div>
   );

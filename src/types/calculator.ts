@@ -7,6 +7,8 @@ export interface ShipmentItem {
   weight: number;
   weightUnit: "kg" | "lb";
   quantity: number;
+  productName?: string;
+  productImage?: string;
 }
 
 export interface QuoteBreakdown {

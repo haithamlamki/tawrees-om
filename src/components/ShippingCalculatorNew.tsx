@@ -43,6 +43,8 @@ export const ShippingCalculatorNew = () => {
       weight: 0,
       weightUnit: "kg",
       quantity: 1,
+      productName: "",
+      productImage: "",
     },
   ]);
   const [quote, setQuote] = useState<{
@@ -110,6 +112,8 @@ export const ShippingCalculatorNew = () => {
         weight: 0,
         weightUnit: "kg",
         quantity: 1,
+        productName: "",
+        productImage: "",
       },
     ]);
   };
