@@ -27,6 +27,7 @@ export default function Rates() {
   const [origins, setOrigins] = useState<Origin[]>([]);
   const [destinations, setDestinations] = useState<Destination[]>([]);
   const [agreements, setAgreements] = useState<Agreement[]>([]);
+  const [editingAgreement, setEditingAgreement] = useState<Agreement | null>(null);
   const [formData, setFormData] = useState({
     origin_id: "",
     destination_id: "",
@@ -124,6 +125,38 @@ export default function Rates() {
     }
   };
 
+  const openEditDialog = (agreement: Agreement) => {
+    setEditingAgreement(agreement);
+    setFormData({
+      origin_id: agreement.origin_id,
+      destination_id: agreement.destination_id,
+      rate_type: agreement.rate_type,
+      buy_price: agreement.buy_price.toString(),
+      sell_price: agreement.sell_price.toString(),
+      margin_percent: agreement.margin_percent.toString(),
+      min_charge: agreement.min_charge?.toString() || "",
+      valid_from: new Date(agreement.valid_from),
+      valid_to: agreement.valid_to ? new Date(agreement.valid_to) : null,
+      notes: agreement.notes || "",
+    });
+  };
+
+  const resetForm = () => {
+    setEditingAgreement(null);
+    setFormData({
+      origin_id: "",
+      destination_id: "",
+      rate_type: "",
+      buy_price: "",
+      sell_price: "",
+      margin_percent: "",
+      min_charge: "",
+      valid_from: new Date(),
+      valid_to: null,
+      notes: "",
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -213,35 +246,77 @@ export default function Rates() {
       approval_status,
     });
 
-    if (error) {
-      console.error("Agreement creation error:", error);
-      
-      if (error.message.includes("row-level security")) {
-        toast.error("Access denied. Please ensure you're properly linked to a shipping partner company.");
-      } else {
-        toast.error(`Failed to create agreement: ${error.message}`);
+    if (editingAgreement) {
+      // Update existing agreement
+      const { error: updateError } = await supabase
+        .from("agreements")
+        .update({
+          origin_id: formData.origin_id,
+          destination_id: formData.destination_id,
+          rate_type: formData.rate_type,
+          buy_price: parseFloat(formData.buy_price),
+          sell_price: parseFloat(formData.sell_price),
+          margin_percent: parseFloat(formData.margin_percent),
+          min_charge: formData.min_charge ? parseFloat(formData.min_charge) : null,
+          valid_from: formData.valid_from.toISOString(),
+          valid_to: formData.valid_to?.toISOString() || null,
+          notes: formData.notes || null,
+          // When partner edits, set to pending_admin again
+          approval_status: userRole === 'shipping_partner' ? 'pending_admin' : approval_status,
+        })
+        .eq("id", editingAgreement.id);
+
+      if (updateError) {
+        console.error("Agreement update error:", updateError);
+        
+        if (updateError.message.includes("row-level security")) {
+          toast.error("Access denied. You can only edit your own agreements.");
+        } else {
+          toast.error(`Failed to update agreement: ${updateError.message}`);
+        }
+        return;
       }
-      return;
+
+      const message = userRole === 'shipping_partner'
+        ? "Agreement updated and pending admin approval"
+        : "Agreement updated successfully";
+      toast.success(message);
+    } else {
+      // Create new agreement
+      const { error } = await supabase.from("agreements").insert({
+        origin_id: formData.origin_id,
+        destination_id: formData.destination_id,
+        rate_type: formData.rate_type,
+        buy_price: parseFloat(formData.buy_price),
+        sell_price: parseFloat(formData.sell_price),
+        margin_percent: parseFloat(formData.margin_percent),
+        min_charge: formData.min_charge ? parseFloat(formData.min_charge) : null,
+        valid_from: formData.valid_from.toISOString(),
+        valid_to: formData.valid_to?.toISOString() || null,
+        notes: formData.notes || null,
+        partner_id: partner_id_value,
+        approval_status,
+      });
+
+      if (error) {
+        console.error("Agreement creation error:", error);
+        
+        if (error.message.includes("row-level security")) {
+          toast.error("Access denied. Please ensure you're properly linked to a shipping partner company.");
+        } else {
+          toast.error(`Failed to create agreement: ${error.message}`);
+        }
+        return;
+      }
+
+      const message = approval_status === 'approved' 
+        ? "Agreement created successfully"
+        : "Agreement created and pending approval";
+      toast.success(message);
     }
 
-    const message = approval_status === 'approved' 
-      ? "Agreement created successfully"
-      : "Agreement created and pending approval";
-    toast.success(message);
     loadData();
-    // Reset form
-    setFormData({
-      origin_id: "",
-      destination_id: "",
-      rate_type: "",
-      buy_price: "",
-      sell_price: "",
-      margin_percent: "",
-      min_charge: "",
-      valid_from: new Date(),
-      valid_to: null,
-      notes: "",
-    });
+    resetForm();
   };
 
   const handleApprove = async (agreementId: string) => {
@@ -342,7 +417,19 @@ export default function Rates() {
           {/* Update Rates Form */}
           <Card>
             <CardHeader>
-              <CardTitle>Update Rates</CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle>{editingAgreement ? "Edit Rate" : "Create New Rate"}</CardTitle>
+                {editingAgreement && (
+                  <Button variant="ghost" size="sm" onClick={resetForm}>
+                    Cancel Edit
+                  </Button>
+                )}
+              </div>
+              {userRole === 'shipping_partner' && (
+                <p className="text-sm text-muted-foreground mt-2">
+                  ⚠️ Your rate changes require admin approval before becoming active
+                </p>
+              )}
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-4">

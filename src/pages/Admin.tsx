@@ -30,6 +30,9 @@ import { BulkOperations } from "@/components/admin/BulkOperations";
 import { CSVExportButtons } from "@/components/admin/CSVExportButtons";
 import { CSVImportDialog } from "@/components/admin/CSVImportDialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { MarginOverride } from "@/components/admin/MarginOverride";
+import ShipmentStatusUpdate from "@/components/admin/ShipmentStatusUpdate";
+import AgreementsManagement from "@/components/admin/AgreementsManagement";
 import { sendRequestApprovedNotification } from "@/utils/notificationUtils";
 
 interface ShipmentRequest {
@@ -476,131 +479,7 @@ const Admin = () => {
           </TabsContent>
 
           <TabsContent value="rates">
-            <div className="grid gap-6 md:grid-cols-2">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Settings className="h-5 w-5" />
-                    Update Rates
-                  </CardTitle>
-                  <CardDescription>Modify base rates and profit margins</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="rate-select">Select Rate Type</Label>
-                    <Select value={selectedRate} onValueChange={(value) => {
-                      setSelectedRate(value);
-                      const rate = rates.find(r => r.id === value);
-                      if (rate) {
-                        setBaseRate(rate.base_rate.toString());
-                        setBuyPrice(rate.buy_price?.toString() || "");
-                        setSellPrice(rate.sell_price?.toString() || "");
-                        setMargin(rate.margin_percentage.toString());
-                      }
-                    }}>
-                      <SelectTrigger id="rate-select">
-                        <SelectValue placeholder="Choose a rate type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {rates.map((rate) => (
-                          <SelectItem key={rate.id} value={rate.id}>
-                            {rate.rate_type.replace("_", " ").toUpperCase()}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="buy-price">Buy Price ($)</Label>
-                    <Input
-                      id="buy-price"
-                      type="number"
-                      step="0.01"
-                      placeholder="Enter buy price"
-                      value={buyPrice}
-                      onChange={(e) => setBuyPrice(e.target.value)}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="sell-price">Sell Price ($)</Label>
-                    <Input
-                      id="sell-price"
-                      type="number"
-                      step="0.01"
-                      placeholder="Enter sell price"
-                      value={sellPrice}
-                      onChange={(e) => setSellPrice(e.target.value)}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="base-rate">Base Rate ($) - Legacy</Label>
-                    <Input
-                      id="base-rate"
-                      type="number"
-                      step="0.01"
-                      placeholder="Enter base rate"
-                      value={baseRate}
-                      onChange={(e) => setBaseRate(e.target.value)}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="margin">Margin (%) - Legacy</Label>
-                    <Input
-                      id="margin"
-                      type="number"
-                      step="0.1"
-                      placeholder="Enter profit margin"
-                      value={margin}
-                      onChange={(e) => setMargin(e.target.value)}
-                    />
-                  </div>
-
-                  <Button onClick={handleUpdateRate} className="w-full">
-                    Update Rate
-                  </Button>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Current Rates</CardTitle>
-                  <CardDescription>Active shipping rates with margins</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {rates.map((rate) => {
-                      const buyPrice = rate.buy_price || rate.base_rate;
-                      const sellPrice = rate.sell_price || rate.base_rate * (1 + rate.margin_percentage / 100);
-                      const profit = sellPrice - buyPrice;
-                      const profitMargin = buyPrice > 0 ? ((profit / buyPrice) * 100).toFixed(2) : "0.00";
-                      
-                      return (
-                        <div
-                          key={rate.id}
-                          className="flex items-center justify-between p-4 border rounded-lg"
-                        >
-                          <div className="flex-1">
-                            <p className="font-medium">
-                              {rate.rate_type.replace("_", " ").toUpperCase()}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              Buy: ${buyPrice.toFixed(2)} • Sell: ${sellPrice.toFixed(2)}
-                            </p>
-                            <p className="text-xs text-green-600 font-medium">
-                              Profit: ${profit.toFixed(2)} ({profitMargin}% margin)
-                            </p>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+            <AgreementsManagement />
           </TabsContent>
 
           <TabsContent value="qc">
