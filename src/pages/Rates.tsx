@@ -58,10 +58,13 @@ export default function Rates() {
         console.log("User roles data:", roles);
         
         if (roles && roles.length > 0) {
-          setUserRole(roles[0].role);
-          setPartnerId(roles[0].shipping_partner_id);
-          console.log("Partner ID loaded:", roles[0].shipping_partner_id);
-          console.log("User role:", roles[0].role);
+          // Prefer admin if present, otherwise shipping_partner, else first
+          const isAdmin = roles.some(r => r.role === 'admin');
+          const partnerRole = roles.find(r => r.role === 'shipping_partner' && r.shipping_partner_id);
+          setUserRole(isAdmin ? 'admin' : (partnerRole ? 'shipping_partner' : roles[0].role));
+          setPartnerId(partnerRole?.shipping_partner_id || null);
+          console.log("Resolved role:", isAdmin ? 'admin' : (partnerRole ? 'shipping_partner' : roles[0].role));
+          console.log("Resolved partnerId:", partnerRole?.shipping_partner_id || null);
         }
       }
     } catch (error) {
@@ -133,11 +136,27 @@ export default function Rates() {
     }
 
     console.log("Submit - User Role:", userRole);
-    console.log("Submit - Partner ID:", partnerId);
+    console.log("Submit - Partner ID (state):", partnerId);
+
+    // Ensure we have the partner_id for partners
+    let resolvedPartnerId: string | null = partnerId;
+    if (userRole === 'shipping_partner' && !resolvedPartnerId) {
+      const { data: rolesErrCheck, error: rolesErr } = await supabase
+        .from('user_roles')
+        .select('shipping_partner_id, role')
+        .eq('role', 'shipping_partner')
+        .limit(1)
+        .maybeSingle();
+      if (rolesErr) {
+        console.error('Failed to load partner mapping on submit:', rolesErr);
+      }
+      resolvedPartnerId = rolesErrCheck?.shipping_partner_id ?? null;
+      console.log('Resolved partnerId from backend on submit:', resolvedPartnerId);
+    }
 
     // Determine approval status based on who creates it
     let approval_status: ApprovalStatus = 'approved';
-    let partner_id_value = partnerId;
+    let partner_id_value = resolvedPartnerId;
     
     if (userRole === 'shipping_partner') {
       // Partner creates -> needs admin approval and must set their partner_id
