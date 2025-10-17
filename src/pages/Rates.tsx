@@ -28,10 +28,12 @@ export default function Rates() {
   const [destinations, setDestinations] = useState<Destination[]>([]);
   const [agreements, setAgreements] = useState<Agreement[]>([]);
   const [editingAgreement, setEditingAgreement] = useState<Agreement | null>(null);
+  const [shippingPartners, setShippingPartners] = useState<Array<{ id: string; company_name: string }>>([]);
   const [formData, setFormData] = useState({
     origin_id: "",
     destination_id: "",
     rate_type: "" as RateType | "",
+    partner_id: null as string | null,
     buy_price: "",
     sell_price: "",
     margin_percent: "",
@@ -78,7 +80,7 @@ export default function Rates() {
   };
 
   const loadData = async () => {
-    const [originsRes, destinationsRes, agreementsRes] = await Promise.all([
+    const [originsRes, destinationsRes, agreementsRes, partnersRes] = await Promise.all([
       supabase.from("origins").select("*").eq("active", true).order("name"),
       supabase.from("destinations").select("*").eq("active", true).order("name"),
       supabase
@@ -86,11 +88,13 @@ export default function Rates() {
         .select(`*, origins(*), destinations(*)`)
         .eq("active", true)
         .order("created_at", { ascending: false }),
+      supabase.from("shipping_partners").select("id, company_name").eq("is_active", true).order("company_name"),
     ]);
 
     if (originsRes.data) setOrigins(originsRes.data);
     if (destinationsRes.data) setDestinations(destinationsRes.data);
     if (agreementsRes.data) setAgreements(agreementsRes.data as Agreement[]);
+    if (partnersRes.data) setShippingPartners(partnersRes.data);
   };
 
   const calculateSellPrice = (buy: number, margin: number) => {
@@ -131,6 +135,7 @@ export default function Rates() {
       origin_id: agreement.origin_id,
       destination_id: agreement.destination_id,
       rate_type: agreement.rate_type,
+      partner_id: agreement.partner_id,
       buy_price: agreement.buy_price.toString(),
       sell_price: agreement.sell_price.toString(),
       margin_percent: agreement.margin_percent.toString(),
@@ -147,6 +152,7 @@ export default function Rates() {
       origin_id: "",
       destination_id: "",
       rate_type: "",
+      partner_id: null,
       buy_price: "",
       sell_price: "",
       margin_percent: "",
@@ -210,7 +216,7 @@ export default function Rates() {
 
     // Determine approval status based on who creates it
     let approval_status: ApprovalStatus = 'approved';
-    let partner_id_value = resolvedPartnerId;
+    let partner_id_value = formData.partner_id || resolvedPartnerId;
     
     if (userRole === 'shipping_partner') {
       // Partner creates -> needs admin approval and must set their partner_id
@@ -225,10 +231,9 @@ export default function Rates() {
       partner_id_value = partnerId;
       console.log("Creating agreement with partner_id:", partner_id_value);
     } else if (userRole === 'admin') {
-      // Admin creates -> needs partner approval if partner_id is set
-      if (partnerId) {
-        approval_status = 'pending_partner';
-      }
+      // Admin creates -> can set partner_id from form or leave as global
+      // Use the selected partner from the form
+      partner_id_value = formData.partner_id;
     }
 
     const { error } = await supabase.from("agreements").insert({
@@ -495,6 +500,30 @@ export default function Rates() {
                     </Select>
                   </div>
                 </div>
+
+                {userRole === 'admin' && (
+                  <div>
+                    <Label htmlFor="partner">Shipping Partner (Optional - Leave empty for global rate)</Label>
+                    <Select
+                      value={formData.partner_id || "global"}
+                      onValueChange={(value) => 
+                        setFormData({ ...formData, partner_id: value === "global" ? null : value })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Global rate" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="global">Global Rate</SelectItem>
+                        {shippingPartners.map((partner) => (
+                          <SelectItem key={partner.id} value={partner.id}>
+                            {partner.company_name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
 
                 <div>
                   <Label htmlFor="buy_price">Buy Price (USD)</Label>
