@@ -66,6 +66,7 @@ const ProductRequestApproval = () => {
           const { error: invError } = await supabase
             .from("wms_inventory")
             .insert({
+              customer_id: request.customer_id,
               product_name: request.product_name,
               description: request.description,
               quantity: request.requested_quantity,
