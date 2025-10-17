@@ -173,6 +173,11 @@ export const ShippingCalculatorNew = () => {
         return;
       }
 
+      if (!agreement.sell_price) {
+        toast.error("Rate configuration error: Missing sell price");
+        return;
+      }
+
       totalPrice = chargeableWeight * agreement.sell_price;
       if (agreement.min_charge && totalPrice < agreement.min_charge) {
         totalPrice = agreement.min_charge;
@@ -191,6 +196,11 @@ export const ShippingCalculatorNew = () => {
       const agreement = await findActiveAgreement(rateType);
       if (!agreement) {
         toast.error(`No active rate found for Sea LCL from ${origins.find(o => o.id === selectedOrigin)?.name} to ${destinations.find(d => d.id === selectedDestination)?.name}`);
+        return;
+      }
+
+      if (!agreement.sell_price) {
+        toast.error("Rate configuration error: Missing sell price");
         return;
       }
 
@@ -214,6 +224,11 @@ export const ShippingCalculatorNew = () => {
       const agreement = await findActiveAgreement(rateType);
       if (!agreement) {
         toast.error(`No active rate found for ${rateType.replace("SEA_CONTAINER_", "")} container from ${origins.find(o => o.id === selectedOrigin)?.name} to ${destinations.find(d => d.id === selectedDestination)?.name}`);
+        return;
+      }
+
+      if (!agreement.sell_price) {
+        toast.error("Rate configuration error: Missing sell price");
         return;
       }
 
@@ -573,10 +588,12 @@ export const ShippingCalculatorNew = () => {
                       ${quote.totalPrice.toFixed(2)}
                     </span>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-2">
-                    Rate: ${quote.agreement.sell_price.toFixed(2)} per{" "}
-                    {mode === "air" ? "kg" : mode === "sea_lcl" ? "CBM" : "container"}
-                  </p>
+                  {quote.agreement.sell_price && (
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Rate: ${quote.agreement.sell_price.toFixed(2)} per{" "}
+                      {mode === "air" ? "kg" : mode === "sea_lcl" ? "CBM" : "container"}
+                    </p>
+                  )}
                 </div>
 
                 <Button onClick={handleSubmit} className="w-full" size="lg">
