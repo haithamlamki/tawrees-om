@@ -327,28 +327,93 @@ export const ShippingCalculatorNew = () => {
     navigate("/auth?returnTo=/");
   };
 
-  const restoreSavedCalculation = () => {
+  const restoreSavedCalculation = async () => {
     if (!savedCalculation) return;
     
-    // Restore all form fields
-    setMode(savedCalculation.mode);
-    setItems(savedCalculation.items);
-    setSelectedOrigin(savedCalculation.selectedOrigin);
-    setSelectedDestination(savedCalculation.selectedDestination);
-    setSelectedContainer(savedCalculation.selectedContainer || null);
-    setDeliveryType(savedCalculation.deliveryType);
-    setDeliveryAddress(savedCalculation.deliveryAddress);
-    setQuote(savedCalculation.quote);
+    console.log("Restoring saved calculation:", savedCalculation);
     
-    // Clear the dialog and saved data
+    // Clear the dialog first
     setShowRestoreDialog(false);
-    localStorage.removeItem('pendingCalculation');
     
-    // Auto-submit
-    toast.success("Restored your previous calculation. Submitting...");
-    setTimeout(() => {
-      submitCalculation();
-    }, 500);
+    toast.success("Restoring your calculation...");
+    
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error("Please log in to submit");
+        return;
+      }
+
+      if (!savedCalculation.quote) {
+        toast.error("No quote data found");
+        localStorage.removeItem('pendingCalculation');
+        return;
+      }
+
+      console.log("Submitting with quote:", savedCalculation.quote);
+
+      const requestData: any = {
+        customer_id: session.user.id,
+        shipping_type: savedCalculation.mode === "air" ? "air" : "sea",
+        calculated_cost: savedCalculation.quote.totalPrice,
+        status: "pending",
+        delivery_type: savedCalculation.deliveryType || "pickup",
+      };
+
+      // Calculate and add totals based on saved items
+      if (savedCalculation.mode === "air" || savedCalculation.mode === "sea_lcl") {
+        const savedItems = savedCalculation.items || [];
+        const validItems = savedItems.filter(
+          (item: any) => item.length > 0 && item.width > 0 && item.height > 0 && item.weight > 0
+        );
+        
+        if (validItems.length > 0) {
+          requestData.weight_kg = calculateActualWeight(validItems);
+          requestData.cbm_volume = calculateCBM(validItems);
+          requestData.items = savedItems;
+        }
+      }
+
+      // Add delivery address if applicable
+      if (savedCalculation.deliveryType === "door_delivery" && savedCalculation.deliveryAddress) {
+        requestData.delivery_address = savedCalculation.deliveryAddress.address;
+        requestData.delivery_city = savedCalculation.deliveryAddress.city;
+        requestData.delivery_postal_code = savedCalculation.deliveryAddress.postalCode;
+        requestData.delivery_country = savedCalculation.deliveryAddress.country;
+        requestData.delivery_contact_name = savedCalculation.deliveryAddress.contactName;
+        requestData.delivery_contact_phone = savedCalculation.deliveryAddress.contactPhone;
+      }
+
+      // Set calculation method
+      if (savedCalculation.mode === "sea_fcl") {
+        requestData.calculation_method = "container";
+        requestData.container_type_id = savedCalculation.selectedContainer;
+      } else {
+        requestData.calculation_method = savedCalculation.mode === "sea_lcl" ? "cbm" : null;
+      }
+
+      console.log("Submitting request data:", requestData);
+
+      const { data, error } = await supabase.from("shipment_requests").insert(requestData).select();
+
+      if (error) {
+        console.error("Submission error:", error);
+        toast.error(`Failed to submit: ${error.message}`);
+        return;
+      }
+
+      console.log("Submission successful:", data);
+
+      // Clear saved data
+      localStorage.removeItem('pendingCalculation');
+      setSavedCalculation(null);
+
+      toast.success("Shipment request submitted successfully!");
+      navigate("/dashboard");
+    } catch (error: any) {
+      console.error("Error in restoreSavedCalculation:", error);
+      toast.error("Failed to submit request. Please try again.");
+    }
   };
 
   const dismissSavedCalculation = () => {
@@ -632,9 +697,14 @@ export const ShippingCalculatorNew = () => {
                 deliveryContactPhone={deliveryAddress.contactPhone}
                 onDeliveryTypeChange={setDeliveryType}
                 onAddressChange={(field, value) => {
+                  // field will be like "deliveryAddress", "deliveryCity", etc.
+                  // Convert to state keys: "address", "city", etc.
+                  const stateKey = field.startsWith('delivery') 
+                    ? field.charAt(8).toLowerCase() + field.slice(9) 
+                    : field;
                   setDeliveryAddress((prev) => ({
                     ...prev,
-                    [field.replace('delivery', '').charAt(0).toLowerCase() + field.replace('delivery', '').slice(1)]: value
+                    [stateKey]: value
                   }));
                 }}
               />
