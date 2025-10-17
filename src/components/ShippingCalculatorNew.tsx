@@ -96,8 +96,25 @@ export const ShippingCalculatorNew = () => {
       supabase.from("destinations").select("*").eq("active", true).order("name"),
     ]);
 
-    if (originsRes.data) setOrigins(originsRes.data);
-    if (destinationsRes.data) setDestinations(destinationsRes.data);
+    if (originsRes.data) {
+      setOrigins(originsRes.data);
+      
+      // Set default origin to Guangzhou if no URL param
+      if (!searchParams.get('origin')) {
+        const guangzhou = originsRes.data.find(o => o.name.toLowerCase().includes('guangzhou'));
+        if (guangzhou) setSelectedOrigin(guangzhou.id);
+      }
+    }
+    
+    if (destinationsRes.data) {
+      setDestinations(destinationsRes.data);
+      
+      // Set default destination to Muscat if no URL param
+      if (!searchParams.get('dest')) {
+        const muscat = destinationsRes.data.find(d => d.name.toLowerCase().includes('muscat'));
+        if (muscat) setSelectedDestination(muscat.id);
+      }
+    }
   };
 
   const addItem = () => {
