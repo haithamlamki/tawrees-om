@@ -191,25 +191,68 @@ const Admin = () => {
       return;
     }
 
+    // Build update payload with numeric validation
     const updateData: any = {};
-    
-    if (baseRate) updateData.base_rate = parseFloat(baseRate);
-    if (buyPrice) updateData.buy_price = parseFloat(buyPrice);
-    if (sellPrice) updateData.sell_price = parseFloat(sellPrice);
-    if (margin) updateData.margin_percentage = parseFloat(margin);
+
+    const buy = buyPrice ? Number(buyPrice) : undefined;
+    const sell = sellPrice ? Number(sellPrice) : undefined;
+    const base = baseRate ? Number(baseRate) : undefined;
+    const mrg = margin ? Number(margin) : undefined;
+
+    if (base !== undefined) {
+      if (!Number.isFinite(base) || base < 0) {
+        toast.error("Base rate must be a valid non-negative number");
+        return;
+      }
+      updateData.base_rate = base;
+    }
+    if (buy !== undefined) {
+      if (!Number.isFinite(buy) || buy <= 0) {
+        toast.error("Buy price must be greater than 0");
+        return;
+      }
+      updateData.buy_price = buy;
+    }
+    if (sell !== undefined) {
+      if (!Number.isFinite(sell) || sell <= 0) {
+        toast.error("Sell price must be greater than 0");
+        return;
+      }
+      updateData.sell_price = sell;
+    }
+    if (mrg !== undefined) {
+      if (!Number.isFinite(mrg)) {
+        toast.error("Margin must be a valid number");
+        return;
+      }
+      updateData.margin_percentage = mrg;
+    }
+
+    if (buy !== undefined && sell !== undefined && sell <= buy) {
+      toast.error("Sell price must be greater than buy price");
+      return;
+    }
 
     if (Object.keys(updateData).length === 0) {
       toast.error("Please fill at least one field to update");
       return;
     }
 
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from("shipping_rates")
       .update(updateData)
-      .eq("id", selectedRate);
+      .eq("id", selectedRate)
+      .select()
+      .maybeSingle();
 
     if (error) {
-      toast.error("Failed to update rate");
+      console.error("Failed to update rate:", error);
+      toast.error(`Failed to update rate: ${error.message}`);
+      return;
+    }
+
+    if (!data) {
+      toast.error("No rate was updated. You might not have permission.");
       return;
     }
 
