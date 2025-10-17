@@ -29,16 +29,5 @@
   "surcharges": "Surcharges",
   "lastMileFee": "Last Mile Delivery",
   "totalPrice": "Total Price",
-  "requestQuote": "Request Quote",
-  "exportPDF": "Export PDF",
-  "exportExcel": "Export Excel",
-  "pdfExported": "PDF exported successfully",
-  "excelExported": "Excel exported successfully",
-  "exportError": "Failed to export",
-  "liveRates": "Live Shipping Rates",
-  "fetchingRates": "Fetching rates from carriers...",
-  "ratesError": "Unable to Fetch Rates",
-  "ratesDescription": "Real-time rates from major carriers",
-  "days": "days",
-  "ratesDisclaimer": "Rates are estimates and may vary. Contact carriers for final quotes."
+  "requestQuote": "Request Quote"
 }

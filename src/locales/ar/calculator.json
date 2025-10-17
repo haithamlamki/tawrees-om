@@ -29,16 +29,5 @@
   "surcharges": "الرسوم الإضافية",
   "lastMileFee": "رسوم التسليم الأخير",
   "totalPrice": "السعر الإجمالي",
-  "requestQuote": "طلب عرض سعر",
-  "exportPDF": "تصدير PDF",
-  "exportExcel": "تصدير Excel",
-  "pdfExported": "تم تصدير PDF بنجاح",
-  "excelExported": "تم تصدير Excel بنجاح",
-  "exportError": "فشل التصدير",
-  "liveRates": "أسعار الشحن المباشرة",
-  "fetchingRates": "جلب الأسعار من الناقلين...",
-  "ratesError": "تعذر جلب الأسعار",
-  "ratesDescription": "أسعار مباشرة من الناقلين الرئيسيين",
-  "days": "أيام",
-  "ratesDisclaimer": "الأسعار تقديرية وقد تختلف. اتصل بالناقلين للحصول على عروض أسعار نهائية."
+  "requestQuote": "طلب عرض سعر"
 }
