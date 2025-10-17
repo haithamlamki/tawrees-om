@@ -24,7 +24,7 @@ interface ProductRequest {
   created_at: string;
   customer: {
     company_name: string;
-    full_name: string;
+    customer_code?: string;
   };
 }
 
@@ -41,7 +41,7 @@ const ProductRequestApproval = () => {
         .from("wms_product_requests")
         .select(`
           *,
-          customer:wms_customers!wms_product_requests_customer_id_fkey(company_name, full_name)
+          customer:wms_customers!wms_product_requests_customer_id_fkey(company_name, customer_code)
         `)
         .order("created_at", { ascending: false });
 
