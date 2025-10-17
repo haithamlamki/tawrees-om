@@ -107,25 +107,28 @@ export const ShippingCalculatorNew = () => {
   };
 
   const findActiveAgreement = async (rateType: RateType): Promise<Agreement | null> => {
-    const { data, error } = await supabase
-      .from("agreements")
-      .select("*, origins(*), destinations(*)")
-      .eq("origin_id", selectedOrigin)
-      .eq("destination_id", selectedDestination)
-      .eq("rate_type", rateType)
-      .eq("active", true)
-      .eq("approval_status", "approved")
-      .lte("valid_from", new Date().toISOString())
-      .or(`valid_to.is.null,valid_to.gte.${new Date().toISOString()}`)
-      .limit(1)
-      .maybeSingle();
+    // Use secure RPC that bypasses RLS while enforcing business rules internally
+    const { data, error } = await supabase.rpc("get_public_active_agreement", {
+      p_origin: selectedOrigin,
+      p_destination: selectedDestination,
+      p_rate_type: rateType,
+    });
 
     if (error) {
       console.error("Error finding agreement:", error);
       return null;
     }
 
-    return data as Agreement;
+    if (!data) return null;
+
+    // Enrich with names for display using already-loaded lists
+    const agreement = {
+      ...(data as any),
+      origins: origins.find((o) => o.id === selectedOrigin),
+      destinations: destinations.find((d) => d.id === selectedDestination),
+    } as unknown as Agreement;
+
+    return agreement;
   };
 
   const calculateQuote = async () => {
@@ -526,7 +529,7 @@ export const ShippingCalculatorNew = () => {
                 <div>
                   <p className="text-sm text-muted-foreground">Lane</p>
                   <p className="font-medium">
-                    {quote.agreement.origins?.name} → {quote.agreement.destinations?.name}
+                    {origins.find(o => o.id === selectedOrigin)?.name} → {destinations.find(d => d.id === selectedDestination)?.name}
                   </p>
                 </div>
 

@@ -2536,6 +2536,24 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_public_active_agreement: {
+        Args: { p_destination: string; p_origin: string; p_rate_type: string }
+        Returns: {
+          active: boolean
+          buy_price: number
+          currency: string
+          destination_id: string
+          id: string
+          margin_percent: number
+          min_charge: number
+          notes: string
+          origin_id: string
+          rate_type: string
+          sell_price: number
+          valid_from: string
+          valid_to: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
