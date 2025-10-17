@@ -305,7 +305,6 @@ const PartnerDashboard = () => {
                 shipmentId={selectedShipment.id}
                 currentStatus={selectedShipment.status}
                 trackingNumber={selectedShipment.tracking_number}
-                customerId={selectedShipment.shipment_requests?.customer_id || ""}
                 onUpdate={() => {
                   setSelectedShipment(null);
                   loadPartnerData(partner?.id || "");
@@ -339,6 +338,8 @@ const PartnerDashboard = () => {
             }}
           />
         )}
+
+        {selectedShipment && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <div className="bg-card p-6 rounded-lg max-w-md w-full">
               <h3 className="text-lg font-semibold mb-4">Update Shipment Status</h3>
@@ -348,7 +349,7 @@ const PartnerDashboard = () => {
                 trackingNumber={selectedShipment.tracking_number}
                 onUpdate={() => {
                   setSelectedShipment(null);
-                  checkAuthAndLoadData();
+                  loadPartnerData(partner?.id || "");
                 }}
               />
               <Button

@@ -31,8 +31,13 @@ interface Shipment {
   id: string;
   tracking_number: string;
   status: string;
+  assigned_partner_id?: string;
   shipping_partners?: {
     company_name: string;
+    contact_person?: string;
+    phone?: string;
+    email?: string;
+    address?: string;
   };
 }
 
@@ -255,12 +260,20 @@ const Dashboard = () => {
                     
                     <div className="flex gap-2 justify-end">
                       {request.shipments && request.shipments.length > 0 && (
-                        <Button
-                          variant="outline"
-                          onClick={() => navigate(`/tracking/${request.shipments![0].tracking_number}`)}
-                        >
-                          Track Shipment
-                        </Button>
+                        <>
+                          <Button
+                            variant="outline"
+                            onClick={() => setSelectedRequestId(request.id)}
+                          >
+                            View Details
+                          </Button>
+                          <Button
+                            variant="outline"
+                            onClick={() => navigate(`/tracking/${request.shipments![0].tracking_number}`)}
+                          >
+                            Track Shipment
+                          </Button>
+                        </>
                       )}
                       <InvoiceGenerator 
                         requestId={request.id} 
@@ -274,6 +287,24 @@ const Dashboard = () => {
                       amount={request.calculated_cost}
                       requestStatus={request.status}
                     />
+
+                    {/* Show Partner Details and Timeline when shipment is assigned */}
+                    {request.shipments && request.shipments.length > 0 && selectedRequestId === request.id && (
+                      <div className="mt-4 space-y-4 pt-4 border-t">
+                        <ShippingPartnerDetails
+                          partnerName={request.shipments[0].shipping_partners?.company_name || "Unknown"}
+                          contactPerson={request.shipments[0].shipping_partners?.contact_person}
+                          phone={request.shipments[0].shipping_partners?.phone}
+                          email={request.shipments[0].shipping_partners?.email}
+                          address={request.shipments[0].shipping_partners?.address}
+                          status={request.shipments[0].status}
+                          trackingNumber={request.shipments[0].tracking_number}
+                        />
+                        <StatusTimeline
+                          currentStatus={request.shipments[0].status}
+                        />
+                      </div>
+                    )}
 
                     {/* Document Manager */}
                     <DocumentManager shipmentRequestId={request.id} />
