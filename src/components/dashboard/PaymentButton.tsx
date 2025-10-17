@@ -12,7 +12,7 @@ interface PaymentButtonProps {
   requestStatus: string;
 }
 
-const PaymentButton = ({ requestId, amount, currency = "NGN", requestStatus }: PaymentButtonProps) => {
+const PaymentButton = ({ requestId, amount, currency = "USD", requestStatus }: PaymentButtonProps) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
 

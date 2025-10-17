@@ -529,7 +529,7 @@ const Admin = () => {
                       <div className="flex items-center justify-between p-3 bg-primary/5 border border-primary/20 rounded-lg">
                         <div>
                           <p className="text-xs text-muted-foreground">Calculated Cost</p>
-                          <p className="text-2xl font-bold">₦{request.calculated_cost.toFixed(2)}</p>
+                          <p className="text-2xl font-bold">${request.calculated_cost.toFixed(2)}</p>
                         </div>
                         <div className="flex gap-2">
                           <Button
