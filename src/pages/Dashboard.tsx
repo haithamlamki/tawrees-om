@@ -29,6 +29,9 @@ interface Shipment {
   id: string;
   tracking_number: string;
   status: string;
+  shipping_partners?: {
+    company_name: string;
+  };
 }
 
 const Dashboard = () => {
@@ -98,7 +101,10 @@ const Dashboard = () => {
         shipments (
           id,
           tracking_number,
-          status
+          status,
+          shipping_partners (
+            company_name
+          )
         )
       `)
       .order("created_at", { ascending: false });
@@ -223,27 +229,36 @@ const Dashboard = () => {
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <div className="flex items-center justify-between">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <p className="text-sm text-muted-foreground">Estimated Cost</p>
                         <p className="text-2xl font-bold text-accent">
                           ${request.calculated_cost.toFixed(2)}
                         </p>
                       </div>
-                      <div className="flex gap-2">
-                        {request.shipments && request.shipments.length > 0 && (
-                          <Button
-                            variant="outline"
-                            onClick={() => navigate(`/tracking/${request.shipments![0].tracking_number}`)}
-                          >
-                            Track Shipment
-                          </Button>
-                        )}
-                        <InvoiceGenerator 
-                          requestId={request.id} 
-                          requestStatus={request.status}
-                        />
-                      </div>
+                      {request.shipments?.[0]?.shipping_partners && (
+                        <div>
+                          <p className="text-sm text-muted-foreground">Shipping Partner</p>
+                          <p className="text-lg font-semibold">
+                            {request.shipments[0].shipping_partners.company_name}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="flex gap-2 justify-end">
+                      {request.shipments && request.shipments.length > 0 && (
+                        <Button
+                          variant="outline"
+                          onClick={() => navigate(`/tracking/${request.shipments![0].tracking_number}`)}
+                        >
+                          Track Shipment
+                        </Button>
+                      )}
+                      <InvoiceGenerator 
+                        requestId={request.id} 
+                        requestStatus={request.status}
+                      />
                     </div>
 
                     {/* Payment Button */}
