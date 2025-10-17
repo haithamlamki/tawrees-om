@@ -8,9 +8,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Plane, Ship, Package, Calculator as CalcIcon, Plus } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import ItemRow from "./calculator/ItemRow";
 import { ContainerCard } from "./calculator/ContainerCard";
 import { DeliveryOptions } from "./calculator/DeliveryOptions";
+import { ExportButtons } from "./calculator/ExportButtons";
+import { ShippingRatesDisplay } from "./calculator/ShippingRatesDisplay";
+import { exportToPDF, exportToExcel } from "@/utils/exportUtils";
 import type { Origin, Destination, Agreement, RateType } from "@/types/locations";
 import { CONTAINER_DIMENSIONS } from "@/types/locations";
 import type { ShipmentItem } from "@/types/calculator";
@@ -35,6 +39,7 @@ import {
 type ShippingMode = "air" | "sea_lcl" | "sea_fcl";
 
 export const ShippingCalculatorNew = () => {
+  const { i18n } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [mode, setMode] = useState<ShippingMode>("air");
@@ -74,6 +79,9 @@ export const ShippingCalculatorNew = () => {
   });
   const [showRestoreDialog, setShowRestoreDialog] = useState(false);
   const [savedCalculation, setSavedCalculation] = useState<any>(null);
+  const [shippingRates, setShippingRates] = useState<any[]>([]);
+  const [loadingRates, setLoadingRates] = useState(false);
+  const [ratesError, setRatesError] = useState<string | undefined>();
 
   useEffect(() => {
     checkAuth();
@@ -487,6 +495,84 @@ export const ShippingCalculatorNew = () => {
     await submitCalculation();
   };
 
+  const fetchShippingRates = async () => {
+    if (!selectedOrigin || !selectedDestination) return;
+    
+    setLoadingRates(true);
+    setRatesError(undefined);
+
+    try {
+      const originData = origins.find(o => o.id === selectedOrigin);
+      const destData = destinations.find(d => d.id === selectedDestination);
+      
+      const weight = calculateActualWeight(items);
+      const volume = mode === "sea_lcl" || mode === "air" ? calculateCBM(items) : 0;
+
+      const { data, error } = await supabase.functions.invoke('get-shipping-rates', {
+        body: {
+          origin: originData?.name || '',
+          destination: destData?.name || '',
+          weight,
+          volume,
+          shippingType: mode === 'air' ? 'air' : 'sea'
+        }
+      });
+
+      if (error) throw error;
+      
+      setShippingRates(data?.rates || []);
+    } catch (error: any) {
+      console.error('Error fetching shipping rates:', error);
+      setRatesError('Unable to fetch live shipping rates at this time');
+    } finally {
+      setLoadingRates(false);
+    }
+  };
+
+  const handleExportPDF = async () => {
+    if (!quote) return;
+
+    await exportToPDF({
+      shippingType: mode === 'air' ? 'air' : 'sea',
+      items,
+      quote: {
+        baseRate: quote.totalPrice,
+        surcharges: [],
+        margin: { type: 'flat', value: 0, amount: 0 },
+        subtotal: quote.totalPrice,
+        total: quote.totalPrice,
+        calculations: quote.calculation
+      },
+      shippingRates,
+      deliveryType: deliveryType === 'pickup' ? 'Pickup from Port' : 'Door-to-Door Delivery',
+      deliveryCity: deliveryAddress.city,
+      containerType: selectedContainer ? selectedContainer.replace('SEA_CONTAINER_', '') + 'ft' : undefined,
+      language: i18n.language as 'en' | 'ar' | 'zh-CN'
+    });
+  };
+
+  const handleExportExcel = () => {
+    if (!quote) return;
+
+    exportToExcel({
+      shippingType: mode === 'air' ? 'air' : 'sea',
+      items,
+      quote: {
+        baseRate: quote.totalPrice,
+        surcharges: [],
+        margin: { type: 'flat', value: 0, amount: 0 },
+        subtotal: quote.totalPrice,
+        total: quote.totalPrice,
+        calculations: quote.calculation
+      },
+      shippingRates,
+      deliveryType: deliveryType === 'pickup' ? 'Pickup from Port' : 'Door-to-Door Delivery',
+      deliveryCity: deliveryAddress.city,
+      containerType: selectedContainer ? selectedContainer.replace('SEA_CONTAINER_', '') + 'ft' : undefined,
+      language: i18n.language as 'en' | 'ar' | 'zh-CN'
+    });
+  };
+
   const isCalculateDisabled = () => {
     if (!selectedOrigin || !selectedDestination) return true;
     
@@ -713,7 +799,10 @@ export const ShippingCalculatorNew = () => {
             {/* Calculate Button */}
             <div className="mt-6">
               <Button
-                onClick={calculateQuote}
+                onClick={() => {
+                  calculateQuote();
+                  fetchShippingRates();
+                }}
                 disabled={isCalculateDisabled()}
                 className="w-full"
                 size="lg"
@@ -722,6 +811,17 @@ export const ShippingCalculatorNew = () => {
                 Calculate Shipping Cost
               </Button>
             </div>
+
+            {/* Shipping Rates Display */}
+            {(loadingRates || shippingRates.length > 0 || ratesError) && (
+              <div className="mt-6">
+                <ShippingRatesDisplay
+                  rates={shippingRates}
+                  loading={loadingRates}
+                  error={ratesError}
+                />
+              </div>
+            )}
 
             {/* Quote Display */}
             {quote && (
@@ -795,6 +895,15 @@ export const ShippingCalculatorNew = () => {
                       </span>
                     </div>
                   </div>
+                </div>
+
+                {/* Export Buttons */}
+                <div className="mt-4">
+                  <ExportButtons
+                    onExportPDF={handleExportPDF}
+                    onExportExcel={handleExportExcel}
+                    disabled={false}
+                  />
                 </div>
 
                 <Button onClick={handleSubmit} className="w-full" size="lg">

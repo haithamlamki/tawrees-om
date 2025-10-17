@@ -29,5 +29,16 @@
   "surcharges": "附加费",
   "lastMileFee": "最后一公里配送",
   "totalPrice": "总价",
-  "requestQuote": "请求报价"
+  "requestQuote": "请求报价",
+  "exportPDF": "导出 PDF",
+  "exportExcel": "导出 Excel",
+  "pdfExported": "PDF 导出成功",
+  "excelExported": "Excel 导出成功",
+  "exportError": "导出失败",
+  "liveRates": "实时运费报价",
+  "fetchingRates": "正在获取承运商报价...",
+  "ratesError": "无法获取报价",
+  "ratesDescription": "主要承运商的实时报价",
+  "days": "天",
+  "ratesDisclaimer": "报价为估算值，可能有所变化。请联系承运商获取最终报价。"
 }
