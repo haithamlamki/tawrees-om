@@ -5,11 +5,12 @@ import Navigation from "@/components/Navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Loader2, Package, MapPin, Clock, Building2 } from "lucide-react";
+import { Loader2, Package, MapPin, Clock, Building2, FileText } from "lucide-react";
 import { toast } from "sonner";
 import ShipmentStatusUpdate from "@/components/admin/ShipmentStatusUpdate";
 import { OrderAcceptance } from "@/components/partner/OrderAcceptance";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ShipmentInvoices } from "@/components/admin/ShipmentInvoices";
 
 interface PartnerShipment {
   id: string;
@@ -175,12 +176,16 @@ const PartnerDashboard = () => {
         )}
 
         <Tabs defaultValue="pending" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="pending">
               New Requests ({pendingShipments.length})
             </TabsTrigger>
             <TabsTrigger value="active">
               Active Shipments ({activeShipments.length})
+            </TabsTrigger>
+            <TabsTrigger value="invoices">
+              <FileText className="mr-2 h-4 w-4" />
+              Invoices
             </TabsTrigger>
           </TabsList>
 
@@ -294,6 +299,10 @@ const PartnerDashboard = () => {
                 ))}
               </div>
             )}
+          </TabsContent>
+
+          <TabsContent value="invoices">
+            {partner && <ShipmentInvoices partnerId={partner.id} isAdmin={false} />}
           </TabsContent>
         </Tabs>
 

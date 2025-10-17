@@ -35,6 +35,7 @@ import ShipmentStatusUpdate from "@/components/admin/ShipmentStatusUpdate";
 import AgreementsManagement from "@/components/admin/AgreementsManagement";
 import { ShipmentApproval } from "@/components/admin/ShipmentApproval";
 import { sendRequestApprovedNotification } from "@/utils/notificationUtils";
+import { ShipmentInvoices } from "@/components/admin/ShipmentInvoices";
 
 interface ShipmentRequest {
   id: string;
@@ -367,6 +368,10 @@ const Admin = () => {
             <TabsTrigger value="wms">
               <Warehouse className="mr-2 h-4 w-4" />
               WMS
+            </TabsTrigger>
+            <TabsTrigger value="invoices">
+              <FileText className="mr-2 h-4 w-4" />
+              Invoices
             </TabsTrigger>
           </TabsList>
 
@@ -757,6 +762,10 @@ const Admin = () => {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          <TabsContent value="invoices">
+            <ShipmentInvoices isAdmin={true} />
           </TabsContent>
         </Tabs>
       </>
