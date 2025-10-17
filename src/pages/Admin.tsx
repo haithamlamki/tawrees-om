@@ -42,8 +42,23 @@ interface ShipmentRequest {
   calculated_cost: number;
   status: string;
   created_at: string;
+  items?: any;
+  calculation_method?: string;
+  cbm_volume?: number;
+  weight_kg?: number;
+  delivery_type?: string;
+  delivery_address?: string;
+  delivery_city?: string;
+  delivery_country?: string;
+  delivery_contact_name?: string;
+  delivery_contact_phone?: string;
+  notes?: string;
   profiles?: {
     full_name: string;
+    email: string;
+  };
+  container_types?: {
+    name: string;
   };
 }
 
@@ -104,7 +119,11 @@ const Admin = () => {
       .select(`
         *,
         profiles (
-          full_name
+          full_name,
+          email
+        ),
+        container_types (
+          name
         )
       `)
       .eq("status", "pending")
@@ -387,7 +406,126 @@ const Admin = () => {
                       </div>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
+                      {/* Customer Contact Info */}
+                      <div className="grid grid-cols-2 gap-4 p-4 bg-muted/50 rounded-lg">
+                        <div>
+                          <p className="text-xs text-muted-foreground">Email</p>
+                          <p className="text-sm font-medium">{request.profiles?.email || "-"}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground">Shipping Method</p>
+                          <p className="text-sm font-medium">{request.calculation_method?.toUpperCase() || "-"}</p>
+                        </div>
+                      </div>
+
+                      {/* Items Details */}
+                      {request.items && Array.isArray(request.items) && request.items.length > 0 && (
+                        <div className="space-y-3">
+                          <p className="text-sm font-semibold">Items ({request.items.length})</p>
+                          <div className="space-y-2">
+                            {request.items.map((item: any, idx: number) => (
+                              <div key={idx} className="p-3 border rounded-lg space-y-2">
+                                <div className="flex items-start gap-3">
+                                  {item.productImage && (
+                                    <img 
+                                      src={item.productImage} 
+                                      alt={item.productName || "Product"} 
+                                      className="w-16 h-16 object-cover rounded border"
+                                    />
+                                  )}
+                                  <div className="flex-1 min-w-0">
+                                    {item.productName && (
+                                      <p className="text-sm font-medium truncate">{item.productName}</p>
+                                    )}
+                                    <div className="grid grid-cols-2 gap-x-4 gap-y-1 mt-1">
+                                      <div className="text-xs">
+                                        <span className="text-muted-foreground">Dimensions: </span>
+                                        <span className="font-medium">
+                                          {item.length} × {item.width} × {item.height} {item.dimensionUnit}
+                                        </span>
+                                      </div>
+                                      <div className="text-xs">
+                                        <span className="text-muted-foreground">Weight: </span>
+                                        <span className="font-medium">{item.weight} {item.weightUnit}</span>
+                                      </div>
+                                      <div className="text-xs">
+                                        <span className="text-muted-foreground">Quantity: </span>
+                                        <span className="font-medium">{item.quantity}</span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Shipment Summary */}
+                      <div className="grid grid-cols-2 gap-4 p-4 bg-muted/50 rounded-lg">
+                        {request.container_types && (
+                          <div>
+                            <p className="text-xs text-muted-foreground">Container</p>
+                            <p className="text-sm font-medium">{request.container_types.name}</p>
+                          </div>
+                        )}
+                        {request.cbm_volume && (
+                          <div>
+                            <p className="text-xs text-muted-foreground">Total Volume</p>
+                            <p className="text-sm font-medium">{request.cbm_volume.toFixed(3)} CBM</p>
+                          </div>
+                        )}
+                        {request.weight_kg && (
+                          <div>
+                            <p className="text-xs text-muted-foreground">Total Weight</p>
+                            <p className="text-sm font-medium">{request.weight_kg.toFixed(2)} kg</p>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Delivery Details */}
+                      {request.delivery_type && (
+                        <div className="space-y-2 p-4 bg-muted/50 rounded-lg">
+                          <p className="text-sm font-semibold">Delivery Information</p>
+                          <div className="grid grid-cols-2 gap-2 text-sm">
+                            <div>
+                              <span className="text-muted-foreground">Type: </span>
+                              <span className="font-medium capitalize">{request.delivery_type}</span>
+                            </div>
+                            {request.delivery_contact_name && (
+                              <div>
+                                <span className="text-muted-foreground">Contact: </span>
+                                <span className="font-medium">{request.delivery_contact_name}</span>
+                              </div>
+                            )}
+                            {request.delivery_contact_phone && (
+                              <div>
+                                <span className="text-muted-foreground">Phone: </span>
+                                <span className="font-medium">{request.delivery_contact_phone}</span>
+                              </div>
+                            )}
+                            {request.delivery_address && (
+                              <div className="col-span-2">
+                                <span className="text-muted-foreground">Address: </span>
+                                <span className="font-medium">
+                                  {request.delivery_address}, {request.delivery_city}, {request.delivery_country}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Notes */}
+                      {request.notes && (
+                        <div className="p-4 bg-muted/50 rounded-lg">
+                          <p className="text-sm font-semibold mb-1">Customer Notes</p>
+                          <p className="text-sm text-muted-foreground">{request.notes}</p>
+                        </div>
+                      )}
+
+                      {/* Calculated Cost */}
+                      <div className="flex items-center justify-between p-4 bg-primary/5 border border-primary/20 rounded-lg">
                         <div>
                           <p className="text-sm text-muted-foreground">Calculated Cost</p>
                           <p className="text-2xl font-bold">₦{request.calculated_cost.toFixed(2)}</p>
