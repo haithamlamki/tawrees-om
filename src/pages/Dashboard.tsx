@@ -102,17 +102,17 @@ const Dashboard = () => {
           id,
           tracking_number,
           status,
-          shipping_partners (
+          shipping_partners:shipping_partners!shipments_assigned_partner_id_fkey (
             company_name
           )
         )
       `)
       .order("created_at", { ascending: false });
-
+ 
     if (!isAdmin) {
       query = query.eq("customer_id", userId);
     }
-
+ 
     const { data, error } = await query;
 
     if (error) {
@@ -236,11 +236,11 @@ const Dashboard = () => {
                           ${request.calculated_cost.toFixed(2)}
                         </p>
                       </div>
-                      {request.shipments?.[0]?.shipping_partners && (
+                      {request.shipments && request.shipments.length > 0 && (
                         <div>
                           <p className="text-sm text-muted-foreground">Shipping Partner</p>
                           <p className="text-lg font-semibold">
-                            {request.shipments[0].shipping_partners.company_name}
+                            {request.shipments[0].shipping_partners?.company_name || "Not assigned yet"}
                           </p>
                         </div>
                       )}
