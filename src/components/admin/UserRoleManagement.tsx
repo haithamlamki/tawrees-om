@@ -84,6 +84,12 @@ const UserRoleManagement = () => {
       return;
     }
 
+    // Validate shipping partner selection
+    if (newRole === "shipping_partner" && !selectedPartner) {
+      toast.error("Please select a shipping partner company for this partner user");
+      return;
+    }
+
     try {
       const insertData: any = {
         user_id: selectedUser,

@@ -120,8 +120,15 @@ export default function Rates() {
     let partner_id_value = partnerId;
     
     if (userRole === 'shipping_partner') {
-      // Partner creates -> needs admin approval
+      // Partner creates -> needs admin approval and must set their partner_id
       approval_status = 'pending_admin';
+      
+      // Ensure partner_id is set for partners - it's required by RLS
+      if (!partnerId) {
+        toast.error("Partner ID not found. Please contact admin.");
+        return;
+      }
+      partner_id_value = partnerId;
     } else if (userRole === 'admin') {
       // Admin creates -> needs partner approval if partner_id is set
       if (partnerId) {
@@ -145,7 +152,13 @@ export default function Rates() {
     });
 
     if (error) {
-      toast.error(`Failed to create agreement: ${error.message}`);
+      console.error("Agreement creation error:", error);
+      
+      if (error.message.includes("row-level security")) {
+        toast.error("Access denied. Please ensure you're properly linked to a shipping partner company.");
+      } else {
+        toast.error(`Failed to create agreement: ${error.message}`);
+      }
       return;
     }
 
