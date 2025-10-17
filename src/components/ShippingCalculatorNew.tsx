@@ -21,6 +21,16 @@ import {
   calculateVolumetricWeight,
   generateItemId,
 } from "@/utils/calculatorUtils";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 type ShippingMode = "air" | "sea_lcl" | "sea_fcl";
 
@@ -62,6 +72,8 @@ export const ShippingCalculatorNew = () => {
     contactName: "",
     contactPhone: "",
   });
+  const [showRestoreDialog, setShowRestoreDialog] = useState(false);
+  const [savedCalculation, setSavedCalculation] = useState<any>(null);
 
   useEffect(() => {
     checkAuth();
@@ -88,6 +100,16 @@ export const ShippingCalculatorNew = () => {
   const checkAuth = async () => {
     const { data: { session } } = await supabase.auth.getSession();
     setIsAuthenticated(!!session);
+    
+    // Check for saved calculation after authentication
+    if (session) {
+      const saved = localStorage.getItem('pendingCalculation');
+      if (saved) {
+        const calculationData = JSON.parse(saved);
+        setSavedCalculation(calculationData);
+        setShowRestoreDialog(true);
+      }
+    }
   };
 
   const loadLocations = async () => {
@@ -288,13 +310,54 @@ export const ShippingCalculatorNew = () => {
     }
   };
 
-  const handleSubmit = async () => {
-    if (!isAuthenticated) {
-      toast.error("Please sign in to submit a request");
-      navigate("/auth");
-      return;
-    }
+  const saveCalculationAndRedirect = () => {
+    const calculationData = {
+      timestamp: Date.now(),
+      mode,
+      items,
+      selectedOrigin,
+      selectedDestination,
+      selectedContainer,
+      deliveryType,
+      deliveryAddress,
+      quote,
+    };
+    
+    localStorage.setItem('pendingCalculation', JSON.stringify(calculationData));
+    navigate("/auth?returnTo=/");
+  };
 
+  const restoreSavedCalculation = () => {
+    if (!savedCalculation) return;
+    
+    // Restore all form fields
+    setMode(savedCalculation.mode);
+    setItems(savedCalculation.items);
+    setSelectedOrigin(savedCalculation.selectedOrigin);
+    setSelectedDestination(savedCalculation.selectedDestination);
+    setSelectedContainer(savedCalculation.selectedContainer || null);
+    setDeliveryType(savedCalculation.deliveryType);
+    setDeliveryAddress(savedCalculation.deliveryAddress);
+    setQuote(savedCalculation.quote);
+    
+    // Clear the dialog and saved data
+    setShowRestoreDialog(false);
+    localStorage.removeItem('pendingCalculation');
+    
+    // Auto-submit
+    toast.success("Restored your previous calculation. Submitting...");
+    setTimeout(() => {
+      submitCalculation();
+    }, 500);
+  };
+
+  const dismissSavedCalculation = () => {
+    setShowRestoreDialog(false);
+    setSavedCalculation(null);
+    localStorage.removeItem('pendingCalculation');
+  };
+
+  const submitCalculation = async () => {
     if (!quote) {
       toast.error("Please calculate a quote first");
       return;
@@ -317,10 +380,7 @@ export const ShippingCalculatorNew = () => {
         (item) => item.length > 0 && item.width > 0 && item.height > 0 && item.weight > 0
       );
       
-      // Calculate total weight in kg
       requestData.weight_kg = calculateActualWeight(validItems);
-      
-      // Calculate total CBM
       requestData.cbm_volume = calculateCBM(validItems);
     }
 
@@ -352,6 +412,16 @@ export const ShippingCalculatorNew = () => {
     navigate("/dashboard");
   };
 
+  const handleSubmit = async () => {
+    if (!isAuthenticated) {
+      toast.error("Please sign in to submit a request");
+      saveCalculationAndRedirect();
+      return;
+    }
+    
+    await submitCalculation();
+  };
+
   const isCalculateDisabled = () => {
     if (!selectedOrigin || !selectedDestination) return true;
     
@@ -366,306 +436,291 @@ export const ShippingCalculatorNew = () => {
   };
 
   return (
-    <div className="w-full max-w-6xl mx-auto">
-      <Card>
-        <CardHeader className="bg-primary text-primary-foreground">
-          <CardTitle className="flex items-center gap-2 text-2xl">
-            <Package className="h-6 w-6" />
-            Shipping Cost Calculator
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-6">
-          <Tabs value={mode} onValueChange={(v) => setMode(v as ShippingMode)}>
-            <TabsList className="grid w-full grid-cols-3 mb-6">
-              <TabsTrigger value="air" className="flex items-center gap-2">
-                <Plane className="h-4 w-4" />
-                Air Freight
-              </TabsTrigger>
-              <TabsTrigger value="sea_lcl" className="flex items-center gap-2">
-                <Ship className="h-4 w-4" />
-                Sea LCL
-              </TabsTrigger>
-              <TabsTrigger value="sea_fcl" className="flex items-center gap-2">
-                <Package className="h-4 w-4" />
-                Sea FCL
-              </TabsTrigger>
-            </TabsList>
+    <>
+      <AlertDialog open={showRestoreDialog} onOpenChange={setShowRestoreDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Restore Previous Calculation?</AlertDialogTitle>
+            <AlertDialogDescription>
+              We found your previous shipping calculation. Would you like to restore it and submit the request?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={dismissSavedCalculation}>
+              Discard
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={restoreSavedCalculation}>
+              Restore & Submit
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
-            {/* Common: Origin & Destination */}
-            <div className="grid md:grid-cols-2 gap-4 mb-6">
-              <div>
-                <Label>
-                  {mode === "air" ? "Origin (China)" : "Port of Origin (China)"}
-                </Label>
-                <Select value={selectedOrigin} onValueChange={setSelectedOrigin}>
-                  <SelectTrigger>
-                    <SelectValue placeholder={mode === "air" ? "Select origin city" : "Select origin port"} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {origins.map((origin) => (
-                      <SelectItem key={origin.id} value={origin.id}>
-                        {origin.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+      <div className="w-full max-w-6xl mx-auto">
+        <Card>
+          <CardHeader className="bg-primary text-primary-foreground">
+            <CardTitle className="flex items-center gap-2 text-2xl">
+              <Package className="h-6 w-6" />
+              Shipping Cost Calculator
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <Tabs value={mode} onValueChange={(v) => setMode(v as ShippingMode)}>
+              <TabsList className="grid w-full grid-cols-3 mb-6">
+                <TabsTrigger value="air" className="flex items-center gap-2">
+                  <Plane className="h-4 w-4" />
+                  Air Freight
+                </TabsTrigger>
+                <TabsTrigger value="sea_lcl" className="flex items-center gap-2">
+                  <Ship className="h-4 w-4" />
+                  Sea LCL
+                </TabsTrigger>
+                <TabsTrigger value="sea_fcl" className="flex items-center gap-2">
+                  <Package className="h-4 w-4" />
+                  Sea FCL
+                </TabsTrigger>
+              </TabsList>
+
+              {/* Common: Origin & Destination */}
+              <div className="grid md:grid-cols-2 gap-4 mb-6">
+                <div>
+                  <Label>
+                    {mode === "air" ? "Origin (China)" : "Port of Origin (China)"}
+                  </Label>
+                  <Select value={selectedOrigin} onValueChange={setSelectedOrigin}>
+                    <SelectTrigger>
+                      <SelectValue placeholder={mode === "air" ? "Select origin city" : "Select origin port"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {origins.map((origin) => (
+                        <SelectItem key={origin.id} value={origin.id}>
+                          {origin.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label>
+                    {mode === "air" ? "Destination" : "Port of Destination"}
+                  </Label>
+                  <Select value={selectedDestination} onValueChange={setSelectedDestination}>
+                    <SelectTrigger>
+                      <SelectValue placeholder={mode === "air" ? "Select destination" : "Select destination port"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {destinations.map((dest) => (
+                        <SelectItem key={dest.id} value={dest.id}>
+                          {dest.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
-              <div>
-                <Label>
-                  {mode === "air" ? "Destination" : "Port of Destination"}
-                </Label>
-                <Select value={selectedDestination} onValueChange={setSelectedDestination}>
-                  <SelectTrigger>
-                    <SelectValue placeholder={mode === "air" ? "Select destination" : "Select destination port"} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {destinations.map((dest) => (
-                      <SelectItem key={dest.id} value={dest.id}>
-                        {dest.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              {/* Air & Sea LCL: Cargo Items */}
+              <TabsContent value="air" className="mt-0">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold">Cargo Items</h3>
+                    <Button onClick={addItem} variant="outline" size="sm">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Item
+                    </Button>
+                  </div>
+
+                  {items.length === 0 ? (
+                    <div className="text-center py-12 border-2 border-dashed rounded-lg">
+                      <p className="text-muted-foreground mb-4">No items added yet</p>
+                      <Button onClick={addItem} variant="outline">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Your First Item
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {items.map((item) => (
+                        <ItemRow
+                          key={item.id}
+                          item={item}
+                          onUpdate={updateItem}
+                          onRemove={removeItem}
+                          canRemove={items.length > 1}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="sea_lcl" className="mt-0">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold">Cargo Items</h3>
+                    <Button onClick={addItem} variant="outline" size="sm">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Item
+                    </Button>
+                  </div>
+
+                  {items.length === 0 ? (
+                    <div className="text-center py-12 border-2 border-dashed rounded-lg">
+                      <p className="text-muted-foreground mb-4">No items added yet</p>
+                      <Button onClick={addItem} variant="outline">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Your First Item
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {items.map((item) => (
+                        <ItemRow
+                          key={item.id}
+                          item={item}
+                          onUpdate={updateItem}
+                          onRemove={removeItem}
+                          canRemove={items.length > 1}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </TabsContent>
+
+              {/* Sea FCL: Container Selection */}
+              <TabsContent value="sea_fcl" className="mt-0">
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Select Container Type</h3>
+                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <ContainerCard
+                      type="SEA_CONTAINER_20FT"
+                      selected={selectedContainer === "SEA_CONTAINER_20FT"}
+                      onSelect={() => setSelectedContainer("SEA_CONTAINER_20FT")}
+                    />
+                    <ContainerCard
+                      type="SEA_CONTAINER_40FT"
+                      selected={selectedContainer === "SEA_CONTAINER_40FT"}
+                      onSelect={() => setSelectedContainer("SEA_CONTAINER_40FT")}
+                    />
+                    <ContainerCard
+                      type="SEA_CONTAINER_40HC"
+                      selected={selectedContainer === "SEA_CONTAINER_40HC"}
+                      onSelect={() => setSelectedContainer("SEA_CONTAINER_40HC")}
+                    />
+                  </div>
+                </div>
+              </TabsContent>
+            </Tabs>
+
+            {/* Delivery Options */}
+            <div className="mt-6">
+              <DeliveryOptions
+                deliveryType={deliveryType}
+                deliveryAddress={deliveryAddress}
+                onDeliveryTypeChange={setDeliveryType}
+                onDeliveryAddressChange={setDeliveryAddress}
+              />
             </div>
 
-            {/* Air & Sea LCL: Cargo Items */}
-            <TabsContent value="air" className="mt-0">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold">Cargo Items</h3>
-                  <Button onClick={addItem} variant="outline" size="sm">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Item
-                  </Button>
-                </div>
+            {/* Calculate Button */}
+            <div className="mt-6">
+              <Button
+                onClick={calculateQuote}
+                disabled={isCalculateDisabled()}
+                className="w-full"
+                size="lg"
+              >
+                <CalcIcon className="mr-2 h-5 w-5" />
+                Calculate Shipping Cost
+              </Button>
+            </div>
 
-                {items.length === 0 ? (
-                  <div className="text-center py-12 border-2 border-dashed rounded-lg">
-                    <p className="text-muted-foreground mb-4">No items added yet</p>
-                    <Button onClick={addItem} variant="outline">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Your First Item
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {items.map((item) => (
-                      <ItemRow
-                        key={item.id}
-                        item={item}
-                        onUpdate={updateItem}
-                        onRemove={removeItem}
-                        canRemove={items.length > 1}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-            </TabsContent>
-
-            <TabsContent value="sea_lcl" className="mt-0">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold">Cargo Items</h3>
-                  <Button onClick={addItem} variant="outline" size="sm">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Item
-                  </Button>
-                </div>
-
-                {items.length === 0 ? (
-                  <div className="text-center py-12 border-2 border-dashed rounded-lg">
-                    <p className="text-muted-foreground mb-4">No items added yet</p>
-                    <Button onClick={addItem} variant="outline">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Your First Item
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {items.map((item) => (
-                      <ItemRow
-                        key={item.id}
-                        item={item}
-                        onUpdate={updateItem}
-                        onRemove={removeItem}
-                        canRemove={items.length > 1}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-            </TabsContent>
-
-            {/* Sea FCL: Container Selection */}
-            <TabsContent value="sea_fcl" className="mt-0">
-              <div className="space-y-6">
-                <h3 className="text-lg font-semibold">Select Container Type</h3>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <ContainerCard
-                    name="20' Standard"
-                    dimensions="5.9m × 2.35m × 2.39m"
-                    capacity={33}
-                    selected={selectedContainer === "SEA_CONTAINER_20"}
-                    onClick={() => setSelectedContainer("SEA_CONTAINER_20")}
-                  />
-                  <ContainerCard
-                    name="40' Standard"
-                    dimensions="12.03m × 2.35m × 2.39m"
-                    capacity={67}
-                    selected={selectedContainer === "SEA_CONTAINER_40"}
-                    onClick={() => setSelectedContainer("SEA_CONTAINER_40")}
-                  />
-                  <ContainerCard
-                    name="40' High Cube"
-                    dimensions="12.03m × 2.35m × 2.69m"
-                    capacity={76}
-                    selected={selectedContainer === "SEA_CONTAINER_40HC"}
-                    onClick={() => setSelectedContainer("SEA_CONTAINER_40HC")}
-                  />
-                  <ContainerCard
-                    name="45' High Cube"
-                    dimensions="13.56m × 2.35m × 2.69m"
-                    capacity={86}
-                    selected={selectedContainer === "SEA_CONTAINER_45HC"}
-                    onClick={() => setSelectedContainer("SEA_CONTAINER_45HC")}
-                  />
-                </div>
-
-                {selectedContainer && (
-                  <Card className="bg-muted/50">
-                    <CardContent className="p-4">
-                      <h4 className="font-semibold mb-2">Selected Container Details</h4>
-                      <div className="grid grid-cols-2 gap-4 text-sm">
-                        <div>
-                          <p className="text-muted-foreground">Type</p>
-                          <p className="font-medium">
-                            {selectedContainer.replace("SEA_CONTAINER_", "").replace("HC", " High Cube")}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-muted-foreground">Capacity</p>
-                          <p className="font-medium">{CONTAINER_DIMENSIONS[selectedContainer].capacity} CBM</p>
-                        </div>
-                        <div className="col-span-2">
-                          <p className="text-muted-foreground">Internal Dimensions</p>
-                          <p className="font-medium">
-                            {CONTAINER_DIMENSIONS[selectedContainer].length}m ×{" "}
-                            {CONTAINER_DIMENSIONS[selectedContainer].width}m ×{" "}
-                            {CONTAINER_DIMENSIONS[selectedContainer].height}m
-                          </p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
-              </div>
-            </TabsContent>
-          </Tabs>
-
-          {/* Delivery Options */}
-          <div className="mt-6">
-            <DeliveryOptions
-              deliveryType={deliveryType}
-              onDeliveryTypeChange={setDeliveryType}
-              deliveryAddress={deliveryAddress.address}
-              deliveryCity={deliveryAddress.city}
-              deliveryPostalCode={deliveryAddress.postalCode}
-              deliveryCountry={deliveryAddress.country}
-              deliveryContactName={deliveryAddress.contactName}
-              deliveryContactPhone={deliveryAddress.contactPhone}
-              onAddressChange={(field, value) => {
-                setDeliveryAddress(prev => {
-                  const key = field.replace("delivery", "").charAt(0).toLowerCase() + field.replace("delivery", "").slice(1);
-                  return { ...prev, [key]: value };
-                });
-              }}
-            />
-          </div>
-
-          {/* Calculate Button */}
-          <Button
-            onClick={calculateQuote}
-            className="w-full mt-6"
-            size="lg"
-            disabled={isCalculateDisabled()}
-          >
-            <CalcIcon className="h-5 w-5 mr-2" />
-            Calculate Shipping Cost
-          </Button>
-
-          {/* Quote Breakdown */}
-          {quote && (
-            <Card className="mt-6 border-primary">
-              <CardHeader>
-                <CardTitle>Cost Breakdown</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <p className="text-sm text-muted-foreground">Lane</p>
-                  <p className="font-medium">
-                    {origins.find(o => o.id === selectedOrigin)?.name} → {destinations.find(d => d.id === selectedDestination)?.name}
-                  </p>
-                </div>
-
-                {quote.calculation.chargeableWeight && (
-                  <div className="grid grid-cols-3 gap-4 text-sm">
-                    <div>
-                      <p className="text-muted-foreground">Actual Weight</p>
-                      <p className="font-medium">{quote.calculation.actualWeight} kg</p>
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground">Volumetric Weight</p>
-                      <p className="font-medium">{quote.calculation.volumetricWeight} kg</p>
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground">Chargeable Weight</p>
-                      <p className="font-medium">{quote.calculation.chargeableWeight} kg</p>
-                    </div>
-                  </div>
-                )}
-
-                {quote.calculation.totalCBM && (
-                  <div>
-                    <p className="text-sm text-muted-foreground">Total CBM</p>
-                    <p className="font-medium">{quote.calculation.totalCBM} CBM</p>
-                  </div>
-                )}
-
-                {quote.calculation.containerType && (
-                  <div>
-                    <p className="text-sm text-muted-foreground">Container</p>
-                    <p className="font-medium">
-                      {quote.calculation.containerType.replace("SEA_CONTAINER_", "").replace("HC", " High Cube")}
-                    </p>
-                  </div>
-                )}
-
-                <div className="border-t pt-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-lg font-semibold">Total Cost</span>
-                    <span className="text-2xl font-bold text-primary">
-                      ${quote.totalPrice.toFixed(2)}
+            {/* Quote Display */}
+            {quote && (
+              <div className="mt-6 p-6 bg-secondary/20 rounded-lg space-y-4">
+                <h3 className="text-xl font-semibold">Quote Breakdown</h3>
+                
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Route:</span>
+                    <span className="font-medium">
+                      {quote.agreement.origins?.name} → {quote.agreement.destinations?.name}
                     </span>
                   </div>
-                  {quote.agreement.sell_price && (
-                    <p className="text-xs text-muted-foreground mt-2">
-                      Rate: ${quote.agreement.sell_price.toFixed(2)} per{" "}
-                      {mode === "air" ? "kg" : mode === "sea_lcl" ? "CBM" : "container"}
-                    </p>
+                  
+                  {mode === "air" && (
+                    <>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Actual Weight:</span>
+                        <span>{quote.calculation.actualWeight} kg</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Volumetric Weight:</span>
+                        <span>{quote.calculation.volumetricWeight} kg</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Chargeable Weight:</span>
+                        <span className="font-medium">{quote.calculation.chargeableWeight} kg</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Rate per kg:</span>
+                        <span>{quote.agreement.currency} {quote.agreement.sell_price.toFixed(2)}</span>
+                      </div>
+                    </>
                   )}
+                  
+                  {mode === "sea_lcl" && (
+                    <>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Total CBM:</span>
+                        <span className="font-medium">{quote.calculation.totalCBM} m³</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Rate per CBM:</span>
+                        <span>{quote.agreement.currency} {quote.agreement.sell_price.toFixed(2)}</span>
+                      </div>
+                    </>
+                  )}
+                  
+                  {mode === "sea_fcl" && (
+                    <>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Container:</span>
+                        <span className="font-medium">{quote.calculation.containerType.replace("SEA_CONTAINER_", "")}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Capacity:</span>
+                        <span>{quote.calculation.capacity} m³</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Dimensions:</span>
+                        <span>{quote.calculation.dimensions}</span>
+                      </div>
+                    </>
+                  )}
+                  
+                  <div className="border-t pt-2 mt-2">
+                    <div className="flex justify-between text-lg font-bold">
+                      <span>Total Price:</span>
+                      <span className="text-primary">
+                        {quote.agreement.currency} {quote.totalPrice.toFixed(2)}
+                      </span>
+                    </div>
+                  </div>
                 </div>
 
                 <Button onClick={handleSubmit} className="w-full" size="lg">
                   Submit Shipment Request
                 </Button>
-              </CardContent>
-            </Card>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </>
   );
 };
+
+export default ShippingCalculatorNew;

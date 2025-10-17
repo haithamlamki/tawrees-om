@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,16 +28,18 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   useEffect(() => {
     const checkUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        navigate("/dashboard");
+        const returnTo = searchParams.get("returnTo");
+        navigate(returnTo || "/dashboard");
       }
     };
     checkUser();
-  }, [navigate]);
+  }, [navigate, searchParams]);
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,7 +76,8 @@ const Auth = () => {
           password: validation.data.password,
         });
         if (!signInError) {
-          navigate("/dashboard");
+          const returnTo = searchParams.get("returnTo");
+          navigate(returnTo || "/dashboard");
         }
       }, 1000);
     } catch (error: any) {
@@ -106,7 +109,8 @@ const Auth = () => {
       if (error) throw error;
       
       toast.success("Logged in successfully!");
-      navigate("/dashboard");
+      const returnTo = searchParams.get("returnTo") || "/dashboard";
+      navigate(returnTo);
     } catch (error: any) {
       toast.error("Invalid credentials. Please try again.");
       console.error("[Auth] Sign in error:", error);
