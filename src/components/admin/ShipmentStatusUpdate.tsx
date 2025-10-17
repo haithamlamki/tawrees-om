@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { sendStatusUpdateNotification } from "@/utils/notificationUtils";
+import { Upload } from "lucide-react";
 
 interface ShipmentStatusUpdateProps {
   shipmentId: string;
@@ -23,6 +24,7 @@ const ShipmentStatusUpdate = ({
 }: ShipmentStatusUpdateProps) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [paymentSlip, setPaymentSlip] = useState<File | null>(null);
   const [formData, setFormData] = useState({
     status: currentStatus,
     location: "",
@@ -34,6 +36,66 @@ const ShipmentStatusUpdate = ({
     setLoading(true);
 
     try {
+      // Get shipment request data
+      const { data: shipmentData, error: shipmentError } = await supabase
+        .from("shipments")
+        .select(`
+          request_id,
+          shipment_requests!inner (
+            customer_id
+          )
+        `)
+        .eq("id", shipmentId)
+        .single();
+
+      if (shipmentError) throw shipmentError;
+
+      // If setting status to delivered, check payment or require payment slip
+      if (formData.status === "delivered") {
+        // Check if payment exists and is paid
+        const { data: payment } = await supabase
+          .from("payments")
+          .select("status")
+          .eq("shipment_request_id", shipmentData.request_id)
+          .eq("status", "paid")
+          .single();
+
+        if (!payment && !paymentSlip) {
+          toast({
+            title: "Payment Required",
+            description: "Order must be paid or attach a payment slip before marking as delivered.",
+            variant: "destructive",
+          });
+          setLoading(false);
+          return;
+        }
+
+        // Upload payment slip if provided
+        if (paymentSlip) {
+          const fileExt = paymentSlip.name.split(".").pop();
+          const fileName = `${shipmentData.request_id}_payment_slip_${Date.now()}.${fileExt}`;
+          const filePath = `${shipmentData.request_id}/${fileName}`;
+
+          const { error: uploadError } = await supabase.storage
+            .from("shipment-documents")
+            .upload(filePath, paymentSlip);
+
+          if (uploadError) throw uploadError;
+
+          // Create document record
+          await supabase.from("shipment_documents").insert({
+            shipment_request_id: shipmentData.request_id,
+            document_type: "payment_slip",
+            file_name: paymentSlip.name,
+            file_path: filePath,
+            file_type: paymentSlip.type,
+            file_size: paymentSlip.size,
+            uploaded_by: (await supabase.auth.getUser()).data.user?.id,
+          });
+        }
+      }
+
+      // Update shipment status
       const { error: updateError } = await supabase
         .from("shipments")
         .update({
@@ -45,18 +107,7 @@ const ShipmentStatusUpdate = ({
 
       if (updateError) throw updateError;
 
-      // Get customer ID for notification
-      const { data: shipmentData } = await supabase
-        .from("shipments")
-        .select(`
-          request_id,
-          shipment_requests!inner (
-            customer_id
-          )
-        `)
-        .eq("id", shipmentId)
-        .single();
-
+      // Send notification
       if (shipmentData?.shipment_requests?.customer_id) {
         await sendStatusUpdateNotification(
           shipmentData.shipment_requests.customer_id,
@@ -126,6 +177,34 @@ const ShipmentStatusUpdate = ({
           rows={3}
         />
       </div>
+
+      {formData.status === "delivered" && (
+        <div className="space-y-2">
+          <Label htmlFor="payment-slip">Payment Slip (Required if unpaid)</Label>
+          <div className="flex items-center gap-2">
+            <Input
+              id="payment-slip"
+              type="file"
+              accept="image/*,.pdf"
+              onChange={(e) => setPaymentSlip(e.target.files?.[0] || null)}
+              className="flex-1"
+            />
+            {paymentSlip && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => setPaymentSlip(null)}
+              >
+                Clear
+              </Button>
+            )}
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Upload payment slip if order is not yet paid
+          </p>
+        </div>
+      )}
 
       <Button type="submit" className="w-full" disabled={loading}>
         {loading ? "Updating..." : "Update Status"}
