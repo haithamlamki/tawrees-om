@@ -29,5 +29,20 @@
   "surcharges": "الرسوم الإضافية",
   "lastMileFee": "رسوم التسليم الأخير",
   "totalPrice": "السعر الإجمالي",
-  "requestQuote": "طلب عرض سعر"
+  "requestQuote": "طلب عرض سعر",
+  "packageDetails": "أدخل تفاصيل الطرد",
+  "unit": "الوحدة",
+  "weightPerBox": "الوزن/صندوق",
+  "calculationResult": "نتيجة الحساب",
+  "volumeM3": "الحجم م³",
+  "volumeFt3": "الحجم قدم³",
+  "weightKg": "الوزن (كجم)",
+  "weightLb": "الوزن (رطل)",
+  "container20FT": "20 قدم",
+  "container40FT": "40 قدم",
+  "container40HC": "40 HC",
+  "volumetricWtKg": "الوزن الحجمي (كجم)",
+  "volumetricWtLbs": "الوزن الحجمي (رطل)",
+  "addMoreRows": "إضافة المزيد من الصفوف",
+  "removePackage": "إزالة"
 }

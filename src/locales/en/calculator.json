@@ -29,5 +29,20 @@
   "surcharges": "Surcharges",
   "lastMileFee": "Last Mile Delivery",
   "totalPrice": "Total Price",
-  "requestQuote": "Request Quote"
+  "requestQuote": "Request Quote",
+  "packageDetails": "Enter Package Details",
+  "unit": "Unit",
+  "weightPerBox": "Weight/box",
+  "calculationResult": "Calculation Result",
+  "volumeM3": "Volume m³",
+  "volumeFt3": "Volume ft³",
+  "weightKg": "Weight (Kg)",
+  "weightLb": "Weight (Lb)",
+  "container20FT": "20 FT",
+  "container40FT": "40 FT",
+  "container40HC": "40 HC",
+  "volumetricWtKg": "Volumetric Wt (Kg)",
+  "volumetricWtLbs": "Volumetric Wt (Lbs)",
+  "addMoreRows": "Add more rows",
+  "removePackage": "Remove"
 }

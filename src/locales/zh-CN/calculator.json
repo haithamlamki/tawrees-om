@@ -29,5 +29,20 @@
   "surcharges": "附加费",
   "lastMileFee": "最后一公里配送",
   "totalPrice": "总价",
-  "requestQuote": "请求报价"
+  "requestQuote": "请求报价",
+  "packageDetails": "输入包裹详情",
+  "unit": "单位",
+  "weightPerBox": "每箱重量",
+  "calculationResult": "计算结果",
+  "volumeM3": "体积 m³",
+  "volumeFt3": "体积 ft³",
+  "weightKg": "重量（公斤）",
+  "weightLb": "重量（磅）",
+  "container20FT": "20 英尺",
+  "container40FT": "40 英尺",
+  "container40HC": "40 HC",
+  "volumetricWtKg": "体积重量（公斤）",
+  "volumetricWtLbs": "体积重量（磅）",
+  "addMoreRows": "添加更多行",
+  "removePackage": "移除"
 }

@@ -8,7 +8,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Plane, Ship, Package, Calculator as CalcIcon, Plus } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import ItemRow from "./calculator/ItemRow";
+import { useTranslation } from "react-i18next";
+import { PackageRow } from "./calculator/PackageRow";
 import { ContainerCard } from "./calculator/ContainerCard";
 import { DeliveryOptions } from "./calculator/DeliveryOptions";
 import type { Origin, Destination, Agreement, RateType } from "@/types/locations";
@@ -37,6 +38,7 @@ type ShippingMode = "air" | "sea_lcl" | "sea_fcl";
 export const ShippingCalculatorNew = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { t } = useTranslation();
   const [mode, setMode] = useState<ShippingMode>("air");
   const [origins, setOrigins] = useState<Origin[]>([]);
   const [destinations, setDestinations] = useState<Destination[]>([]);
@@ -587,70 +589,42 @@ export const ShippingCalculatorNew = () => {
 
               {/* Air & Sea LCL: Cargo Items */}
               <TabsContent value="air" className="mt-0">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-semibold">Cargo Items</h3>
-                    <Button onClick={addItem} variant="outline" size="sm">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Item
-                    </Button>
-                  </div>
-
-                  {items.length === 0 ? (
-                    <div className="text-center py-12 border-2 border-dashed rounded-lg">
-                      <p className="text-muted-foreground mb-4">No items added yet</p>
-                      <Button onClick={addItem} variant="outline">
-                        <Plus className="h-4 w-4 mr-2" />
-                        Add Your First Item
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      {items.map((item) => (
-                        <ItemRow
-                          key={item.id}
-                          item={item}
-                          onUpdate={updateItem}
-                          onRemove={removeItem}
-                          canRemove={items.length > 1}
-                        />
-                      ))}
-                    </div>
-                  )}
+                <div className="space-y-6">
+                  {items.map((item, index) => (
+                    <PackageRow
+                      key={item.id}
+                      item={item}
+                      index={index}
+                      onUpdate={updateItem}
+                      onRemove={removeItem}
+                      canRemove={items.length > 1}
+                    />
+                  ))}
+                  
+                  <Button onClick={addItem} variant="outline" className="w-full">
+                    <Plus className="h-4 w-4 mr-2" />
+                    {t("calculator:addMoreRows")}
+                  </Button>
                 </div>
               </TabsContent>
 
               <TabsContent value="sea_lcl" className="mt-0">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-semibold">Cargo Items</h3>
-                    <Button onClick={addItem} variant="outline" size="sm">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Item
-                    </Button>
-                  </div>
-
-                  {items.length === 0 ? (
-                    <div className="text-center py-12 border-2 border-dashed rounded-lg">
-                      <p className="text-muted-foreground mb-4">No items added yet</p>
-                      <Button onClick={addItem} variant="outline">
-                        <Plus className="h-4 w-4 mr-2" />
-                        Add Your First Item
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      {items.map((item) => (
-                        <ItemRow
-                          key={item.id}
-                          item={item}
-                          onUpdate={updateItem}
-                          onRemove={removeItem}
-                          canRemove={items.length > 1}
-                        />
-                      ))}
-                    </div>
-                  )}
+                <div className="space-y-6">
+                  {items.map((item, index) => (
+                    <PackageRow
+                      key={item.id}
+                      item={item}
+                      index={index}
+                      onUpdate={updateItem}
+                      onRemove={removeItem}
+                      canRemove={items.length > 1}
+                    />
+                  ))}
+                  
+                  <Button onClick={addItem} variant="outline" className="w-full">
+                    <Plus className="h-4 w-4 mr-2" />
+                    {t("calculator:addMoreRows")}
+                  </Button>
                 </div>
               </TabsContent>
 
