@@ -311,6 +311,19 @@ export const ShippingCalculatorNew = () => {
       delivery_type: deliveryType,
     };
 
+    // Calculate and add totals based on items
+    if (mode === "air" || mode === "sea_lcl") {
+      const validItems = items.filter(
+        (item) => item.length > 0 && item.width > 0 && item.height > 0 && item.weight > 0
+      );
+      
+      // Calculate total weight in kg
+      requestData.weight_kg = calculateActualWeight(validItems);
+      
+      // Calculate total CBM
+      requestData.cbm_volume = calculateCBM(validItems);
+    }
+
     if (deliveryType === "door_delivery") {
       requestData.delivery_address = deliveryAddress.address;
       requestData.delivery_city = deliveryAddress.city;
