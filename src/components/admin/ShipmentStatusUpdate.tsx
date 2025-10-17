@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,11 +25,33 @@ const ShipmentStatusUpdate = ({
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [paymentSlip, setPaymentSlip] = useState<File | null>(null);
+  const [dueAmount, setDueAmount] = useState<number | null>(null);
   const [formData, setFormData] = useState({
     status: currentStatus,
     location: "",
     notes: "",
   });
+
+  // Fetch due amount when component mounts
+  useEffect(() => {
+    const fetchDueAmount = async () => {
+      const { data: shipmentData } = await supabase
+        .from("shipments")
+        .select(`
+          request_id,
+          shipment_requests!inner (
+            calculated_cost
+          )
+        `)
+        .eq("id", shipmentId)
+        .single();
+
+      if (shipmentData?.shipment_requests?.calculated_cost) {
+        setDueAmount(shipmentData.shipment_requests.calculated_cost);
+      }
+    };
+    fetchDueAmount();
+  }, [shipmentId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -180,6 +202,11 @@ const ShipmentStatusUpdate = ({
 
       {formData.status === "delivered" && (
         <div className="space-y-2">
+          {dueAmount && (
+            <div className="rounded-lg bg-muted p-3 mb-2">
+              <p className="text-sm font-medium">Due Amount: ${dueAmount.toFixed(2)}</p>
+            </div>
+          )}
           <Label htmlFor="payment-slip">Payment Slip (Required if unpaid)</Label>
           <div className="flex items-center gap-2">
             <Input
