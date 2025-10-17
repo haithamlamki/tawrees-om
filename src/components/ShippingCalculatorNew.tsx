@@ -778,6 +778,199 @@ export const ShippingCalculatorNew = () => {
             )}
           </CardContent>
         </Card>
+
+        {/* Educational Content Section */}
+        <div className="mt-12 space-y-8">
+          {/* Introduction */}
+          <section className="prose prose-slate max-w-none">
+            <h2 className="text-3xl font-bold mb-4">Cubic Meter Calculator</h2>
+            <p className="text-lg text-muted-foreground leading-relaxed">
+              Our cubic meter calculator helps you quickly and accurately calculate the volume of your cargo in cubic meters (m³). With this tool, you can enter the dimensions of a single package or multiple products and instantly get the CBM value.
+            </p>
+            <p className="text-muted-foreground leading-relaxed">
+              You can enter package dimensions in centimeters (cm), millimeters (mm), meters (m), inches (in), feet (ft), or yards (yd), making it flexible for users worldwide. The calculator automatically converts the entered values into cubic meters and cubic feet, so you can easily compare both units.
+            </p>
+            <p className="text-muted-foreground leading-relaxed">
+              This CBM calculator is especially useful for shipping, freight forwarding, and logistics planning, as it helps determine how much space your cargo will occupy inside a container. You can also check how many products will fit into standard shipping containers such as 20ft, 40ft, and 40ft High Cube.
+            </p>
+            <p className="text-muted-foreground leading-relaxed">
+              Whether you are exporting goods, planning air freight, or calculating volumetric weight for courier shipments, our cubic meter calculator makes the process simple and reliable.
+            </p>
+          </section>
+
+          {/* Features */}
+          <section>
+            <h3 className="text-2xl font-semibold mb-4">With this tool, you can:</h3>
+            <ul className="list-disc list-inside space-y-2 text-muted-foreground">
+              <li>Calculate CBM for single or multiple packages</li>
+              <li>Convert between cubic meters and cubic feet</li>
+              <li>Optimize container loading for sea freight</li>
+              <li>Estimate volumetric weight for air and courier shipments</li>
+            </ul>
+          </section>
+
+          {/* Formula */}
+          <section className="bg-muted/50 p-6 rounded-lg">
+            <h3 className="text-2xl font-semibold mb-4">Cubic Meter Calculator Formula</h3>
+            <div className="bg-background p-4 rounded border font-mono text-sm mb-4">
+              Length (in centimeter) × Width (in centimeter) × Height (in centimeter) / 1,000,000 = Cubic meter (m³)
+            </div>
+            <p className="text-muted-foreground">
+              We can input dimensions in Centimeter, millimeter, meter, inch, feet or yard
+            </p>
+          </section>
+
+          {/* How to Use */}
+          <section>
+            <h3 className="text-2xl font-semibold mb-4">How to use Cubic Meter Calculator in Meter for Multiple Products?</h3>
+            <p className="text-muted-foreground mb-4">
+              On this calculator you can add up to 10 products to get Volume Weight in meter (m³), Volume Weight in feet (ft³), Number of Packages Minimum & Maximum in Standard 20 FT Container, Number of Packages Minimum & Maximum in Standard 40 FT Container, and Number of packages Minimum & Maximum in Standard 40 FT High Cube Container.
+            </p>
+            
+            <div className="grid md:grid-cols-2 gap-8 mt-6">
+              {/* Steps */}
+              <div>
+                <h4 className="text-xl font-semibold mb-3">Steps (in case you enter dimensions in cm):</h4>
+                <dl className="space-y-3">
+                  <div>
+                    <dt className="font-semibold">Length (cm):</dt>
+                    <dd className="text-muted-foreground">Your package length in centimeter</dd>
+                  </div>
+                  <div>
+                    <dt className="font-semibold">Breadth (cm):</dt>
+                    <dd className="text-muted-foreground">Your package breadth in centimeter</dd>
+                  </div>
+                  <div>
+                    <dt className="font-semibold">Height (cm):</dt>
+                    <dd className="text-muted-foreground">Your package height in centimeter</dd>
+                  </div>
+                  <div>
+                    <dt className="font-semibold">Weight (kg):</dt>
+                    <dd className="text-muted-foreground">Your package weight in kilogram</dd>
+                  </div>
+                  <div>
+                    <dt className="font-semibold">Quantity:</dt>
+                    <dd className="text-muted-foreground">Number of packages, it only affects the Weight, Volume Weight, and shipment volume.</dd>
+                  </div>
+                </dl>
+              </div>
+
+              {/* Results */}
+              <div>
+                <h4 className="text-xl font-semibold mb-3">Results:</h4>
+                <dl className="space-y-3">
+                  <div>
+                    <dt className="font-semibold">Weight kg/lbs:</dt>
+                    <dd className="text-muted-foreground">Shipment weight in kg/lbs</dd>
+                  </div>
+                  <div>
+                    <dt className="font-semibold">Volume Weight kg/lbs:</dt>
+                    <dd className="text-muted-foreground">Volume weight of shipment in kg/lbs</dd>
+                  </div>
+                  <div>
+                    <dt className="font-semibold">Volume m³/ft³:</dt>
+                    <dd className="text-muted-foreground">Shipment volume in m³/ft³</dd>
+                  </div>
+                  <div>
+                    <dt className="font-semibold">20 FT min/max:</dt>
+                    <dd className="text-muted-foreground">Approx. minimum & maximum of packages which can be placed inside standard 20 FT container</dd>
+                  </div>
+                  <div>
+                    <dt className="font-semibold">40 FT min/max:</dt>
+                    <dd className="text-muted-foreground">Approx. minimum & maximum number of packages which can be placed inside standard 40 FT container</dd>
+                  </div>
+                  <div>
+                    <dt className="font-semibold">40 FT HC min/max:</dt>
+                    <dd className="text-muted-foreground">Approx. minimum & maximum number of packages which can be placed inside standard 40 FT High Cube container</dd>
+                  </div>
+                </dl>
+              </div>
+            </div>
+          </section>
+
+          {/* Container Dimensions Table */}
+          <section>
+            <h3 className="text-2xl font-semibold mb-4">Container Dimensions</h3>
+            <p className="text-muted-foreground mb-4">For above calculation we had used following container dimensions:</p>
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse border border-border">
+                <thead>
+                  <tr className="bg-muted">
+                    <th className="border border-border px-4 py-3 text-left font-semibold">Container / Dimensions</th>
+                    <th className="border border-border px-4 py-3 text-left font-semibold">Length (cm)</th>
+                    <th className="border border-border px-4 py-3 text-left font-semibold">Width (cm)</th>
+                    <th className="border border-border px-4 py-3 text-left font-semibold">Height (cm)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td className="border border-border px-4 py-3">20 FT Container</td>
+                    <td className="border border-border px-4 py-3">589</td>
+                    <td className="border border-border px-4 py-3">230</td>
+                    <td className="border border-border px-4 py-3">230</td>
+                  </tr>
+                  <tr className="bg-muted/50">
+                    <td className="border border-border px-4 py-3">40 FT Container</td>
+                    <td className="border border-border px-4 py-3">1200</td>
+                    <td className="border border-border px-4 py-3">230</td>
+                    <td className="border border-border px-4 py-3">230</td>
+                  </tr>
+                  <tr>
+                    <td className="border border-border px-4 py-3">40 FT HIGH CUBE Container</td>
+                    <td className="border border-border px-4 py-3">1200</td>
+                    <td className="border border-border px-4 py-3">230</td>
+                    <td className="border border-border px-4 py-3">260</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          {/* FAQs */}
+          <section>
+            <h3 className="text-2xl font-semibold mb-6">Frequently Asked Questions (FAQs)</h3>
+            <div className="space-y-6">
+              <div>
+                <h4 className="text-lg font-semibold mb-2">What is a cubic meter (CBM)?</h4>
+                <p className="text-muted-foreground">
+                  A cubic meter (m³) is a unit of volume that represents the space occupied by a cube measuring 1 meter × 1 meter × 1 meter. In shipping, CBM is used to calculate how much space cargo will take inside a container.
+                </p>
+              </div>
+
+              <div>
+                <h4 className="text-lg font-semibold mb-2">How do I calculate CBM manually?</h4>
+                <p className="text-muted-foreground mb-2">To calculate CBM:</p>
+                <div className="bg-muted/50 p-3 rounded font-mono text-sm">
+                  CBM = Length (m) × Width (m) × Height (m)
+                </div>
+                <p className="text-muted-foreground mt-2">
+                  If your measurements are in cm, mm, inches, or feet, convert them to meters first before multiplying.
+                </p>
+              </div>
+
+              <div>
+                <h4 className="text-lg font-semibold mb-2">Why is CBM important in shipping?</h4>
+                <p className="text-muted-foreground">
+                  CBM helps shipping companies determine how much cargo can fit inside a container. Freight charges are often calculated based on either weight or CBM, whichever is higher, making it crucial for cost estimation.
+                </p>
+              </div>
+
+              <div>
+                <h4 className="text-lg font-semibold mb-2">How many cubic meters are in a 20ft container?</h4>
+                <p className="text-muted-foreground">
+                  A standard 20ft container can hold approximately 33.2 CBM of cargo, depending on the cargo's shape and packing method.
+                </p>
+              </div>
+
+              <div>
+                <h4 className="text-lg font-semibold mb-2">How many cubic feet are in one cubic meter?</h4>
+                <p className="text-muted-foreground">
+                  1 cubic meter (m³) equals 35.315 cubic feet (ft³).
+                </p>
+              </div>
+            </div>
+          </section>
+        </div>
       </div>
     </>
   );
