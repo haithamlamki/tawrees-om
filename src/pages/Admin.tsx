@@ -462,25 +462,25 @@ const Admin = () => {
                       )}
 
                       {/* Shipment Summary */}
-                      <div className="grid grid-cols-2 gap-4 p-4 bg-muted/50 rounded-lg">
+                      <div className="grid grid-cols-3 gap-4 p-4 bg-accent/10 border border-accent/20 rounded-lg">
                         {request.container_types && (
                           <div>
                             <p className="text-xs text-muted-foreground">Container</p>
                             <p className="text-sm font-medium">{request.container_types.name}</p>
                           </div>
                         )}
-                        {request.cbm_volume && (
-                          <div>
-                            <p className="text-xs text-muted-foreground">Total Volume</p>
-                            <p className="text-sm font-medium">{request.cbm_volume.toFixed(3)} CBM</p>
-                          </div>
-                        )}
-                        {request.weight_kg && (
-                          <div>
-                            <p className="text-xs text-muted-foreground">Total Weight</p>
-                            <p className="text-sm font-medium">{request.weight_kg.toFixed(2)} kg</p>
-                          </div>
-                        )}
+                        <div>
+                          <p className="text-xs text-muted-foreground">Total CBM</p>
+                          <p className="text-lg font-bold text-primary">
+                            {request.cbm_volume ? request.cbm_volume.toFixed(3) : '0.000'} m³
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground">Total Weight</p>
+                          <p className="text-lg font-bold text-primary">
+                            {request.weight_kg ? request.weight_kg.toFixed(2) : '0.00'} kg
+                          </p>
+                        </div>
                       </div>
 
                       {/* Delivery Details */}
