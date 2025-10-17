@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Loader2, Package, MapPin, Clock, Building2 } from "lucide-react";
 import { toast } from "sonner";
 import ShipmentStatusUpdate from "@/components/admin/ShipmentStatusUpdate";
+import { OrderAcceptance } from "@/components/partner/OrderAcceptance";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface PartnerShipment {
   id: string;
@@ -18,6 +20,14 @@ interface PartnerShipment {
   notes: string | null;
   request_id: string;
   created_at: string;
+  shipment_requests?: {
+    customer_id: string;
+    delivery_address: string;
+    items: any;
+    profiles: {
+      full_name: string;
+    };
+  };
 }
 
 interface ShippingPartner {
@@ -34,6 +44,7 @@ const PartnerDashboard = () => {
   const [shipments, setShipments] = useState<PartnerShipment[]>([]);
   const [partner, setPartner] = useState<ShippingPartner | null>(null);
   const [selectedShipment, setSelectedShipment] = useState<PartnerShipment | null>(null);
+  const [selectedForAcceptance, setSelectedForAcceptance] = useState<PartnerShipment | null>(null);
 
   useEffect(() => {
     checkAuthAndLoadData();
@@ -76,10 +87,20 @@ const PartnerDashboard = () => {
       if (partnerError) throw partnerError;
       setPartner(partnerData);
 
-      // Load assigned shipments
+      // Load assigned shipments with customer details
       const { data: shipmentsData, error: shipmentsError } = await supabase
         .from("shipments")
-        .select("*")
+        .select(`
+          *,
+          shipment_requests (
+            customer_id,
+            delivery_address,
+            items,
+            profiles (
+              full_name
+            )
+          )
+        `)
         .eq("assigned_partner_id", partnerId)
         .order("created_at", { ascending: false });
 
@@ -95,13 +116,18 @@ const PartnerDashboard = () => {
 
   const getStatusBadge = (status: string) => {
     const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
+      pending_partner_acceptance: "outline",
       processing: "secondary",
       in_transit: "default",
       delivered: "outline",
       cancelled: "destructive",
+      rejected: "destructive",
     };
-    return <Badge variant={variants[status] || "default"}>{status.replace("_", " ")}</Badge>;
+    return <Badge variant={variants[status] || "default"}>{status.replace(/_/g, " ").toUpperCase()}</Badge>;
   };
+
+  const pendingShipments = shipments.filter(s => s.status === "pending_partner_acceptance");
+  const activeShipments = shipments.filter(s => s.status !== "pending_partner_acceptance" && s.status !== "rejected");
 
   if (loading) {
     return (
@@ -148,62 +174,171 @@ const PartnerDashboard = () => {
           </Card>
         )}
 
-        {shipments.length === 0 ? (
-          <Card>
-            <CardContent className="flex flex-col items-center justify-center py-12">
-              <Package className="h-12 w-12 text-muted-foreground mb-4" />
-              <p className="text-muted-foreground">No shipments assigned to your company yet</p>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid gap-4">
-            {shipments.map((shipment) => (
-              <Card key={shipment.id}>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-xl">
-                      Tracking: {shipment.tracking_number}
-                    </CardTitle>
-                    {getStatusBadge(shipment.status)}
-                  </div>
-                  <CardDescription>Request ID: {shipment.request_id}</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {shipment.current_location && (
-                    <div className="flex items-center gap-2">
-                      <MapPin className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">Current Location: {shipment.current_location}</span>
-                    </div>
-                  )}
-                  
-                  {shipment.estimated_delivery && (
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">
-                        Est. Delivery: {new Date(shipment.estimated_delivery).toLocaleDateString()}
-                      </span>
-                    </div>
-                  )}
+        <Tabs defaultValue="pending" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="pending">
+              New Requests ({pendingShipments.length})
+            </TabsTrigger>
+            <TabsTrigger value="active">
+              Active Shipments ({activeShipments.length})
+            </TabsTrigger>
+          </TabsList>
 
-                  {shipment.notes && (
-                    <div className="text-sm text-muted-foreground">
-                      <strong>Notes:</strong> {shipment.notes}
-                    </div>
-                  )}
-
-                  <Button 
-                    onClick={() => setSelectedShipment(shipment)}
-                    className="w-full"
-                  >
-                    Update Status
-                  </Button>
+          <TabsContent value="pending">
+            {pendingShipments.length === 0 ? (
+              <Card>
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <Package className="h-12 w-12 text-muted-foreground mb-4" />
+                  <p className="text-muted-foreground">No new order requests</p>
                 </CardContent>
               </Card>
-            ))}
+            ) : (
+              <div className="grid gap-4">
+                {pendingShipments.map((shipment) => (
+                  <Card key={shipment.id} className="border-primary/50">
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-xl">
+                          New Order - {shipment.tracking_number}
+                        </CardTitle>
+                        {getStatusBadge(shipment.status)}
+                      </div>
+                      <CardDescription>
+                        Customer: {shipment.shipment_requests?.profiles?.full_name || "Unknown"}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {shipment.shipment_requests?.delivery_address && (
+                        <div className="flex items-center gap-2">
+                          <MapPin className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-sm">{shipment.shipment_requests.delivery_address}</span>
+                        </div>
+                      )}
+                      
+                      {shipment.estimated_delivery && (
+                        <div className="flex items-center gap-2">
+                          <Clock className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-sm">
+                            Est. Delivery: {new Date(shipment.estimated_delivery).toLocaleDateString()}
+                          </span>
+                        </div>
+                      )}
+
+                      <Button 
+                        onClick={() => setSelectedForAcceptance(shipment)}
+                        className="w-full"
+                      >
+                        Review & Accept Order
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="active">
+            {activeShipments.length === 0 ? (
+              <Card>
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <Package className="h-12 w-12 text-muted-foreground mb-4" />
+                  <p className="text-muted-foreground">No active shipments</p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid gap-4">
+                {activeShipments.map((shipment) => (
+                  <Card key={shipment.id}>
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-xl">
+                          {shipment.tracking_number}
+                        </CardTitle>
+                        {getStatusBadge(shipment.status)}
+                      </div>
+                      <CardDescription>
+                        Customer: {shipment.shipment_requests?.profiles?.full_name || "Unknown"}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {shipment.current_location && (
+                        <div className="flex items-center gap-2">
+                          <MapPin className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-sm">Current Location: {shipment.current_location}</span>
+                        </div>
+                      )}
+                      
+                      {shipment.estimated_delivery && (
+                        <div className="flex items-center gap-2">
+                          <Clock className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-sm">
+                            Est. Delivery: {new Date(shipment.estimated_delivery).toLocaleDateString()}
+                          </span>
+                        </div>
+                      )}
+
+                      {shipment.notes && (
+                        <div className="text-sm text-muted-foreground">
+                          <strong>Notes:</strong> {shipment.notes}
+                        </div>
+                      )}
+
+                      <Button 
+                        onClick={() => setSelectedShipment(shipment)}
+                        className="w-full"
+                      >
+                        Update Status
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
+
+        {selectedShipment && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className="bg-card p-6 rounded-lg max-w-md w-full">
+              <h3 className="text-lg font-semibold mb-4">Update Shipment Status</h3>
+              <ShipmentStatusUpdate
+                shipmentId={selectedShipment.id}
+                currentStatus={selectedShipment.status}
+                trackingNumber={selectedShipment.tracking_number}
+                customerId={selectedShipment.shipment_requests?.customer_id || ""}
+                onUpdate={() => {
+                  setSelectedShipment(null);
+                  loadPartnerData(partner?.id || "");
+                }}
+              />
+              <Button
+                variant="outline"
+                className="w-full mt-4"
+                onClick={() => setSelectedShipment(null)}
+              >
+                Cancel
+              </Button>
+            </div>
           </div>
         )}
 
-        {selectedShipment && (
+        {selectedForAcceptance && (
+          <OrderAcceptance
+            shipmentId={selectedForAcceptance.id}
+            trackingNumber={selectedForAcceptance.tracking_number}
+            customerId={selectedForAcceptance.shipment_requests?.customer_id || ""}
+            customerName={selectedForAcceptance.shipment_requests?.profiles?.full_name || "Unknown"}
+            deliveryAddress={selectedForAcceptance.shipment_requests?.delivery_address || ""}
+            estimatedDelivery={selectedForAcceptance.estimated_delivery || ""}
+            items={selectedForAcceptance.shipment_requests?.items}
+            open={!!selectedForAcceptance}
+            onOpenChange={(open) => !open && setSelectedForAcceptance(null)}
+            onSuccess={() => {
+              setSelectedForAcceptance(null);
+              loadPartnerData(partner?.id || "");
+            }}
+          />
+        )}
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <div className="bg-card p-6 rounded-lg max-w-md w-full">
               <h3 className="text-lg font-semibold mb-4">Update Shipment Status</h3>

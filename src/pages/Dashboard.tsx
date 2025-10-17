@@ -14,6 +14,8 @@ import NotificationSettings from "@/components/notifications/NotificationSetting
 import QuoteView from "@/components/dashboard/QuoteView";
 import InvoiceGenerator from "@/components/dashboard/InvoiceGenerator";
 import PaymentButton from "@/components/dashboard/PaymentButton";
+import { ShippingPartnerDetails } from "@/components/customer/ShippingPartnerDetails";
+import { StatusTimeline } from "@/components/shipment/StatusTimeline";
 
 interface ShipmentRequest {
   id: string;
@@ -102,8 +104,13 @@ const Dashboard = () => {
           id,
           tracking_number,
           status,
+          assigned_partner_id,
           shipping_partners:shipping_partners!shipments_assigned_partner_id_fkey (
-            company_name
+            company_name,
+            contact_person,
+            phone,
+            email,
+            address
           )
         )
       `)

@@ -33,6 +33,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { MarginOverride } from "@/components/admin/MarginOverride";
 import ShipmentStatusUpdate from "@/components/admin/ShipmentStatusUpdate";
 import AgreementsManagement from "@/components/admin/AgreementsManagement";
+import { ShipmentApproval } from "@/components/admin/ShipmentApproval";
 import { sendRequestApprovedNotification } from "@/utils/notificationUtils";
 
 interface ShipmentRequest {
@@ -82,6 +83,7 @@ const Admin = () => {
   const [sellPrice, setSellPrice] = useState<string>("");
   const [margin, setMargin] = useState<string>("");
   const [selectedRequestForQuote, setSelectedRequestForQuote] = useState<string | null>(null);
+  const [selectedRequestForApproval, setSelectedRequestForApproval] = useState<ShipmentRequest | null>(null);
 
   useEffect(() => {
     checkAdminAndLoadData();
@@ -542,11 +544,11 @@ const Admin = () => {
                           </Button>
                           <Button
                             size="sm"
-                            variant="secondary"
-                            onClick={() => handleApproveRequest(request.id, "after")}
+                            variant="default"
+                            onClick={() => setSelectedRequestForApproval(request)}
                           >
                             <CheckCircle className="mr-1 h-3 w-3" />
-                            Quick Approve
+                            Approve Order
                           </Button>
                           <Button
                             size="sm"
@@ -582,6 +584,20 @@ const Admin = () => {
                 )}
               </DialogContent>
             </Dialog>
+
+            {/* Order Approval Dialog */}
+            {selectedRequestForApproval && (
+              <ShipmentApproval
+                requestId={selectedRequestForApproval.id}
+                customerId={selectedRequestForApproval.customer_id}
+                open={!!selectedRequestForApproval}
+                onOpenChange={(open) => !open && setSelectedRequestForApproval(null)}
+                onSuccess={() => {
+                  setSelectedRequestForApproval(null);
+                  loadPendingRequests();
+                }}
+              />
+            )}
           </TabsContent>
 
           <TabsContent value="customers">

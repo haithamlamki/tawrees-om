@@ -172,3 +172,103 @@ export const sendPushNotification = async ({
     return { success: false, error };
   }
 };
+
+export const sendOrderApprovedNotification = async (
+  customerId: string,
+  shipmentId: string,
+  partnerName: string,
+  trackingNumber: string
+) => {
+  await createInAppNotification(
+    customerId,
+    "Order Approved",
+    `Your order has been approved and assigned to ${partnerName}. Tracking: ${trackingNumber}`,
+    "shipment_approved",
+    shipmentId
+  );
+
+  await sendNotificationEmail({
+    recipientUserId: customerId,
+    templateType: "order_approved",
+    subject: "Your Order Has Been Approved",
+    metadata: {
+      partnerName,
+      trackingNumber,
+    },
+  });
+};
+
+export const sendPartnerAssignedNotification = async (
+  partnerId: string,
+  shipmentId: string,
+  trackingNumber: string
+) => {
+  const { data: partnerUsers } = await supabase
+    .from("user_roles")
+    .select("user_id")
+    .eq("shipping_partner_id", partnerId)
+    .eq("role", "shipping_partner");
+
+  if (partnerUsers) {
+    for (const partnerUser of partnerUsers) {
+      await createInAppNotification(
+        partnerUser.user_id,
+        "New Order Assignment",
+        `You have been assigned a new order. Tracking: ${trackingNumber}`,
+        "partner_assigned",
+        shipmentId
+      );
+    }
+  }
+};
+
+export const sendPartnerAcceptanceNotification = async (
+  customerId: string,
+  shipmentId: string,
+  partnerInfo: any,
+  trackingNumber: string
+) => {
+  await createInAppNotification(
+    customerId,
+    "Order Accepted",
+    `${partnerInfo.company_name} has accepted your order. Tracking: ${trackingNumber}`,
+    "partner_accepted",
+    shipmentId
+  );
+
+  await sendNotificationEmail({
+    recipientUserId: customerId,
+    templateType: "partner_accepted",
+    subject: "Your Order Is Now In Transit",
+    metadata: {
+      trackingNumber,
+      partnerName: partnerInfo.company_name,
+      partnerContact: partnerInfo.contact_person,
+      partnerPhone: partnerInfo.phone,
+      partnerEmail: partnerInfo.email,
+    },
+  });
+};
+
+export const sendDeliveryCompletedNotification = async (
+  customerId: string,
+  shipmentId: string,
+  trackingNumber: string
+) => {
+  await createInAppNotification(
+    customerId,
+    "Order Delivered",
+    `Your order ${trackingNumber} has been delivered. Please confirm receipt.`,
+    "delivered",
+    shipmentId
+  );
+
+  await sendNotificationEmail({
+    recipientUserId: customerId,
+    templateType: "delivery_completed",
+    subject: "Your Order Has Been Delivered",
+    metadata: {
+      trackingNumber,
+    },
+  });
+};

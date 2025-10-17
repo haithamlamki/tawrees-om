@@ -1139,6 +1139,41 @@ export type Database = {
           },
         ]
       }
+      shipment_messages: {
+        Row: {
+          created_at: string | null
+          id: string
+          message: string
+          sender_id: string
+          sender_type: string
+          shipment_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          message: string
+          sender_id: string
+          sender_type: string
+          shipment_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          message?: string
+          sender_id?: string
+          sender_type?: string
+          shipment_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shipment_messages_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shipment_requests: {
         Row: {
           actual_delivery_date: string | null
@@ -1347,14 +1382,21 @@ export type Database = {
           assigned_to: string | null
           created_at: string
           current_location: string | null
+          customer_confirmation_at: string | null
+          customer_feedback: string | null
+          customer_rating: number | null
           delivery_confirmed: boolean | null
           delivery_confirmed_at: string | null
           delivery_confirmed_by: string | null
+          delivery_confirmed_by_customer: boolean | null
           delivery_photo_url: string | null
           delivery_signature_url: string | null
           estimated_delivery: string | null
           id: string
           notes: string | null
+          partner_accepted_at: string | null
+          partner_accepted_by: string | null
+          partner_rejection_reason: string | null
           request_id: string
           status: string
           tracking_number: string
@@ -1366,14 +1408,21 @@ export type Database = {
           assigned_to?: string | null
           created_at?: string
           current_location?: string | null
+          customer_confirmation_at?: string | null
+          customer_feedback?: string | null
+          customer_rating?: number | null
           delivery_confirmed?: boolean | null
           delivery_confirmed_at?: string | null
           delivery_confirmed_by?: string | null
+          delivery_confirmed_by_customer?: boolean | null
           delivery_photo_url?: string | null
           delivery_signature_url?: string | null
           estimated_delivery?: string | null
           id?: string
           notes?: string | null
+          partner_accepted_at?: string | null
+          partner_accepted_by?: string | null
+          partner_rejection_reason?: string | null
           request_id: string
           status?: string
           tracking_number: string
@@ -1385,14 +1434,21 @@ export type Database = {
           assigned_to?: string | null
           created_at?: string
           current_location?: string | null
+          customer_confirmation_at?: string | null
+          customer_feedback?: string | null
+          customer_rating?: number | null
           delivery_confirmed?: boolean | null
           delivery_confirmed_at?: string | null
           delivery_confirmed_by?: string | null
+          delivery_confirmed_by_customer?: boolean | null
           delivery_photo_url?: string | null
           delivery_signature_url?: string | null
           estimated_delivery?: string | null
           id?: string
           notes?: string | null
+          partner_accepted_at?: string | null
+          partner_accepted_by?: string | null
+          partner_rejection_reason?: string | null
           request_id?: string
           status?: string
           tracking_number?: string

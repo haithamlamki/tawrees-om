@@ -79,3 +79,8 @@ export const calculateItemWeight = (item: ShipmentItem): number => {
   const weightKg = convertToKg(item.weight, item.weightUnit);
   return weightKg * item.quantity;
 };
+
+// Generate unique tracking number
+export const generateTrackingNumber = (): string => {
+  return 'TRK' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).substr(2, 5).toUpperCase();
+};
