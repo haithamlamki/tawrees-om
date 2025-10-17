@@ -114,6 +114,7 @@ export const ShippingCalculatorNew = () => {
       .eq("destination_id", selectedDestination)
       .eq("rate_type", rateType)
       .eq("active", true)
+      .eq("approval_status", "approved")
       .lte("valid_from", new Date().toISOString())
       .or(`valid_to.is.null,valid_to.gte.${new Date().toISOString()}`)
       .limit(1)
