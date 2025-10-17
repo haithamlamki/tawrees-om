@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,6 +28,60 @@ const QuoteManagement = ({ requestId, calculatedCost, onQuoteCreated }: QuoteMan
     handlingFees: "",
     notes: "",
   });
+
+  // Fetch buy cost from rates based on shipment request
+  useEffect(() => {
+    const fetchBuyCost = async () => {
+      try {
+        // Get shipment request details
+        const { data: request } = await supabase
+          .from("shipment_requests")
+          .select("shipping_type, calculation_method, cbm_volume, weight_kg")
+          .eq("id", requestId)
+          .single();
+
+        if (!request) return;
+
+        // Determine rate type
+        let rateType = "";
+        if (request.shipping_type === "air") {
+          rateType = "air_kg";
+        } else if (request.calculation_method === "cbm") {
+          rateType = "sea_cbm";
+        } else if (request.calculation_method === "container") {
+          rateType = "sea_container";
+        }
+
+        // Fetch rate
+        const { data: rate } = await supabase
+          .from("shipping_rates")
+          .select("buy_price, base_rate, sell_price")
+          .eq("rate_type", rateType)
+          .eq("is_active", true)
+          .single();
+
+        if (rate) {
+          // Calculate buy cost based on volume/weight
+          let buyCost = 0;
+          const rateValue = rate.buy_price || rate.base_rate || rate.sell_price || 0;
+          
+          if (request.shipping_type === "air") {
+            buyCost = (request.weight_kg || 0) * rateValue;
+          } else if (request.calculation_method === "cbm") {
+            buyCost = (request.cbm_volume || 0) * rateValue;
+          } else {
+            buyCost = rateValue; // Container rate is flat
+          }
+
+          setFormData(prev => ({ ...prev, buyCost: buyCost.toFixed(2) }));
+        }
+      } catch (error) {
+        console.error("Error fetching buy cost:", error);
+      }
+    };
+
+    fetchBuyCost();
+  }, [requestId]);
 
   const calculateProfit = () => {
     const buy = parseFloat(formData.buyCost) || 0;
@@ -122,7 +176,7 @@ const QuoteManagement = ({ requestId, calculatedCost, onQuoteCreated }: QuoteMan
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="buyCost">Buy Cost (₦)</Label>
+              <Label htmlFor="buyCost">Buy Cost ($)</Label>
               <Input
                 id="buyCost"
                 type="number"
@@ -134,7 +188,7 @@ const QuoteManagement = ({ requestId, calculatedCost, onQuoteCreated }: QuoteMan
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="sellPrice">Sell Price (₦)</Label>
+              <Label htmlFor="sellPrice">Sell Price ($)</Label>
               <Input
                 id="sellPrice"
                 type="number"
@@ -148,7 +202,7 @@ const QuoteManagement = ({ requestId, calculatedCost, onQuoteCreated }: QuoteMan
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="shippingCost">Shipping Cost (₦)</Label>
+              <Label htmlFor="shippingCost">Shipping Cost ($)</Label>
               <Input
                 id="shippingCost"
                 type="number"
@@ -159,7 +213,7 @@ const QuoteManagement = ({ requestId, calculatedCost, onQuoteCreated }: QuoteMan
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="customsFees">Customs Fees (₦)</Label>
+              <Label htmlFor="customsFees">Customs Fees ($)</Label>
               <Input
                 id="customsFees"
                 type="number"
@@ -172,7 +226,7 @@ const QuoteManagement = ({ requestId, calculatedCost, onQuoteCreated }: QuoteMan
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="insuranceCost">Insurance (₦)</Label>
+              <Label htmlFor="insuranceCost">Insurance ($)</Label>
               <Input
                 id="insuranceCost"
                 type="number"
@@ -183,7 +237,7 @@ const QuoteManagement = ({ requestId, calculatedCost, onQuoteCreated }: QuoteMan
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="handlingFees">Handling Fees (₦)</Label>
+              <Label htmlFor="handlingFees">Handling Fees ($)</Label>
               <Input
                 id="handlingFees"
                 type="number"
@@ -219,7 +273,7 @@ const QuoteManagement = ({ requestId, calculatedCost, onQuoteCreated }: QuoteMan
             <div className="flex justify-between">
               <span className="font-medium">Profit:</span>
               <span className={profit >= 0 ? "text-green-600" : "text-red-600"}>
-                ₦{profit.toFixed(2)}
+                ${profit.toFixed(2)}
               </span>
             </div>
             <div className="flex justify-between">
