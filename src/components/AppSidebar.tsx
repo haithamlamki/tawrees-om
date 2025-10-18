@@ -102,14 +102,22 @@ const adminNavigation: NavigationItem[] = [
   { name: "Support", href: "/admin/wms-support", icon: MessageSquare, group: "WMS" },
 ];
 
-const customerNavigation: NavigationItem[] = [
+const customerNavigation: NavigationItemWithSub[] = [
   { name: "Home", href: "/", icon: Home, group: "Main" },
-  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard, group: "Main" },
-  { name: "Shipment Requests", href: "/dashboard#requests", icon: Package, group: "Main" },
-  { name: "My Quotes", href: "/dashboard#quotes", icon: FileText, group: "Main" },
-  { name: "Invoices", href: "/dashboard#invoices", icon: FileBarChart, group: "Main" },
-  { name: "Profile", href: "/dashboard#profile", icon: User, group: "Main" },
-  { name: "Notifications", href: "/dashboard#notifications", icon: Bell, group: "Main" },
+  { 
+    name: "Dashboard", 
+    href: "/dashboard", 
+    icon: LayoutDashboard, 
+    group: "Main",
+    subItems: [
+      { name: "My Shipment Requests", href: "/dashboard#requests", icon: Package },
+      { name: "My Profile", href: "/dashboard#profile", icon: User },
+      { name: "Notifications", href: "/dashboard#notifications", icon: Bell },
+      { name: "My Quotes", href: "/dashboard#quotes", icon: FileText },
+      { name: "Quote Approvals", href: "/dashboard#approvals", icon: CheckSquare },
+      { name: "Invoices", href: "/dashboard#invoices", icon: FileBarChart },
+    ]
+  },
   { name: "Calculator", href: "/", icon: Calculator, group: "Tools" },
   { name: "Track Shipment", href: "/tracking", icon: Ship, group: "Tools" },
   { name: "Locations", href: "/locations", icon: MapPin, group: "Tools" },
@@ -140,17 +148,26 @@ interface NavigationItemWithSub extends NavigationItem {
 const partnerNavigation: NavigationItemWithSub[] = [
   // Main group
   { name: "Home", href: "/", icon: Home, group: "Main" },
-  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard, group: "Main" },
-  { name: "Shipment Requests", href: "/partner#requests", icon: Package, group: "Main" },
-  { name: "Profile", href: "/partner#profile", icon: User, group: "Main" },
-  { name: "Notifications", href: "/dashboard#notifications", icon: Bell, group: "Main" },
-  { name: "My Quotes", href: "/dashboard#quotes", icon: FileText, group: "Main" },
+  { 
+    name: "Dashboard", 
+    href: "/dashboard", 
+    icon: LayoutDashboard, 
+    group: "Main",
+    subItems: [
+      { name: "My Shipment Requests", href: "/dashboard#requests", icon: Package },
+      { name: "My Profile", href: "/dashboard#profile", icon: User },
+      { name: "Notifications", href: "/dashboard#notifications", icon: Bell },
+      { name: "My Quotes", href: "/dashboard#quotes", icon: FileText },
+      { name: "Quote Approvals", href: "/dashboard#approvals", icon: CheckSquare },
+      { name: "Invoices", href: "/dashboard#invoices", icon: FileBarChart },
+    ]
+  },
   
   // Partner group
   { name: "Partner Dashboard", href: "/partner", icon: Ship, group: "Partner" },
   { name: "New Requests", href: "/partner#requests", icon: Package, group: "Partner" },
   { name: "Active Shipments", href: "/partner#shipments", icon: Truck, group: "Partner" },
-  { name: "Invoices", href: "/partner#invoices", icon: FileBarChart, group: "Partner" },
+  { name: "Partner Invoices", href: "/partner#invoices", icon: FileBarChart, group: "Partner" },
   { name: "Partner Locations", href: "/locations", icon: MapPin, group: "Partner" },
   { name: "Rates", href: "/rates", icon: DollarSign, group: "Partner" },
 ];
@@ -331,23 +348,21 @@ export function AppSidebar() {
                               {!collapsed && <span>{item.name}</span>}
                             </Link>
                           </SidebarMenuButton>
-                          {!collapsed && (
-                            <SidebarMenuSub>
-                              {item.subItems!.map((subItem) => {
-                                const SubIcon = subItem.icon;
-                                return (
-                                  <SidebarMenuSubItem key={subItem.name}>
-                                    <SidebarMenuSubButton asChild isActive={isActive(subItem.href)}>
-                                      <Link to={subItem.href} className="flex items-center gap-2">
-                                        {SubIcon && <SubIcon className="h-4 w-4 flex-shrink-0" />}
-                                        <span>{subItem.name}</span>
-                                      </Link>
-                                    </SidebarMenuSubButton>
-                                  </SidebarMenuSubItem>
-                                );
-                              })}
-                            </SidebarMenuSub>
-                          )}
+                          <SidebarMenuSub>
+                            {item.subItems!.map((subItem) => {
+                              const SubIcon = subItem.icon;
+                              return (
+                                <SidebarMenuSubItem key={subItem.name}>
+                                  <SidebarMenuSubButton asChild isActive={isActive(subItem.href)}>
+                                    <Link to={subItem.href} className="flex items-center gap-2">
+                                      {SubIcon && <SubIcon className="h-4 w-4 flex-shrink-0" />}
+                                      {!collapsed && <span>{subItem.name}</span>}
+                                    </Link>
+                                  </SidebarMenuSubButton>
+                                </SidebarMenuSubItem>
+                              );
+                            })}
+                          </SidebarMenuSub>
                         </>
                       ) : (
                         <SidebarMenuButton asChild isActive={isActive(item.href)}>
