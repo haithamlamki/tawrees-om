@@ -2566,6 +2566,18 @@ export type Database = {
         Args: { p_invoice_id: string }
         Returns: Json
       }
+      can_partner_view_profile: {
+        Args: { _profile_id: string; _user_id: string }
+        Returns: boolean
+      }
+      can_partner_view_request: {
+        Args: { _request_id: string; _user_id: string }
+        Returns: boolean
+      }
+      can_partner_view_shipment: {
+        Args: { _shipment_id: string; _user_id: string }
+        Returns: boolean
+      }
       can_view_customer_statistics: {
         Args: Record<PropertyKey, never>
         Returns: boolean
@@ -2639,6 +2651,10 @@ export type Database = {
           _required_roles: string[]
           _user_id: string
         }
+        Returns: boolean
+      }
+      is_request_owned_by_user: {
+        Args: { _request_id: string; _user_id: string }
         Returns: boolean
       }
       sanitize_error_message: {
