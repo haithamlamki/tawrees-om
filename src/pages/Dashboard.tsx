@@ -116,6 +116,14 @@ const Dashboard = () => {
       .eq("user_id", session.user.id);
     
     const adminRole = roles?.some(r => r.role === "admin");
+    const partnerRole = roles?.some(r => r.role === "shipping_partner");
+    
+    // Redirect shipping partners to their partner dashboard
+    if (partnerRole && !adminRole) {
+      navigate("/partner");
+      return;
+    }
+    
     setIsAdmin(!!adminRole);
 
     await loadRequests(session.user.id, !!adminRole);
