@@ -70,6 +70,11 @@ export const PartnerPaymentDialog = ({
       return;
     }
 
+    if (!partnerId) {
+      toast.error("Cannot process payment for invoices without an assigned partner");
+      return;
+    }
+
     setUploading(true);
     try {
       // Get current user
@@ -83,14 +88,17 @@ export const PartnerPaymentDialog = ({
       if (refError) throw refError;
       const paymentReference = refData;
 
-      // Upload payment slip
+      // Upload payment slip with timestamp to avoid conflicts
       const fileExt = paymentSlip.name.split('.').pop();
-      const fileName = `${paymentReference}.${fileExt}`;
+      const timestamp = Date.now();
+      const fileName = `${paymentReference}_${timestamp}.${fileExt}`;
       const filePath = `${partnerId}/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
         .from('partner-payment-slips')
-        .upload(filePath, paymentSlip);
+        .upload(filePath, paymentSlip, {
+          upsert: false // Don't overwrite existing files
+        });
 
       if (uploadError) throw uploadError;
 

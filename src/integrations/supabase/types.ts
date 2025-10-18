@@ -3022,6 +3022,7 @@ export type Database = {
           customer_name: string
           id: string
           partner_amount: number
+          partner_id: string
           partner_name: string
           profit: number
           status: string

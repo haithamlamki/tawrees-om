@@ -21,6 +21,7 @@ interface InvoiceData {
   tawreed_amount: number;
   partner_amount: number;
   partner_name: string | null;
+  partner_id: string | null;
 }
 
 interface ShipmentInvoicesProps {
@@ -63,6 +64,12 @@ export const ShipmentInvoices = ({ partnerId, isAdmin = false }: ShipmentInvoice
   };
 
   const toggleInvoiceSelection = (invoiceId: string) => {
+    const invoice = displayedInvoices.find(inv => inv.id === invoiceId);
+    if (!invoice?.partner_id) {
+      toast.error("Cannot select invoices without an assigned partner");
+      return;
+    }
+    
     setSelectedInvoices(prev => {
       const newSet = new Set(prev);
       if (newSet.has(invoiceId)) {
@@ -75,10 +82,12 @@ export const ShipmentInvoices = ({ partnerId, isAdmin = false }: ShipmentInvoice
   };
 
   const toggleSelectAll = () => {
-    if (selectedInvoices.size === displayedInvoices.length) {
+    const selectableInvoices = displayedInvoices.filter(inv => inv.partner_id);
+    
+    if (selectedInvoices.size === selectableInvoices.length) {
       setSelectedInvoices(new Set());
     } else {
-      setSelectedInvoices(new Set(displayedInvoices.map(inv => inv.id)));
+      setSelectedInvoices(new Set(selectableInvoices.map(inv => inv.id)));
     }
   };
 
@@ -106,8 +115,8 @@ export const ShipmentInvoices = ({ partnerId, isAdmin = false }: ShipmentInvoice
     : invoices;
 
   const selectedInvoicesData = displayedInvoices.filter(inv => selectedInvoices.has(inv.id));
-  const selectedPartnerIds = new Set(selectedInvoicesData.map(inv => inv.partner_name));
-  const canProcessPayment = selectedInvoices.size > 0 && selectedPartnerIds.size === 1;
+  const selectedPartnerIds = new Set(selectedInvoicesData.map(inv => inv.partner_id).filter(Boolean));
+  const canProcessPayment = selectedInvoices.size > 0 && selectedPartnerIds.size === 1 && selectedInvoicesData[0]?.partner_id;
 
   if (loading) {
     return (
@@ -180,7 +189,7 @@ export const ShipmentInvoices = ({ partnerId, isAdmin = false }: ShipmentInvoice
                       {isAdmin && (
                         <TableHead className="w-12">
                           <Checkbox
-                            checked={selectedInvoices.size === displayedInvoices.length && displayedInvoices.length > 0}
+                            checked={selectedInvoices.size === displayedInvoices.filter(inv => inv.partner_id).length && displayedInvoices.filter(inv => inv.partner_id).length > 0}
                             onCheckedChange={toggleSelectAll}
                           />
                         </TableHead>
@@ -201,12 +210,13 @@ export const ShipmentInvoices = ({ partnerId, isAdmin = false }: ShipmentInvoice
                     {displayedInvoices.map((invoice) => (
                       <TableRow key={invoice.id}>
                         {isAdmin && (
-                          <TableCell>
-                            <Checkbox
-                              checked={selectedInvoices.has(invoice.id)}
-                              onCheckedChange={() => toggleInvoiceSelection(invoice.id)}
-                            />
-                          </TableCell>
+                        <TableCell>
+                          <Checkbox
+                            checked={selectedInvoices.has(invoice.id)}
+                            onCheckedChange={() => toggleInvoiceSelection(invoice.id)}
+                            disabled={!invoice.partner_id}
+                          />
+                        </TableCell>
                         )}
                         <TableCell className="font-mono text-xs">
                           {invoice.tracking_number}
@@ -319,7 +329,7 @@ export const ShipmentInvoices = ({ partnerId, isAdmin = false }: ShipmentInvoice
             partner_amount: inv.partner_amount,
             customer_name: inv.customer_name,
           }))}
-          partnerId={selectedInvoicesData[0]?.partner_name || ''}
+          partnerId={selectedInvoicesData[0]?.partner_id || ''}
           partnerName={selectedInvoicesData[0]?.partner_name || ''}
           onSuccess={() => {
             loadInvoices();
