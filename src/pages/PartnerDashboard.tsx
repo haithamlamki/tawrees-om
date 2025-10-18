@@ -5,12 +5,13 @@ import Navigation from "@/components/Navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Loader2, Package, MapPin, Clock, Building2, FileText } from "lucide-react";
+import { Loader2, Package, MapPin, Clock, Building2, FileText, ChevronDown, Box, Weight } from "lucide-react";
 import { toast } from "sonner";
 import ShipmentStatusUpdate from "@/components/admin/ShipmentStatusUpdate";
 import { OrderAcceptance } from "@/components/partner/OrderAcceptance";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ShipmentInvoices } from "@/components/admin/ShipmentInvoices";
+import { ItemDetailsViewer } from "@/components/admin/ItemDetailsViewer";
 
 interface PartnerShipment {
   id: string;
@@ -24,7 +25,14 @@ interface PartnerShipment {
   shipment_requests?: {
     customer_id: string;
     delivery_address: string;
+    delivery_city: string | null;
+    delivery_country: string | null;
+    delivery_contact_name: string | null;
+    delivery_contact_phone: string | null;
+    delivery_type: string | null;
     items: any;
+    cbm_volume: number | null;
+    weight_kg: number | null;
     profiles: {
       full_name: string;
     };
@@ -123,7 +131,14 @@ const PartnerDashboard = () => {
           shipment_requests (
             customer_id,
             delivery_address,
+            delivery_city,
+            delivery_country,
+            delivery_contact_name,
+            delivery_contact_phone,
+            delivery_type,
             items,
+            cbm_volume,
+            weight_kg,
             profiles (
               full_name
             )
@@ -225,46 +240,171 @@ const PartnerDashboard = () => {
                 </CardContent>
               </Card>
             ) : (
-              <div className="grid gap-4">
-                {pendingShipments.map((shipment) => (
-                  <Card key={shipment.id} className="border-primary/50">
-                    <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="text-xl">
-                          New Order - {shipment.tracking_number}
-                        </CardTitle>
-                        {getStatusBadge(shipment.status)}
-                      </div>
-                      <CardDescription>
-                        Customer: {shipment.shipment_requests?.profiles?.full_name || "Unknown"}
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      {shipment.shipment_requests?.delivery_address && (
-                        <div className="flex items-center gap-2">
-                          <MapPin className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-sm">{shipment.shipment_requests.delivery_address}</span>
-                        </div>
-                      )}
-                      
-                      {shipment.estimated_delivery && (
-                        <div className="flex items-center gap-2">
-                          <Clock className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-sm">
-                            Est. Delivery: {new Date(shipment.estimated_delivery).toLocaleDateString()}
-                          </span>
-                        </div>
-                      )}
+              <div className="grid gap-6">
+                {pendingShipments.map((shipment) => {
+                  const request = shipment.shipment_requests;
+                  const items = request?.items || [];
+                  const totalItems = Array.isArray(items) ? items.length : 0;
+                  
+                  // Get thumbnails from items with images
+                  const thumbnails = Array.isArray(items) 
+                    ? items
+                        .filter((item: any) => item.image_url)
+                        .slice(0, 4)
+                        .map((item: any) => item.image_url)
+                    : [];
 
-                      <Button 
-                        onClick={() => setSelectedForAcceptance(shipment)}
-                        className="w-full"
-                      >
-                        Review & Accept Order
-                      </Button>
-                    </CardContent>
-                  </Card>
-                ))}
+                  return (
+                    <Card key={shipment.id} className="border-primary/50">
+                      <CardHeader>
+                        <div className="flex items-center justify-between flex-wrap gap-2">
+                          <CardTitle className="text-xl">
+                            New Order - {shipment.tracking_number}
+                          </CardTitle>
+                          {getStatusBadge(shipment.status)}
+                        </div>
+                        <CardDescription>
+                          Customer: {request?.profiles?.full_name || "Unknown"}
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {/* Thumbnail Gallery */}
+                        {thumbnails.length > 0 && (
+                          <div className="flex gap-2 overflow-x-auto pb-2">
+                            {thumbnails.map((url: string, idx: number) => (
+                              <div 
+                                key={idx} 
+                                className="relative h-20 w-20 flex-shrink-0 rounded-lg overflow-hidden border-2 border-primary/20"
+                              >
+                                <img 
+                                  src={url} 
+                                  alt={`Item ${idx + 1}`}
+                                  className="h-full w-full object-cover"
+                                />
+                              </div>
+                            ))}
+                            {totalItems > thumbnails.length && (
+                              <div className="h-20 w-20 flex-shrink-0 rounded-lg border-2 border-dashed border-muted-foreground/30 flex items-center justify-center bg-muted/20">
+                                <span className="text-xs text-muted-foreground font-medium">
+                                  +{totalItems - thumbnails.length}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Quick Stats */}
+                        <div className="grid grid-cols-3 gap-2">
+                          <div className="bg-accent/10 border border-accent/20 rounded-lg p-3">
+                            <div className="flex items-center gap-2 mb-1">
+                              <Package className="h-4 w-4 text-primary" />
+                              <span className="text-xs text-muted-foreground">Items</span>
+                            </div>
+                            <p className="text-lg font-bold text-primary">{totalItems}</p>
+                          </div>
+                          <div className="bg-accent/10 border border-accent/20 rounded-lg p-3">
+                            <div className="flex items-center gap-2 mb-1">
+                              <Box className="h-4 w-4 text-primary" />
+                              <span className="text-xs text-muted-foreground">CBM</span>
+                            </div>
+                            <p className="text-lg font-bold text-primary">
+                              {request?.cbm_volume ? request.cbm_volume.toFixed(3) : '0.000'}
+                            </p>
+                          </div>
+                          <div className="bg-accent/10 border border-accent/20 rounded-lg p-3">
+                            <div className="flex items-center gap-2 mb-1">
+                              <Weight className="h-4 w-4 text-primary" />
+                              <span className="text-xs text-muted-foreground">Weight</span>
+                            </div>
+                            <p className="text-lg font-bold text-primary">
+                              {request?.weight_kg ? request.weight_kg.toFixed(2) : '0.00'} kg
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Summary & Delivery Section */}
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                          {/* Totals - CBM */}
+                          <div className="p-4 bg-accent/10 border border-accent/20 rounded-lg">
+                            <p className="text-xs text-muted-foreground mb-2">Total CBM</p>
+                            <p className="text-2xl font-bold text-primary">
+                              {request?.cbm_volume ? request.cbm_volume.toFixed(3) : '0.000'} m³
+                            </p>
+                          </div>
+
+                          {/* Totals - Weight */}
+                          <div className="p-4 bg-accent/10 border border-accent/20 rounded-lg">
+                            <p className="text-xs text-muted-foreground mb-2">Total Weight</p>
+                            <p className="text-2xl font-bold text-primary">
+                              {request?.weight_kg ? request.weight_kg.toFixed(2) : '0.00'} kg
+                            </p>
+                          </div>
+
+                          {/* Delivery Info */}
+                          {request?.delivery_type && (
+                            <div className="p-4 bg-muted/50 rounded-lg text-sm space-y-2">
+                              <p className="font-semibold mb-3 text-foreground">Delivery Information</p>
+                              {request.delivery_contact_name && (
+                                <div className="flex flex-col gap-1">
+                                  <span className="text-xs text-muted-foreground">Contact</span>
+                                  <span className="font-medium">{request.delivery_contact_name}</span>
+                                </div>
+                              )}
+                              {request.delivery_contact_phone && (
+                                <div className="flex flex-col gap-1">
+                                  <span className="text-xs text-muted-foreground">Phone</span>
+                                  <span className="font-medium">{request.delivery_contact_phone}</span>
+                                </div>
+                              )}
+                              {request.delivery_address && (
+                                <div className="flex flex-col gap-1">
+                                  <span className="text-xs text-muted-foreground">Address</span>
+                                  <span className="font-medium">
+                                    {request.delivery_address}, {request.delivery_city}, {request.delivery_country}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Expandable Item Details */}
+                        {totalItems > 0 && (
+                          <details className="group border border-border rounded-lg overflow-hidden">
+                            <summary className="flex items-center justify-between p-4 cursor-pointer bg-muted/30 hover:bg-muted/50 transition-colors">
+                              <span className="font-semibold text-foreground">
+                                View Detailed Item List ({totalItems} items)
+                              </span>
+                              <ChevronDown className="h-5 w-5 text-muted-foreground transition-transform group-open:rotate-180" />
+                            </summary>
+                            <div className="p-4 bg-background">
+                              <ItemDetailsViewer 
+                                items={items} 
+                                shippingType="sea"
+                              />
+                            </div>
+                          </details>
+                        )}
+
+                        {shipment.estimated_delivery && (
+                          <div className="flex items-center gap-2">
+                            <Clock className="h-4 w-4 text-muted-foreground" />
+                            <span className="text-sm">
+                              Est. Delivery: {new Date(shipment.estimated_delivery).toLocaleDateString()}
+                            </span>
+                          </div>
+                        )}
+
+                        <Button 
+                          onClick={() => setSelectedForAcceptance(shipment)}
+                          className="w-full"
+                        >
+                          Review & Accept Order
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
               </div>
             )}
           </TabsContent>
