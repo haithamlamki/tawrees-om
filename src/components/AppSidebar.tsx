@@ -99,7 +99,10 @@ const adminNavigation: NavigationItem[] = [
 
 const customerNavigation: NavigationItem[] = [
   { name: "Home", href: "/", icon: Home, group: "Main" },
-  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard, group: "Main" },
+  { name: "Shipment Requests", href: "/dashboard#requests", icon: Package, group: "Dashboard" },
+  { name: "Profile", href: "/dashboard#profile", icon: User, group: "Dashboard" },
+  { name: "Notifications", href: "/dashboard#notifications", icon: Bell, group: "Dashboard" },
+  { name: "My Quotes", href: "/dashboard#quotes", icon: FileText, group: "Dashboard" },
   { name: "Calculator", href: "/", icon: Calculator, group: "Tools" },
   { name: "Track Shipment", href: "/tracking", icon: Ship, group: "Tools" },
 ];

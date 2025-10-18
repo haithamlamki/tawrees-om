@@ -48,10 +48,30 @@ const Dashboard = () => {
   const [requests, setRequests] = useState<ShipmentRequest[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
   const [selectedRequestId, setSelectedRequestId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<string>("requests");
 
   useEffect(() => {
     checkAuthAndLoadData();
     handlePaymentCallback();
+  }, []);
+
+  useEffect(() => {
+    // Read hash from URL and set active tab
+    const hash = window.location.hash.slice(1); // Remove # prefix
+    if (hash && ['requests', 'profile', 'notifications', 'quotes', 'admin'].includes(hash)) {
+      setActiveTab(hash);
+    }
+    
+    // Listen for hash changes
+    const handleHashChange = () => {
+      const newHash = window.location.hash.slice(1);
+      if (newHash && ['requests', 'profile', 'notifications', 'quotes', 'admin'].includes(newHash)) {
+        setActiveTab(newHash);
+      }
+    };
+    
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
   const checkAuthAndLoadData = async () => {
@@ -184,7 +204,7 @@ const Dashboard = () => {
           </p>
         </div>
 
-        <Tabs defaultValue="requests" className="space-y-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList>
             <TabsTrigger value="requests">
               <Package className="mr-2 h-4 w-4" />
