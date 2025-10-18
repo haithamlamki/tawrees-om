@@ -132,34 +132,16 @@ interface NavigationItemWithSub extends NavigationItem {
 const partnerNavigation: NavigationItemWithSub[] = [
   // Main group
   { name: "Home", href: "/", icon: Home, group: "Main" },
-  { 
-    name: "Dashboard", 
-    href: "/dashboard", 
-    icon: LayoutDashboard, 
-    group: "Main",
-    subItems: [
-      { name: "Shipment Requests", href: "/dashboard#requests", icon: Package },
-      { name: "Profile", href: "/dashboard#profile", icon: User },
-      { name: "Notifications", href: "/dashboard#notifications", icon: Bell },
-      { name: "My Quotes", href: "/dashboard#quotes", icon: FileText },
-    ]
-  },
+  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard, group: "Main" },
   
   // Partner group
-  { 
-    name: "Partner Dashboard", 
-    href: "/partner", 
-    icon: Ship, 
-    group: "Partner",
-    subItems: [
-      { name: "New Requests", href: "/partner#requests", icon: Package },
-      { name: "Active Shipments", href: "/partner#shipments", icon: Truck },
-      { name: "All Shipments", href: "/partner#all-shipments", icon: Ship },
-      { name: "Invoices", href: "/partner#invoices", icon: FileBarChart },
-      { name: "Payments", href: "/partner#payments", icon: DollarSign },
-      { name: "Profile", href: "/partner#profile", icon: User },
-    ]
-  },
+  { name: "Partner Dashboard", href: "/partner", icon: Ship, group: "Partner" },
+  { name: "New Requests", href: "/partner#requests", icon: Package, group: "Partner" },
+  { name: "Active Shipments", href: "/partner#shipments", icon: Truck, group: "Partner" },
+  { name: "All Shipments", href: "/partner#all-shipments", icon: Ship, group: "Partner" },
+  { name: "Invoices", href: "/partner#invoices", icon: FileBarChart, group: "Partner" },
+  { name: "Payments", href: "/partner#payments", icon: DollarSign, group: "Partner" },
+  { name: "Profile", href: "/partner#profile", icon: User, group: "Partner" },
   { name: "Partner Locations", href: "/locations", icon: MapPin, group: "Partner" },
   { name: "Rates", href: "/rates", icon: DollarSign, group: "Partner" },
 ];
