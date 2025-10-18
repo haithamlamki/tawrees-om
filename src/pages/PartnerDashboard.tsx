@@ -279,30 +279,71 @@ const PartnerDashboard = () => {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         {/* Always show basic order info */}
-                        <div className="p-4 bg-muted/20 rounded-lg space-y-2">
-                          <p className="text-sm font-semibold text-foreground">Order Information</p>
-                          {request?.delivery_address && (
+                        <div className="p-4 bg-muted/20 rounded-lg space-y-3">
+                          <p className="text-sm font-semibold text-foreground mb-2">Order Information</p>
+                          
+                          {/* Delivery Address */}
+                          <div className="space-y-2">
                             <div className="flex items-start gap-2">
-                              <MapPin className="h-4 w-4 text-muted-foreground mt-0.5" />
-                              <div className="text-sm">
-                                <p className="font-medium">Delivery Address</p>
-                                <p className="text-muted-foreground">
-                                  {request.delivery_address}
-                                  {request.delivery_city && `, ${request.delivery_city}`}
-                                  {request.delivery_country && `, ${request.delivery_country}`}
+                              <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                              <div className="text-sm flex-1">
+                                <p className="font-medium text-foreground">Delivery Address</p>
+                                <p className="text-muted-foreground mt-1">
+                                  {request?.delivery_address || 'No address provided'}
+                                  {request?.delivery_city && `, ${request.delivery_city}`}
+                                  {request?.delivery_country && `, ${request.delivery_country}`}
                                 </p>
                               </div>
                             </div>
-                          )}
-                          {request?.delivery_contact_name && (
+                          </div>
+
+                          {/* Contact Information */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2 border-t border-border/50">
                             <div className="text-sm">
-                              <span className="font-medium">Contact: </span>
-                              <span className="text-muted-foreground">{request.delivery_contact_name}</span>
-                              {request.delivery_contact_phone && (
-                                <span className="text-muted-foreground"> - {request.delivery_contact_phone}</span>
-                              )}
+                              <p className="text-xs text-muted-foreground mb-1">Contact Name</p>
+                              <p className="font-medium text-foreground">
+                                {request?.delivery_contact_name || 'Not provided'}
+                              </p>
                             </div>
-                          )}
+                            <div className="text-sm">
+                              <p className="text-xs text-muted-foreground mb-1">Contact Phone</p>
+                              <p className="font-medium text-foreground">
+                                {request?.delivery_contact_phone || 'Not provided'}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Shipment Stats - Always visible */}
+                        <div>
+                          <p className="text-sm font-semibold mb-3">Shipment Details</p>
+                          <div className="grid grid-cols-3 gap-3">
+                            <div className="bg-accent/10 border border-accent/20 rounded-lg p-3">
+                              <div className="flex items-center gap-2 mb-1">
+                                <Package className="h-4 w-4 text-primary" />
+                                <span className="text-xs text-muted-foreground">Items</span>
+                              </div>
+                              <p className="text-lg font-bold text-primary">{totalItems}</p>
+                            </div>
+                            <div className="bg-accent/10 border border-accent/20 rounded-lg p-3">
+                              <div className="flex items-center gap-2 mb-1">
+                                <Box className="h-4 w-4 text-primary" />
+                                <span className="text-xs text-muted-foreground">CBM</span>
+                              </div>
+                              <p className="text-lg font-bold text-primary">
+                                {request?.cbm_volume ? request.cbm_volume.toFixed(3) : '0.000'}
+                              </p>
+                            </div>
+                            <div className="bg-accent/10 border border-accent/20 rounded-lg p-3">
+                              <div className="flex items-center gap-2 mb-1">
+                                <Weight className="h-4 w-4 text-primary" />
+                                <span className="text-xs text-muted-foreground">Weight</span>
+                              </div>
+                              <p className="text-lg font-bold text-primary">
+                                {request?.weight_kg ? request.weight_kg.toFixed(2) : '0.00'} kg
+                              </p>
+                            </div>
+                          </div>
                         </div>
 
                         {/* Thumbnail Gallery */}
@@ -333,40 +374,6 @@ const PartnerDashboard = () => {
                           </div>
                         )}
 
-                        {/* Quick Stats - Always show if we have data */}
-                        {(totalItems > 0 || request?.cbm_volume || request?.weight_kg) && (
-                          <div>
-                            <p className="text-sm font-semibold mb-2">Shipment Details</p>
-                            <div className="grid grid-cols-3 gap-2">
-                              <div className="bg-accent/10 border border-accent/20 rounded-lg p-3">
-                                <div className="flex items-center gap-2 mb-1">
-                                  <Package className="h-4 w-4 text-primary" />
-                                  <span className="text-xs text-muted-foreground">Items</span>
-                                </div>
-                                <p className="text-lg font-bold text-primary">{totalItems}</p>
-                              </div>
-                              <div className="bg-accent/10 border border-accent/20 rounded-lg p-3">
-                                <div className="flex items-center gap-2 mb-1">
-                                  <Box className="h-4 w-4 text-primary" />
-                                  <span className="text-xs text-muted-foreground">CBM</span>
-                                </div>
-                                <p className="text-lg font-bold text-primary">
-                                  {request?.cbm_volume ? request.cbm_volume.toFixed(3) : '0.000'}
-                                </p>
-                              </div>
-                              <div className="bg-accent/10 border border-accent/20 rounded-lg p-3">
-                                <div className="flex items-center gap-2 mb-1">
-                                  <Weight className="h-4 w-4 text-primary" />
-                                  <span className="text-xs text-muted-foreground">Weight</span>
-                                </div>
-                                <p className="text-lg font-bold text-primary">
-                                  {request?.weight_kg ? request.weight_kg.toFixed(2) : '0.00'} kg
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
                         {/* Expandable Item Details */}
                         {totalItems > 0 && (
                           <details className="group border border-border rounded-lg overflow-hidden">
@@ -385,6 +392,7 @@ const PartnerDashboard = () => {
                           </details>
                         )}
 
+                        {/* Est Delivery */}
                         {shipment.estimated_delivery && (
                           <div className="flex items-center gap-2 p-3 bg-muted/20 rounded-lg">
                             <Clock className="h-4 w-4 text-muted-foreground" />
