@@ -18,6 +18,7 @@ import { SupplierDetails } from "@/components/customer/SupplierDetails";
 import { StatusTimeline } from "@/components/shipment/StatusTimeline";
 import { ItemDetailsViewer } from "@/components/admin/ItemDetailsViewer";
 import { QuoteApprovalDialog } from "@/components/customer/QuoteApprovalDialog";
+import { BulkItemSupplierEditor } from "@/components/admin/BulkItemSupplierEditor";
 
 interface ShipmentRequest {
   id: string;
@@ -73,6 +74,7 @@ const Dashboard = () => {
   const [activeTab, setActiveTab] = useState<string>("requests");
   const [pendingQuotes, setPendingQuotes] = useState<any[]>([]);
   const [selectedQuoteShipment, setSelectedQuoteShipment] = useState<any | null>(null);
+  const [editingSupplier, setEditingSupplier] = useState<{ requestId: string; items: any[] } | null>(null);
 
   useEffect(() => {
     checkAuthAndLoadData();
@@ -418,6 +420,15 @@ const Dashboard = () => {
                           Track Shipment
                         </Button>
                       )}
+                      {request.items && request.items.length > 0 && (
+                        <Button
+                          variant="outline"
+                          onClick={() => setEditingSupplier({ requestId: request.id, items: request.items })}
+                        >
+                          <Building2 className="mr-2 h-4 w-4" />
+                          Edit Supplier
+                        </Button>
+                      )}
                       <InvoiceGenerator 
                         requestId={request.id} 
                         requestStatus={request.status}
@@ -577,6 +588,23 @@ const Dashboard = () => {
               if (user) {
                 await loadRequests(user.id, isAdmin);
                 await loadPendingQuotes(user.id);
+              }
+            }}
+          />
+        )}
+
+        {/* Bulk Supplier Editor Dialog */}
+        {editingSupplier && (
+          <BulkItemSupplierEditor
+            open={!!editingSupplier}
+            onOpenChange={(open) => !open && setEditingSupplier(null)}
+            items={editingSupplier.items}
+            requestId={editingSupplier.requestId}
+            onUpdateComplete={async () => {
+              setEditingSupplier(null);
+              const { data: { user } } = await supabase.auth.getUser();
+              if (user) {
+                await loadRequests(user.id, isAdmin);
               }
             }}
           />

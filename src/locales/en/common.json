@@ -55,5 +55,11 @@
   "supplierPerItem": "Supplier for this item",
   "requestNewSupplier": "Request new supplier",
   "supplierForItem": "Supplier for {itemName}",
-  "suppliersForItems": "Suppliers for Items"
+  "suppliersForItems": "Suppliers for Items",
+  "editSupplierDetails": "Edit Supplier Details",
+  "selectItems": "Select Items",
+  "applyToSelected": "Apply to Selected Items",
+  "createNewSupplier": "Create New Supplier",
+  "contactPerson": "Contact Person",
+  "noItemsSelected": "Please select at least one item"
 }

@@ -4,14 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Package, Image as ImageIcon, Building2, Edit } from "lucide-react";
+import { Package, Image as ImageIcon, Building2 } from "lucide-react";
 import { isValidBase64Image, getPlaceholderImage, openImageLightbox } from "@/utils/imageUtils";
 import { DIMENSION_CONVERSIONS, WEIGHT_CONVERSIONS, CBM_DIVISOR, IATA_DIVISOR } from "@/types/calculator";
 import { useTranslation } from "react-i18next";
 import { ItemSearchFilter } from "./ItemSearchFilter";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { supabase } from "@/integrations/supabase/client";
-import { ItemSupplierEditor } from "./ItemSupplierEditor";
 
 interface ItemDetailsViewerProps {
   items: ShipmentItem[];
@@ -44,7 +43,6 @@ export function ItemDetailsViewer({
   const isMobile = useIsMobile();
   const [filteredItems, setFilteredItems] = useState(items);
   const [suppliers, setSuppliers] = useState<Record<string, any>>({});
-  const [editingItem, setEditingItem] = useState<ShipmentItem | null>(null);
 
   useEffect(() => {
     loadSuppliers();
@@ -113,13 +111,6 @@ export function ItemDetailsViewer({
     }
   };
 
-  const handleUpdateComplete = () => {
-    if (onItemUpdate) {
-      onItemUpdate();
-    }
-    setEditingItem(null);
-  };
-
   if (items.length === 0) {
     return (
       <Card>
@@ -132,7 +123,6 @@ export function ItemDetailsViewer({
   }
 
   return (
-    <>
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
@@ -205,18 +195,6 @@ export function ItemDetailsViewer({
                         <p className="font-bold">{metrics.totalWeight.toFixed(2)} kg</p>
                       </div>
                     </div>
-
-                    {requestId && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setEditingItem(item)}
-                        className="w-full mt-2"
-                      >
-                        <Edit className="h-3 w-3 mr-1" />
-                        Edit Supplier
-                      </Button>
-                    )}
                   </CardContent>
                 </Card>
               );
@@ -236,7 +214,6 @@ export function ItemDetailsViewer({
                   {shippingType === "sea" && <TableHead className="text-right">CBM</TableHead>}
                   {shippingType === "air" && <TableHead className="text-right">Vol. Weight</TableHead>}
                   <TableHead className="text-right">Total</TableHead>
-                  {requestId && <TableHead className="text-center">Actions</TableHead>}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -322,17 +299,6 @@ export function ItemDetailsViewer({
                           {metrics.totalWeight.toFixed(2)} kg
                         </div>
                       </TableCell>
-                      {requestId && (
-                        <TableCell className="text-center">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => setEditingItem(item)}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                        </TableCell>
-                      )}
                     </TableRow>
                   );
                 })}
@@ -389,16 +355,5 @@ export function ItemDetailsViewer({
         </div>
       </CardContent>
     </Card>
-
-    {editingItem && requestId && (
-      <ItemSupplierEditor
-        open={!!editingItem}
-        onOpenChange={(open) => !open && setEditingItem(null)}
-        item={editingItem}
-        requestId={requestId}
-        onUpdate={handleUpdateComplete}
-      />
-    )}
-    </>
   );
 }

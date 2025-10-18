@@ -55,5 +55,11 @@
   "supplierPerItem": "该物品的供应商",
   "requestNewSupplier": "请求新供应商",
   "supplierForItem": "{itemName} 的供应商",
-  "suppliersForItems": "物品供应商"
+  "suppliersForItems": "物品供应商",
+  "editSupplierDetails": "编辑供应商详情",
+  "selectItems": "选择物品",
+  "applyToSelected": "应用于所选物品",
+  "createNewSupplier": "创建新供应商",
+  "contactPerson": "联系人",
+  "noItemsSelected": "请至少选择一个物品"
 }

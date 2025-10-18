@@ -55,5 +55,11 @@
   "supplierPerItem": "المورد لهذا العنصر",
   "requestNewSupplier": "طلب مورد جديد",
   "supplierForItem": "المورد لـ {itemName}",
-  "suppliersForItems": "الموردون للعناصر"
+  "suppliersForItems": "الموردون للعناصر",
+  "editSupplierDetails": "تعديل تفاصيل المورد",
+  "selectItems": "اختر العناصر",
+  "applyToSelected": "تطبيق على العناصر المحددة",
+  "createNewSupplier": "إنشاء مورد جديد",
+  "contactPerson": "جهة الاتصال",
+  "noItemsSelected": "يرجى تحديد عنصر واحد على الأقل"
 }
