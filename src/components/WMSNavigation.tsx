@@ -187,7 +187,23 @@ const navigationItems: NavigationItem[] = [
     href: "/admin",
     icon: LayoutDashboard,
     roles: ["admin"],
-    group: "Admin"
+    group: "Admin",
+    subItems: [
+      { name: "Overview", href: "/admin#dashboard", icon: LayoutDashboard },
+      { name: "Requests", href: "/admin#requests", icon: Package },
+      { name: "Shipments", href: "/admin#shipments", icon: ShoppingCart },
+      { name: "Customers", href: "/admin#customers", icon: Users },
+      { name: "User Roles", href: "/admin#users", icon: UserCog },
+      { name: "Partners", href: "/admin#partners", icon: Building2 },
+      { name: "Surcharges", href: "/admin#surcharges", icon: DollarSign },
+      { name: "Delivery", href: "/admin#delivery", icon: Truck },
+      { name: "Audit Logs", href: "/admin#audit", icon: FileText },
+      { name: "Rates", href: "/admin#rates", icon: DollarSign },
+      { name: "History", href: "/admin#history", icon: FileText },
+      { name: "Quality Check", href: "/admin#qc", icon: ClipboardCheck },
+      { name: "Bulk Operations", href: "/admin#bulk", icon: Workflow },
+      { name: "Invoices", href: "/admin#invoices", icon: FileBarChart },
+    ],
   },
   {
     name: "Analytics",
@@ -354,7 +370,14 @@ const navigationItems: NavigationItem[] = [
     href: "/finance",
     icon: DollarSign,
     roles: ["accountant", "admin"],
-    group: "Finance"
+    group: "Finance",
+    subItems: [
+      { name: "Overview", href: "/finance#dashboard", icon: LayoutDashboard },
+      { name: "Revenue", href: "/finance#revenue", icon: TrendingUp },
+      { name: "Payments", href: "/finance#payments", icon: DollarSign },
+      { name: "Invoices", href: "/finance#invoices", icon: FileBarChart },
+      { name: "Reports", href: "/finance#reports", icon: BarChart3 },
+    ],
   },
 ];
 
