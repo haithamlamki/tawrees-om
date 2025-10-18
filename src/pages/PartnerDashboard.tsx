@@ -449,52 +449,201 @@ const PartnerDashboard = () => {
                 </CardContent>
               </Card>
             ) : (
-              <div className="grid gap-4">
-                {activeShipments.map((shipment) => (
-                  <Card key={shipment.id}>
-                    <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="text-xl">
-                          {shipment.tracking_number}
-                        </CardTitle>
-                        {getStatusBadge(shipment.status)}
-                      </div>
-                      <CardDescription>
-                        Customer: {shipment.shipment_requests?.profiles?.full_name || "Unknown"}
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      {shipment.current_location && (
-                        <div className="flex items-center gap-2">
-                          <MapPin className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-sm">Current Location: {shipment.current_location}</span>
-                        </div>
-                      )}
-                      
-                      {shipment.estimated_delivery && (
-                        <div className="flex items-center gap-2">
-                          <Clock className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-sm">
-                            Est. Delivery: {new Date(shipment.estimated_delivery).toLocaleDateString()}
-                          </span>
-                        </div>
-                      )}
+              <div className="grid gap-6">
+                {activeShipments.map((shipment) => {
+                  const request = shipment.shipment_requests;
+                  const items = request?.items || [];
+                  const totalItems = Array.isArray(items) ? items.length : 0;
+                  
+                  // Get thumbnails from items with images
+                  const thumbnails = Array.isArray(items) 
+                    ? items
+                        .filter((item: any) => item.image_url)
+                        .slice(0, 4)
+                        .map((item: any) => item.image_url)
+                    : [];
 
-                      {shipment.notes && (
-                        <div className="text-sm text-muted-foreground">
-                          <strong>Notes:</strong> {shipment.notes}
+                  return (
+                    <Card key={shipment.id}>
+                      <CardHeader>
+                        <div className="flex items-center justify-between flex-wrap gap-2">
+                          <CardTitle className="text-xl">
+                            {shipment.tracking_number}
+                          </CardTitle>
+                          {getStatusBadge(shipment.status)}
                         </div>
-                      )}
+                        <CardDescription>
+                          Customer: {request?.profiles?.full_name || "Unknown"}
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {/* Order Information */}
+                        <div className="p-4 bg-muted/20 rounded-lg space-y-3">
+                          <p className="text-sm font-semibold text-foreground mb-2">Order Information</p>
+                          
+                          {/* Current Location */}
+                          {shipment.current_location && (
+                            <div className="flex items-start gap-2">
+                              <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                              <div className="text-sm flex-1">
+                                <p className="font-medium text-foreground">Current Location</p>
+                                <p className="text-muted-foreground mt-1">{shipment.current_location}</p>
+                              </div>
+                            </div>
+                          )}
 
-                      <Button 
-                        onClick={() => setSelectedShipment(shipment)}
-                        className="w-full"
-                      >
-                        Update Status
-                      </Button>
-                    </CardContent>
-                  </Card>
-                ))}
+                          {/* Estimated Delivery */}
+                          {shipment.estimated_delivery && (
+                            <div className="flex items-start gap-2">
+                              <Clock className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                              <div className="text-sm flex-1">
+                                <p className="font-medium text-foreground">Est. Delivery</p>
+                                <p className="text-muted-foreground mt-1">
+                                  {new Date(shipment.estimated_delivery).toLocaleDateString()}
+                                </p>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Delivery Address */}
+                          <div className="space-y-2 pt-2 border-t border-border/50">
+                            <div className="flex items-start gap-2">
+                              <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                              <div className="text-sm flex-1">
+                                <p className="font-medium text-foreground">Delivery Address</p>
+                                <p className="text-muted-foreground mt-1">
+                                  {request?.delivery_address || 'No address provided'}
+                                  {request?.delivery_city && `, ${request.delivery_city}`}
+                                  {request?.delivery_country && `, ${request.delivery_country}`}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Contact Information */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2 border-t border-border/50">
+                            <div className="text-sm">
+                              <p className="text-xs text-muted-foreground mb-1">Contact Name</p>
+                              <p className="font-medium text-foreground">
+                                {request?.delivery_contact_name || 'Not provided'}
+                              </p>
+                            </div>
+                            <div className="text-sm">
+                              <p className="text-xs text-muted-foreground mb-1">Contact Phone</p>
+                              <p className="font-medium text-foreground">
+                                {request?.delivery_contact_phone || 'Not provided'}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Shipment Stats */}
+                        <div>
+                          <p className="text-sm font-semibold mb-3">Shipment Details</p>
+                          <div className="grid grid-cols-4 gap-3">
+                            <div className="bg-accent/10 border border-accent/20 rounded-lg p-3">
+                              <div className="flex items-center gap-2 mb-1">
+                                <Package className="h-4 w-4 text-primary" />
+                                <span className="text-xs text-muted-foreground">Items</span>
+                              </div>
+                              <p className="text-lg font-bold text-primary">{totalItems}</p>
+                            </div>
+                            <div className="bg-accent/10 border border-accent/20 rounded-lg p-3">
+                              <div className="flex items-center gap-2 mb-1">
+                                <Box className="h-4 w-4 text-primary" />
+                                <span className="text-xs text-muted-foreground">CBM</span>
+                              </div>
+                              <p className="text-lg font-bold text-primary">
+                                {request?.cbm_volume ? request.cbm_volume.toFixed(3) : '0.000'}
+                              </p>
+                            </div>
+                            <div className="bg-accent/10 border border-accent/20 rounded-lg p-3">
+                              <div className="flex items-center gap-2 mb-1">
+                                <Weight className="h-4 w-4 text-primary" />
+                                <span className="text-xs text-muted-foreground">Weight</span>
+                              </div>
+                              <p className="text-lg font-bold text-primary">
+                                {request?.weight_kg ? request.weight_kg.toFixed(2) : '0.00'} kg
+                              </p>
+                            </div>
+                            <div className="bg-primary/10 border border-primary/30 rounded-lg p-3">
+                              <div className="flex items-center gap-2 mb-1">
+                                <DollarSign className="h-4 w-4 text-primary" />
+                                <span className="text-xs text-muted-foreground">Estimate</span>
+                              </div>
+                              <p className="text-lg font-bold text-primary">
+                                {request?.calculated_cost ? `OMR ${request.calculated_cost.toFixed(3)}` : 'N/A'}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Thumbnail Gallery */}
+                        {thumbnails.length > 0 && (
+                          <div>
+                            <p className="text-sm font-semibold mb-2">Product Images</p>
+                            <div className="flex gap-2 overflow-x-auto pb-2">
+                              {thumbnails.map((url: string, idx: number) => (
+                                <div 
+                                  key={idx} 
+                                  className="relative h-20 w-20 flex-shrink-0 rounded-lg overflow-hidden border-2 border-primary/20"
+                                >
+                                  <img 
+                                    src={url} 
+                                    alt={`Item ${idx + 1}`}
+                                    className="h-full w-full object-cover"
+                                  />
+                                </div>
+                              ))}
+                              {totalItems > thumbnails.length && (
+                                <div className="h-20 w-20 flex-shrink-0 rounded-lg border-2 border-dashed border-muted-foreground/30 flex items-center justify-center bg-muted/20">
+                                  <span className="text-xs text-muted-foreground font-medium">
+                                    +{totalItems - thumbnails.length}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Item Details */}
+                        {totalItems > 0 && (
+                          <div className="border border-border rounded-lg overflow-hidden">
+                            <div className="p-4 bg-muted/30">
+                              <h3 className="font-semibold text-foreground flex items-center gap-2">
+                                <Package className="h-5 w-5" />
+                                Item Details ({totalItems} items)
+                              </h3>
+                            </div>
+                            <div className="p-4 bg-background">
+                              <ItemDetailsViewer 
+                                items={items} 
+                                shippingType="sea"
+                                requestId={request?.id}
+                                onItemUpdate={() => loadPartnerData(partner?.id || '')}
+                              />
+                            </div>
+                          </div>
+                        )}
+
+                        {shipment.notes && (
+                          <div className="p-3 bg-muted/20 rounded-lg">
+                            <p className="text-sm font-semibold mb-1">Notes</p>
+                            <p className="text-sm text-muted-foreground">{shipment.notes}</p>
+                          </div>
+                        )}
+
+                        <Button 
+                          onClick={() => setSelectedShipment(shipment)}
+                          className="w-full"
+                          size="lg"
+                        >
+                          Update Status
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
               </div>
             )}
           </TabsContent>
