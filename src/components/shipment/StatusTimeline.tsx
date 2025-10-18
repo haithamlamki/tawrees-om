@@ -66,46 +66,44 @@ export function StatusTimeline({ currentStatus, statusHistory = [] }: StatusTime
         <CardTitle>Shipment Progress</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          {statusSteps.map((step, index) => {
-            const stepStatus = getStepStatus(index);
-            const historyItem = statusHistory.find((h) => h.status === step.key);
+        <div className="overflow-x-auto pb-4">
+          <div className="flex items-start gap-2 min-w-max">
+            {statusSteps.map((step, index) => {
+              const stepStatus = getStepStatus(index);
+              const historyItem = statusHistory.find((h) => h.status === step.key);
 
-            return (
-              <div key={step.key} className="flex gap-4">
-                <div className="flex flex-col items-center">
-                  {getIcon(stepStatus)}
+              return (
+                <div key={step.key} className="flex items-center">
+                  <div className="flex flex-col items-center min-w-[120px]">
+                    {getIcon(stepStatus)}
+                    <p
+                      className={`text-xs font-medium mt-2 text-center ${
+                        stepStatus === "current"
+                          ? "text-primary"
+                          : stepStatus === "completed"
+                          ? "text-success"
+                          : "text-muted-foreground"
+                      }`}
+                    >
+                      {step.label}
+                    </p>
+                    {historyItem && (
+                      <div className="text-xs text-muted-foreground mt-1 text-center">
+                        <p>{new Date(historyItem.created_at).toLocaleDateString()}</p>
+                      </div>
+                    )}
+                  </div>
                   {index < statusSteps.length - 1 && (
                     <div
-                      className={`w-0.5 h-12 ${
+                      className={`h-0.5 w-8 ${
                         stepStatus === "completed" ? "bg-success" : "bg-muted"
                       }`}
                     />
                   )}
                 </div>
-                <div className="flex-1 pb-4">
-                  <p
-                    className={`font-medium ${
-                      stepStatus === "current"
-                        ? "text-primary"
-                        : stepStatus === "completed"
-                        ? "text-success"
-                        : "text-muted-foreground"
-                    }`}
-                  >
-                    {step.label}
-                  </p>
-                  {historyItem && (
-                    <div className="text-sm text-muted-foreground mt-1">
-                      <p>{new Date(historyItem.created_at).toLocaleString()}</p>
-                      {historyItem.location && <p>Location: {historyItem.location}</p>}
-                      {historyItem.notes && <p className="italic">{historyItem.notes}</p>}
-                    </div>
-                  )}
-                </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
 
         {statusHistory.length > 0 && (
