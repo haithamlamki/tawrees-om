@@ -5,6 +5,7 @@ import Navigation from "@/components/Navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Loader2, Package, MapPin, Clock, Building2, FileText, Box, Weight, DollarSign } from "lucide-react";
 import { toast } from "sonner";
 import ShipmentStatusUpdate from "@/components/admin/ShipmentStatusUpdate";
@@ -60,6 +61,12 @@ const PartnerDashboard = () => {
   const [selectedShipment, setSelectedShipment] = useState<PartnerShipment | null>(null);
   const [selectedForAcceptance, setSelectedForAcceptance] = useState<PartnerShipment | null>(null);
   const [activeTab, setActiveTab] = useState<string>("pending");
+  const [statusFilters, setStatusFilters] = useState<string[]>([
+    "received_from_supplier",
+    "processing",
+    "in_transit",
+    "at_customs"
+  ]);
 
   useEffect(() => {
     checkAuthAndLoadData();
@@ -171,7 +178,7 @@ const PartnerDashboard = () => {
       received_from_supplier: "#FFC000",
       processing: "#EE0000",
       in_transit: "#EE0000",
-      customs: "#00B0F0",
+      at_customs: "#00B0F0",
       received_muscat_wh: "#00B050",
       out_for_delivery: "#00B050",
       delivered: "#00B050",
@@ -188,8 +195,9 @@ const PartnerDashboard = () => {
   };
 
   const pendingShipments = shipments.filter(s => s.status === "pending_partner_acceptance");
-  // Active shipments: show only up to "customs" status
-  const activeShipments = shipments.filter(s => 
+  
+  // Active shipments: show only up to "at_customs" status, filtered by selected statuses
+  const allActiveShipments = shipments.filter(s => 
     s.status !== "pending_partner_acceptance" && 
     s.status !== "rejected" &&
     s.status !== "received_muscat_wh" &&
@@ -197,6 +205,25 @@ const PartnerDashboard = () => {
     s.status !== "delivered" &&
     s.status !== "completed"
   );
+  
+  const activeShipments = statusFilters.length > 0 
+    ? allActiveShipments.filter(s => statusFilters.includes(s.status))
+    : allActiveShipments;
+
+  const toggleStatusFilter = (status: string) => {
+    setStatusFilters(prev => 
+      prev.includes(status) 
+        ? prev.filter(s => s !== status)
+        : [...prev, status]
+    );
+  };
+
+  const statusFilterOptions = [
+    { value: "received_from_supplier", label: "Received from Supplier", color: "#FFC000" },
+    { value: "processing", label: "Processing", color: "#EE0000" },
+    { value: "in_transit", label: "In Transit", color: "#EE0000" },
+    { value: "at_customs", label: "At Customs", color: "#00B0F0" }
+  ];
 
   if (loading) {
     return (
@@ -458,11 +485,42 @@ const PartnerDashboard = () => {
           </TabsContent>
 
           <TabsContent value="active">
+            {/* Status Filters */}
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle className="text-lg">Filter by Status</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-4">
+                  {statusFilterOptions.map(option => (
+                    <div key={option.value} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={option.value}
+                        checked={statusFilters.includes(option.value)}
+                        onCheckedChange={() => toggleStatusFilter(option.value)}
+                      />
+                      <label
+                        htmlFor={option.value}
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                        style={{ color: option.color }}
+                      >
+                        {option.label}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
             {activeShipments.length === 0 ? (
               <Card>
                 <CardContent className="flex flex-col items-center justify-center py-12">
                   <Package className="h-12 w-12 text-muted-foreground mb-4" />
-                  <p className="text-muted-foreground">No active shipments</p>
+                  <p className="text-muted-foreground">
+                    {allActiveShipments.length === 0 
+                      ? "No active shipments" 
+                      : "No shipments match the selected filters"}
+                  </p>
                 </CardContent>
               </Card>
             ) : (
