@@ -24,6 +24,7 @@ interface ItemDetailsViewerProps {
   compact?: boolean;
   requestId?: string;
   onItemUpdate?: () => void;
+  calculatedCost?: number;
 }
 
 export function ItemDetailsViewer({
@@ -38,6 +39,7 @@ export function ItemDetailsViewer({
   compact = false,
   requestId,
   onItemUpdate,
+  calculatedCost,
 }: ItemDetailsViewerProps) {
   const { t } = useTranslation();
   const isMobile = useIsMobile();
@@ -308,7 +310,7 @@ export function ItemDetailsViewer({
         )}
 
         {/* Summary Section */}
-        <div className="pt-4 border-t">
+        <div className="pt-4 border-t space-y-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <div className="bg-muted/50 p-3 rounded-lg">
               <p className="text-xs text-muted-foreground mb-1">Total Items</p>
@@ -352,6 +354,16 @@ export function ItemDetailsViewer({
               </div>
             )}
           </div>
+
+          {/* Cost Summary */}
+          {calculatedCost !== undefined && calculatedCost !== null && (
+            <div className="pt-3 border-t">
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Calculated Cost</span>
+                <span className="text-2xl font-bold text-primary">${calculatedCost.toFixed(2)}</span>
+              </div>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

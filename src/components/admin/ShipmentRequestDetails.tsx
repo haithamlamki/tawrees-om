@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Package, MapPin, DollarSign, Calendar, User, Mail, Phone, FileText } from "lucide-react";
+import { Package, User, Mail, Phone, FileText } from "lucide-react";
 import { ItemDetailsViewer } from "./ItemDetailsViewer";
 import { toast } from "sonner";
 
@@ -100,7 +100,7 @@ export function ShipmentRequestDetails({ requestId, compact = false }: ShipmentR
 
   return (
     <div className="space-y-4">
-      {/* Header */}
+      {/* Request Details with Customer Info */}
       {!compact && (
         <Card>
           <CardHeader>
@@ -114,7 +114,7 @@ export function ShipmentRequestDetails({ requestId, compact = false }: ShipmentR
               </Badge>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-6">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
               <div>
                 <p className="text-muted-foreground mb-1">Request ID</p>
@@ -133,41 +133,40 @@ export function ShipmentRequestDetails({ requestId, compact = false }: ShipmentR
                 <p className="font-medium uppercase">{request.calculation_method || "N/A"}</p>
               </div>
             </div>
-          </CardContent>
-        </Card>
-      )}
 
-      {/* Customer Info */}
-      {!compact && request.profiles && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <User className="h-4 w-4" />
-              Customer Information
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-3 text-sm">
-              <div className="flex items-center gap-2">
-                <User className="h-4 w-4 text-muted-foreground" />
-                <span className="font-medium">{request.profiles.full_name}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Mail className="h-4 w-4 text-muted-foreground" />
-                <span>{request.profiles.email}</span>
-              </div>
-              {request.profiles.phone && (
-                <div className="flex items-center gap-2">
-                  <Phone className="h-4 w-4 text-muted-foreground" />
-                  <span>{request.profiles.phone}</span>
+            {/* Customer Information */}
+            {request.profiles && (
+              <>
+                <Separator />
+                <div>
+                  <h3 className="flex items-center gap-2 text-sm font-semibold mb-3">
+                    <User className="h-4 w-4" />
+                    Customer Information
+                  </h3>
+                  <div className="grid gap-3 text-sm">
+                    <div className="flex items-center gap-2">
+                      <User className="h-4 w-4 text-muted-foreground" />
+                      <span className="font-medium">{request.profiles.full_name}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Mail className="h-4 w-4 text-muted-foreground" />
+                      <span>{request.profiles.email}</span>
+                    </div>
+                    {request.profiles.phone && (
+                      <div className="flex items-center gap-2">
+                        <Phone className="h-4 w-4 text-muted-foreground" />
+                        <span>{request.profiles.phone}</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              )}
-            </div>
+              </>
+            )}
           </CardContent>
         </Card>
       )}
 
-      {/* Items Breakdown */}
+      {/* Items Breakdown with Cost Summary */}
       {request.items && Array.isArray(request.items) && request.items.length > 0 && (
         <ItemDetailsViewer
           items={request.items}
@@ -179,84 +178,9 @@ export function ShipmentRequestDetails({ requestId, compact = false }: ShipmentR
           compact={compact}
           requestId={request.id}
           onItemUpdate={loadRequestDetails}
+          calculatedCost={request.calculated_cost}
         />
       )}
-
-      {/* Delivery Information */}
-      {request.delivery_type && !compact && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <MapPin className="h-4 w-4" />
-              Delivery Information
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3 text-sm">
-              <div>
-                <p className="text-muted-foreground mb-1">Delivery Type</p>
-                <Badge variant="outline" className="capitalize">{request.delivery_type}</Badge>
-              </div>
-              {request.delivery_type === "door" && (
-                <>
-                  {request.delivery_contact_name && (
-                    <div>
-                      <p className="text-muted-foreground mb-1">Contact Name</p>
-                      <p className="font-medium">{request.delivery_contact_name}</p>
-                    </div>
-                  )}
-                  {request.delivery_contact_phone && (
-                    <div>
-                      <p className="text-muted-foreground mb-1">Contact Phone</p>
-                      <p className="font-medium">{request.delivery_contact_phone}</p>
-                    </div>
-                  )}
-                  {request.delivery_address && (
-                    <div>
-                      <p className="text-muted-foreground mb-1">Address</p>
-                      <p className="font-medium">
-                        {request.delivery_address}
-                        {request.delivery_city && `, ${request.delivery_city}`}
-                        {request.delivery_country && `, ${request.delivery_country}`}
-                      </p>
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Cost Summary */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <DollarSign className="h-4 w-4" />
-            Cost Summary
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            <div className="flex justify-between items-center">
-              <span className="text-muted-foreground">Calculated Cost</span>
-              <span className="text-2xl font-bold text-primary">${request.calculated_cost.toFixed(2)}</span>
-            </div>
-            {request.shipping_type === "sea" && request.cbm_volume && (
-              <div className="flex justify-between items-center text-sm pt-2 border-t">
-                <span className="text-muted-foreground">Total Volume</span>
-                <span className="font-medium">{request.cbm_volume.toFixed(3)} m³</span>
-              </div>
-            )}
-            {request.weight_kg && (
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-muted-foreground">Total Weight</span>
-                <span className="font-medium">{request.weight_kg.toFixed(2)} kg</span>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Notes */}
       {request.notes && !compact && (
