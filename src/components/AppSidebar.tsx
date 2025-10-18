@@ -64,6 +64,7 @@ interface NavigationItem {
 }
 
 const adminNavigation: NavigationItem[] = [
+  { name: "Home", href: "/", icon: Home, group: "Main" },
   { name: "Overview", href: "/admin#dashboard", icon: LayoutDashboard, group: "Dashboard" },
   { name: "Requests", href: "/admin#requests", icon: Package, group: "Dashboard" },
   { name: "Shipments", href: "/admin#shipments", icon: Ship, group: "Dashboard" },
@@ -104,17 +105,24 @@ const adminNavigation: NavigationItem[] = [
 const customerNavigation: NavigationItem[] = [
   { name: "Home", href: "/", icon: Home, group: "Main" },
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard, group: "Main" },
-  { name: "Shipment Requests", href: "/dashboard#requests", icon: Package, group: "Dashboard" },
-  { name: "Profile", href: "/dashboard#profile", icon: User, group: "Dashboard" },
-  { name: "Notifications", href: "/dashboard#notifications", icon: Bell, group: "Dashboard" },
-  { name: "My Quotes", href: "/dashboard#quotes", icon: FileText, group: "Dashboard" },
-  { name: "Invoices", href: "/dashboard#invoices", icon: FileBarChart, group: "Dashboard" },
+  { name: "Shipment Requests", href: "/dashboard#requests", icon: Package, group: "Main" },
+  { name: "My Quotes", href: "/dashboard#quotes", icon: FileText, group: "Main" },
+  { name: "Invoices", href: "/dashboard#invoices", icon: FileBarChart, group: "Main" },
+  { name: "Profile", href: "/dashboard#profile", icon: User, group: "Main" },
+  { name: "Notifications", href: "/dashboard#notifications", icon: Bell, group: "Main" },
   { name: "Calculator", href: "/", icon: Calculator, group: "Tools" },
   { name: "Track Shipment", href: "/tracking", icon: Ship, group: "Tools" },
+  { name: "Locations", href: "/locations", icon: MapPin, group: "Tools" },
+  { name: "Rates", href: "/rates", icon: DollarSign, group: "Tools" },
 ];
 
 const employeeNavigation: NavigationItem[] = [
+  { name: "Home", href: "/", icon: Home, group: "Main" },
   { name: "Dashboard", href: "/employee", icon: LayoutDashboard, group: "Main" },
+  { name: "Shipments", href: "/employee#shipments", icon: Ship, group: "Main" },
+  { name: "Quality Checks", href: "/employee#qc", icon: ClipboardCheck, group: "Main" },
+  { name: "Calculator", href: "/", icon: Calculator, group: "Tools" },
+  { name: "Track Shipment", href: "/tracking", icon: Ship, group: "Tools" },
   { name: "Locations", href: "/locations", icon: MapPin, group: "Tools" },
   { name: "Rates", href: "/rates", icon: DollarSign, group: "Tools" },
 ];
@@ -148,16 +156,21 @@ const partnerNavigation: NavigationItemWithSub[] = [
 ];
 
 const accountantNavigation: NavigationItem[] = [
+  { name: "Home", href: "/", icon: Home, group: "Main" },
+  { name: "Dashboard", href: "/finance", icon: LayoutDashboard, group: "Main" },
   { name: "Overview", href: "/finance#dashboard", icon: LayoutDashboard, group: "Finance" },
   { name: "Revenue", href: "/finance#revenue", icon: TrendingUp, group: "Finance" },
   { name: "Payments", href: "/finance#payments", icon: DollarSign, group: "Finance" },
   { name: "Invoices", href: "/finance#invoices", icon: FileBarChart, group: "Finance" },
   { name: "Reports", href: "/finance#reports", icon: BarChart3, group: "Finance" },
+  { name: "Partner Payments", href: "/finance#partner-payments", icon: Building2, group: "Finance" },
+  { name: "Calculator", href: "/", icon: Calculator, group: "Tools" },
   { name: "Locations", href: "/locations", icon: MapPin, group: "Tools" },
   { name: "Rates", href: "/rates", icon: DollarSign, group: "Tools" },
 ];
 
 const wmsCustomerNavigation: NavigationItem[] = [
+  { name: "Home", href: "/", icon: Home, group: "Main" },
   { name: "Dashboard", href: "/warehouse/dashboard", icon: LayoutDashboard, group: "Main" },
   { name: "Contract", href: "/warehouse/contract", icon: FileText, group: "Main" },
   { name: "Inventory", href: "/warehouse/inventory", icon: Package, group: "Operations" },
@@ -172,16 +185,20 @@ const wmsCustomerNavigation: NavigationItem[] = [
 ];
 
 const wmsEmployeeNavigation: NavigationItem[] = [
+  { name: "Home", href: "/", icon: Home, group: "Main" },
   { name: "Dashboard", href: "/warehouse/employee-dashboard", icon: UserCog, group: "Main" },
   { name: "Inventory", href: "/warehouse/inventory", icon: Package, group: "Operations" },
   { name: "Orders", href: "/warehouse/orders", icon: ShoppingCart, group: "Operations" },
   { name: "Product Requests", href: "/warehouse/product-requests", icon: FilePlus, group: "Operations" },
+  { name: "Reports", href: "/warehouse/reports", icon: BarChart3, group: "Reports" },
 ];
 
 const wmsAccountantNavigation: NavigationItem[] = [
+  { name: "Home", href: "/", icon: Home, group: "Main" },
   { name: "Dashboard", href: "/warehouse/accountant-dashboard", icon: FileBarChart, group: "Main" },
   { name: "Invoices", href: "/warehouse/invoices", icon: FileBarChart, group: "Financial" },
   { name: "Reports", href: "/warehouse/reports", icon: BarChart3, group: "Financial" },
+  { name: "Orders", href: "/warehouse/orders", icon: ShoppingCart, group: "Financial" },
 ];
 
 export function AppSidebar() {
