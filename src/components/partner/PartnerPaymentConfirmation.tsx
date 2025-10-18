@@ -144,7 +144,7 @@ export const PartnerPaymentConfirmation = ({
                 <div>
                   <p className="text-sm text-muted-foreground">Total Amount</p>
                   <p className="text-2xl font-bold text-primary">
-                    {currency} {totalAmount.toFixed(3)}
+                    {currency} {totalAmount.toFixed(2)}
                   </p>
                 </div>
               </div>
@@ -197,14 +197,14 @@ export const PartnerPaymentConfirmation = ({
                           {invoice.shipments.shipment_requests?.profiles?.full_name || 'Unknown'}
                         </TableCell>
                         <TableCell className="text-right font-medium">
-                          {currency} {invoice.invoice_amount.toFixed(3)}
+                          {currency} {invoice.invoice_amount.toFixed(2)}
                         </TableCell>
                       </TableRow>
                     ))}
                     <TableRow className="bg-muted/50 font-semibold">
                       <TableCell colSpan={2}>Total</TableCell>
                       <TableCell className="text-right">
-                        {currency} {totalAmount.toFixed(3)}
+                        {currency} {totalAmount.toFixed(2)}
                       </TableCell>
                     </TableRow>
                   </TableBody>

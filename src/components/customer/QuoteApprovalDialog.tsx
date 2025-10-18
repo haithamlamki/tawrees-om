@@ -286,17 +286,17 @@ export function QuoteApprovalDialog({
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-muted-foreground">Original Estimate</p>
-                  <p className="text-2xl font-semibold">OMR {quote.original_amount.toFixed(3)}</p>
+                  <p className="text-2xl font-semibold">${quote.original_amount.toFixed(2)}</p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Partner Quote</p>
                   <p className="text-2xl font-semibold text-primary">
-                    OMR {quote.partner_quoted_amount.toFixed(3)}
+                    ${quote.partner_quoted_amount.toFixed(2)}
                   </p>
                   {hasAdjustment && (
                     <Badge variant={amountDifference > 0 ? "destructive" : "default"} className="mt-1">
                       {amountDifference > 0 ? "+" : ""}
-                      {amountDifference.toFixed(3)} OMR
+                      ${amountDifference.toFixed(2)}
                     </Badge>
                   )}
                 </div>

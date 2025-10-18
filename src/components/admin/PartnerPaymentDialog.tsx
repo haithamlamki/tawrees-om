@@ -196,7 +196,7 @@ export const PartnerPaymentDialog = ({
             <div className="space-y-2">
               <Label>Total Amount</Label>
               <div className="text-2xl font-bold text-primary">
-                OMR {totalAmount.toFixed(3)}
+                ${totalAmount.toFixed(2)}
               </div>
             </div>
           </div>
@@ -222,14 +222,14 @@ export const PartnerPaymentDialog = ({
                         </TableCell>
                         <TableCell>{invoice.customer_name}</TableCell>
                         <TableCell className="text-right font-medium">
-                          OMR {invoice.partner_amount.toFixed(3)}
+                          ${invoice.partner_amount.toFixed(2)}
                         </TableCell>
                       </TableRow>
                     ))}
                     <TableRow className="bg-muted/50 font-semibold">
                       <TableCell colSpan={2}>Total</TableCell>
                       <TableCell className="text-right">
-                        OMR {totalAmount.toFixed(3)}
+                        ${totalAmount.toFixed(2)}
                       </TableCell>
                     </TableRow>
                   </TableBody>

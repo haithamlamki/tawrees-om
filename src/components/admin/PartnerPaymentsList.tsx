@@ -226,7 +226,7 @@ export const PartnerPaymentsList = () => {
                         {new Date(payment.payment_date).toLocaleDateString()}
                       </TableCell>
                       <TableCell className="text-right font-medium">
-                        {payment.currency} {payment.total_amount.toFixed(3)}
+                        {payment.currency} {payment.total_amount.toFixed(2)}
                       </TableCell>
                       <TableCell>{getStatusBadge(payment.status)}</TableCell>
                       <TableCell>
@@ -290,7 +290,7 @@ export const PartnerPaymentsList = () => {
                       <div>
                         <p className="text-sm text-muted-foreground">Amount</p>
                         <p className="font-bold text-lg text-primary">
-                          {selectedPayment.currency} {selectedPayment.total_amount.toFixed(3)}
+                          {selectedPayment.currency} {selectedPayment.total_amount.toFixed(2)}
                         </p>
                       </div>
                     </div>
@@ -356,7 +356,7 @@ export const PartnerPaymentsList = () => {
                                 {invoice.shipments.shipment_requests?.profiles?.full_name || 'Unknown'}
                               </TableCell>
                               <TableCell className="text-right font-medium">
-                                OMR {invoice.invoice_amount.toFixed(3)}
+                                ${invoice.invoice_amount.toFixed(2)}
                               </TableCell>
                             </TableRow>
                           ))}

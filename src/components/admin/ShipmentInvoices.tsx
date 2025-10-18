@@ -166,7 +166,7 @@ export const ShipmentInvoices = ({ partnerId, isAdmin = false }: ShipmentInvoice
                     <span className="font-semibold">{selectedInvoices.size} invoices</span>
                     <span className="text-muted-foreground"> | Total: </span>
                     <span className="font-bold text-primary">
-                      OMR {getSelectedTotal().toFixed(3)}
+                      ${getSelectedTotal().toFixed(2)}
                     </span>
                   </div>
                 )}
@@ -250,19 +250,19 @@ export const ShipmentInvoices = ({ partnerId, isAdmin = false }: ShipmentInvoice
                           </Badge>
                         </TableCell>
                         <TableCell className="text-right font-medium">
-                          OMR {invoice.total_amount.toFixed(3)}
+                          ${invoice.total_amount.toFixed(2)}
                         </TableCell>
                         <TableCell className="text-right text-muted-foreground">
-                          OMR {invoice.cost_amount.toFixed(3)}
+                          ${invoice.cost_amount.toFixed(2)}
                         </TableCell>
                         <TableCell className="text-right font-medium text-green-600">
-                          OMR {invoice.profit.toFixed(3)}
+                          ${invoice.profit.toFixed(2)}
                         </TableCell>
                         <TableCell className="text-right font-semibold text-primary">
-                          OMR {invoice.tawreed_amount.toFixed(3)}
+                          ${invoice.tawreed_amount.toFixed(2)}
                         </TableCell>
                         <TableCell className="text-right font-semibold text-blue-600">
-                          OMR {invoice.partner_amount.toFixed(3)}
+                          ${invoice.partner_amount.toFixed(2)}
                         </TableCell>
                       </TableRow>
                     ))}
@@ -270,16 +270,16 @@ export const ShipmentInvoices = ({ partnerId, isAdmin = false }: ShipmentInvoice
                     {/* Totals Row */}
                     <TableRow className="bg-muted/50 font-semibold">
                       <TableCell colSpan={isAdmin ? 7 : 5}>TOTALS</TableCell>
-                      <TableCell className="text-right">OMR {totals.total.toFixed(3)}</TableCell>
-                      <TableCell className="text-right">OMR {totals.cost.toFixed(3)}</TableCell>
+                      <TableCell className="text-right">${totals.total.toFixed(2)}</TableCell>
+                      <TableCell className="text-right">${totals.cost.toFixed(2)}</TableCell>
                       <TableCell className="text-right text-green-600">
-                        OMR {totals.profit.toFixed(3)}
+                        ${totals.profit.toFixed(2)}
                       </TableCell>
                       <TableCell className="text-right text-primary">
-                        OMR {totals.tawreed.toFixed(3)}
+                        ${totals.tawreed.toFixed(2)}
                       </TableCell>
                       <TableCell className="text-right text-blue-600">
-                        OMR {totals.partner.toFixed(3)}
+                        ${totals.partner.toFixed(2)}
                       </TableCell>
                     </TableRow>
                   </TableBody>
@@ -291,14 +291,14 @@ export const ShipmentInvoices = ({ partnerId, isAdmin = false }: ShipmentInvoice
                 <Card>
                   <CardHeader className="pb-3">
                     <CardDescription>Total Revenue</CardDescription>
-                    <CardTitle className="text-2xl">OMR {totals.total.toFixed(3)}</CardTitle>
+                    <CardTitle className="text-2xl">${totals.total.toFixed(2)}</CardTitle>
                   </CardHeader>
                 </Card>
                 <Card>
                   <CardHeader className="pb-3">
                     <CardDescription>Total Cost</CardDescription>
                     <CardTitle className="text-2xl text-muted-foreground">
-                      OMR {totals.cost.toFixed(3)}
+                      ${totals.cost.toFixed(2)}
                     </CardTitle>
                   </CardHeader>
                 </Card>
@@ -306,7 +306,7 @@ export const ShipmentInvoices = ({ partnerId, isAdmin = false }: ShipmentInvoice
                   <CardHeader className="pb-3">
                     <CardDescription>Total Profit</CardDescription>
                     <CardTitle className="text-2xl text-green-600">
-                      OMR {totals.profit.toFixed(3)}
+                      ${totals.profit.toFixed(2)}
                     </CardTitle>
                   </CardHeader>
                 </Card>
@@ -314,7 +314,7 @@ export const ShipmentInvoices = ({ partnerId, isAdmin = false }: ShipmentInvoice
                   <CardHeader className="pb-3">
                     <CardDescription>Tawreed Share</CardDescription>
                     <CardTitle className="text-2xl text-primary">
-                      OMR {totals.tawreed.toFixed(3)}
+                      ${totals.tawreed.toFixed(2)}
                     </CardTitle>
                   </CardHeader>
                 </Card>
@@ -322,7 +322,7 @@ export const ShipmentInvoices = ({ partnerId, isAdmin = false }: ShipmentInvoice
                   <CardHeader className="pb-3">
                     <CardDescription>Partner Share</CardDescription>
                     <CardTitle className="text-2xl text-blue-600">
-                      OMR {totals.partner.toFixed(3)}
+                      ${totals.partner.toFixed(2)}
                     </CardTitle>
                   </CardHeader>
                 </Card>

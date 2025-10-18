@@ -173,7 +173,7 @@ export const PartnerPaymentRequests = () => {
                         {new Date(payment.payment_date).toLocaleDateString()}
                       </TableCell>
                       <TableCell className="text-right font-bold text-primary text-lg">
-                        {payment.currency} {payment.total_amount.toFixed(3)}
+                        {payment.currency} {payment.total_amount.toFixed(2)}
                       </TableCell>
                       <TableCell>{getStatusBadge(payment.status)}</TableCell>
                       <TableCell className="text-right">
@@ -233,7 +233,7 @@ export const PartnerPaymentRequests = () => {
                         {new Date(payment.payment_date).toLocaleDateString()}
                       </TableCell>
                       <TableCell className="text-right font-medium">
-                        {payment.currency} {payment.total_amount.toFixed(3)}
+                        {payment.currency} {payment.total_amount.toFixed(2)}
                       </TableCell>
                       <TableCell>{getStatusBadge(payment.status)}</TableCell>
                       <TableCell>
