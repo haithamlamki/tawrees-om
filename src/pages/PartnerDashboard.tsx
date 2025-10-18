@@ -316,7 +316,7 @@ const PartnerDashboard = () => {
             </TabsTrigger>
             <TabsTrigger value="invoices" className="flex-1">
               <FileText className="h-4 w-4 mr-2" />
-              Invoices
+              Partner Invoices
             </TabsTrigger>
             <TabsTrigger value="payments" className="flex-1 relative">
               <DollarSign className="h-4 w-4 mr-2" />
