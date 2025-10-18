@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { 
   LayoutDashboard, 
@@ -374,6 +374,20 @@ interface WMSNavigationProps {
 export const WMSNavigation = ({ userRole }: WMSNavigationProps) => {
   const { t } = useTranslation();
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleSubItemClick = (e: React.MouseEvent, href: string) => {
+    // If clicking a hash link on the same page, handle it specially
+    if (href.includes("#")) {
+      const [pathname, hash] = href.split("#");
+      if (location.pathname === pathname) {
+        e.preventDefault();
+        window.location.hash = hash;
+        // Trigger hashchange event manually
+        window.dispatchEvent(new HashChangeEvent("hashchange"));
+      }
+    }
+  };
 
   const filteredItems = navigationItems.filter((item) =>
     item.roles.includes(userRole || "")
@@ -424,7 +438,10 @@ export const WMSNavigation = ({ userRole }: WMSNavigationProps) => {
                       item.subItems!.map((sub) => (
                         <SidebarMenuItem key={`${item.name}-${sub.name}`}>
                           <SidebarMenuButton asChild isActive={isActivePath(sub.href)} className="pl-8 text-sm">
-                            <Link to={sub.href}>
+                            <Link 
+                              to={sub.href}
+                              onClick={(e) => handleSubItemClick(e, sub.href)}
+                            >
                               {sub.icon && <sub.icon className="h-4 w-4" />}
                               <span>{sub.name}</span>
                             </Link>
