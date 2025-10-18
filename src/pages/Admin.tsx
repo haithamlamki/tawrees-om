@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { DollarSign, Settings, Package, CheckCircle, XCircle, Users, Ship, BarChart3, UserCog, Building2, FileText, History as HistoryIcon, ClipboardList, FolderSync, Warehouse, Truck } from "lucide-react";
+import { DollarSign, Settings, Package, CheckCircle, XCircle, Users, Ship, BarChart3, UserCog, Building2, FileText, History as HistoryIcon, ClipboardList, FolderSync, Warehouse, Truck, ChevronDown } from "lucide-react";
 import CustomerManagement from "@/components/admin/CustomerManagement";
 import ShipmentManagement from "@/components/admin/ShipmentManagement";
 import DashboardMetrics from "@/components/admin/DashboardMetrics";
@@ -455,46 +455,104 @@ const Admin = () => {
                         )}
                       </div>
 
-                      {/* Items Row */}
-                      {request.items && Array.isArray(request.items) && request.items.length > 0 && (
-                        <div>
-                          <p className="text-sm font-semibold mb-2">Items ({request.items.length})</p>
-                          <div className="grid gap-2">
-                            {request.items.map((item: any, idx: number) => (
-                              <div key={idx} className="flex items-center gap-3 p-2 border rounded-lg">
-                                {item.productImage && (
-                                  <img 
-                                    src={item.productImage} 
-                                    alt={item.productName || "Product"} 
-                                    className="w-12 h-12 object-cover rounded border flex-shrink-0"
-                                  />
-                                )}
-                                <div className="flex-1 min-w-0 grid grid-cols-5 gap-x-3 items-center text-xs">
-                                  {item.productName && (
-                                    <div className="truncate">
-                                      <span className="font-medium">{item.productName}</span>
-                                    </div>
-                                  )}
-                                  <div>
-                                    <span className="text-muted-foreground">Dimensions: </span>
-                                    <span className="font-medium">
-                                      {item.length}×{item.width}×{item.height} {item.dimensionUnit}
-                                    </span>
-                                  </div>
-                                  <div>
-                                    <span className="text-muted-foreground">Weight: </span>
-                                    <span className="font-medium">{item.weight} {item.weightUnit}</span>
-                                  </div>
-                                  <div>
-                                    <span className="text-muted-foreground">Qty: </span>
-                                    <span className="font-medium">{item.quantity}</span>
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
+                       {/* Enhanced Items Preview with Thumbnails */}
+                       {request.items && Array.isArray(request.items) && request.items.length > 0 && (
+                         <div className="space-y-3">
+                           {/* Thumbnail Gallery & Quick Stats */}
+                           <div className="flex flex-wrap items-center gap-3 p-3 bg-gradient-to-r from-primary/5 to-primary/10 rounded-lg border border-primary/20">
+                             {/* Thumbnail Gallery */}
+                             <div className="flex items-center gap-2">
+                               <Package className="h-4 w-4 text-primary" />
+                               <span className="text-sm font-semibold">{request.items.length} Items:</span>
+                               <div className="flex gap-1">
+                                 {request.items
+                                   .filter((item: any) => item.productImage)
+                                   .slice(0, 4)
+                                   .map((item: any, idx: number) => (
+                                     <img
+                                       key={idx}
+                                       src={item.productImage}
+                                       alt={item.productName || "Product"}
+                                       className="w-10 h-10 object-cover rounded border-2 border-white shadow-sm hover:scale-110 transition-transform cursor-pointer"
+                                       title={item.productName || "Product"}
+                                     />
+                                   ))}
+                                 {request.items.filter((item: any) => item.productImage).length > 4 && (
+                                   <div className="w-10 h-10 rounded border-2 border-white bg-muted flex items-center justify-center text-xs font-medium">
+                                     +{request.items.filter((item: any) => item.productImage).length - 4}
+                                   </div>
+                                 )}
+                                 {request.items.filter((item: any) => item.productImage).length === 0 && (
+                                   <div className="text-xs text-muted-foreground italic">No images</div>
+                                 )}
+                               </div>
+                             </div>
+
+                             {/* Quick Stats */}
+                             <div className="flex-1 flex flex-wrap gap-3 text-xs">
+                               <Badge variant="secondary" className="flex items-center gap-1">
+                                 <span className="font-medium">Total Qty:</span>
+                                 {request.items.reduce((sum: number, item: any) => sum + (item.quantity || 0), 0)}
+                               </Badge>
+                               {request.cbm_volume && (
+                                 <Badge variant="secondary" className="flex items-center gap-1">
+                                   <span className="font-medium">CBM:</span>
+                                   {request.cbm_volume.toFixed(3)} m³
+                                 </Badge>
+                               )}
+                               {request.weight_kg && (
+                                 <Badge variant="secondary" className="flex items-center gap-1">
+                                   <span className="font-medium">Weight:</span>
+                                   {request.weight_kg.toFixed(2)} kg
+                                 </Badge>
+                               )}
+                             </div>
+                           </div>
+
+                           {/* Expandable Detailed List */}
+                           <details className="group">
+                             <summary className="cursor-pointer text-sm font-medium text-primary hover:text-primary/80 flex items-center gap-2">
+                               <span>View Detailed Item List</span>
+                               <ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180" />
+                             </summary>
+                             <div className="mt-3 space-y-2">
+                               {request.items.map((item: any, idx: number) => (
+                                 <div key={idx} className="flex items-center gap-3 p-3 border rounded-lg hover:bg-muted/50 transition-colors">
+                                   {item.productImage && (
+                                     <img
+                                       src={item.productImage}
+                                       alt={item.productName || "Product"}
+                                       className="w-16 h-16 object-cover rounded border flex-shrink-0"
+                                     />
+                                   )}
+                                   <div className="flex-1 min-w-0 grid grid-cols-1 sm:grid-cols-4 gap-2 text-xs">
+                                     {item.productName && (
+                                       <div className="sm:col-span-2">
+                                         <span className="text-muted-foreground">Product: </span>
+                                         <span className="font-medium">{item.productName}</span>
+                                       </div>
+                                     )}
+                                     <div>
+                                       <span className="text-muted-foreground">Dimensions: </span>
+                                       <span className="font-medium">
+                                         {item.length}×{item.width}×{item.height} {item.dimensionUnit}
+                                       </span>
+                                     </div>
+                                     <div>
+                                       <span className="text-muted-foreground">Weight: </span>
+                                       <span className="font-medium">{item.weight} {item.weightUnit}</span>
+                                     </div>
+                                     <div>
+                                       <span className="text-muted-foreground">Qty: </span>
+                                       <Badge variant="outline" className="ml-1">{item.quantity}</Badge>
+                                     </div>
+                                   </div>
+                                 </div>
+                               ))}
+                             </div>
+                           </details>
+                         </div>
+                       )}
 
                       {/* Summary & Delivery Row */}
                       <div className="grid grid-cols-2 gap-4">
