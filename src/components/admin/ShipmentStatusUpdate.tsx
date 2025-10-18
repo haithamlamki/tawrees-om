@@ -38,15 +38,28 @@ const ShipmentStatusUpdate = ({
   const [containerNumber, setContainerNumber] = useState("");
   const [selectedDriver, setSelectedDriver] = useState<string>("");
   const [drivers, setDrivers] = useState<Driver[]>([]);
+  const [isPartner, setIsPartner] = useState(false);
   const [formData, setFormData] = useState({
     status: currentStatus,
     location: "",
     notes: "",
   });
 
-  // Fetch due amount and drivers when component mounts
+  // Fetch due amount, drivers, and user role when component mounts
   useEffect(() => {
     const fetchData = async () => {
+      // Check if user is a shipping partner
+      const { data: userData } = await supabase.auth.getUser();
+      if (userData.user) {
+        const { data: roleData } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", userData.user.id)
+          .eq("role", "shipping_partner")
+          .single();
+        
+        setIsPartner(!!roleData);
+      }
       // Fetch due amount
       const { data: shipmentData } = await supabase
         .from("shipments")
@@ -317,15 +330,19 @@ const ShipmentStatusUpdate = ({
             <SelectItem value="customs">
               At Customs
             </SelectItem>
-            <SelectItem value="received_muscat_wh">
-              Received Muscat WH
-            </SelectItem>
-            <SelectItem value="out_for_delivery">
-              Out for Delivery
-            </SelectItem>
-            <SelectItem value="delivered">
-              Delivered
-            </SelectItem>
+            {!isPartner && (
+              <>
+                <SelectItem value="received_muscat_wh">
+                  Received Muscat WH
+                </SelectItem>
+                <SelectItem value="out_for_delivery">
+                  Out for Delivery
+                </SelectItem>
+                <SelectItem value="delivered">
+                  Delivered
+                </SelectItem>
+              </>
+            )}
           </SelectContent>
         </Select>
       </div>
