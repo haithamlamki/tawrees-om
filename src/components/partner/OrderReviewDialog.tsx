@@ -14,13 +14,7 @@ import { ItemDetailsViewer } from "@/components/admin/ItemDetailsViewer";
 import { ShipmentItem } from "@/types/calculator";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-
-interface StorageLocation {
-  id: string;
-  name: string;
-  address: string;
-  is_default: boolean;
-}
+import { usePartnerProfile, StorageLocation } from "@/hooks/usePartnerProfile";
 
 interface DocumentRequest {
   id: string;
@@ -78,7 +72,6 @@ export function OrderReviewDialog({
   const [quotedAmount, setQuotedAmount] = useState(estimatedAmount.toString());
   const [adjustmentReason, setAdjustmentReason] = useState("");
   const [storageLocation, setStorageLocation] = useState("");
-  const [savedLocations, setSavedLocations] = useState<StorageLocation[]>([]);
   const [showNewLocationInput, setShowNewLocationInput] = useState(false);
   const [newLocationName, setNewLocationName] = useState("");
   const [estimatedDays, setEstimatedDays] = useState("45");
@@ -89,70 +82,34 @@ export function OrderReviewDialog({
   const [newDocTypeOther, setNewDocTypeOther] = useState("");
   const [newDocDescription, setNewDocDescription] = useState("");
 
-  // Fetch saved storage locations
+  // Use partner profile hook for storage locations
+  const { storageLocations: savedLocations, addLocation } = usePartnerProfile(partnerId);
+
+  // Set default location when locations are loaded
   useEffect(() => {
-    if (open && partnerId) {
-      fetchStorageLocations();
-    }
-  }, [open, partnerId]);
-
-  const fetchStorageLocations = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("shipping_partners")
-        .select("storage_locations")
-        .eq("id", partnerId)
-        .single();
-
-      if (error) throw error;
-
-      const locations = Array.isArray(data?.storage_locations) 
-        ? data.storage_locations as unknown as StorageLocation[]
-        : [];
-      setSavedLocations(locations);
-
-      // Set default location if exists
-      const defaultLocation = locations.find((loc) => loc.is_default);
+    if (savedLocations.length > 0 && !storageLocation) {
+      const defaultLocation = savedLocations.find((loc) => loc.is_default);
       if (defaultLocation) {
         setStorageLocation(defaultLocation.name);
       }
-    } catch (error) {
-      console.error("Error fetching storage locations:", error);
     }
-  };
+  }, [savedLocations, storageLocation]);
 
-  const handleSaveNewLocation = async () => {
+  const handleSaveNewLocation = () => {
     if (!newLocationName.trim()) {
       toast.error("Please enter a location name");
       return;
     }
 
-    try {
-      const newLocation: StorageLocation = {
-        id: Math.random().toString(36).substr(2, 9),
-        name: newLocationName.trim(),
-        address: "",
-        is_default: savedLocations.length === 0,
-      };
+    addLocation({
+      name: newLocationName.trim(),
+      address: "",
+      is_default: savedLocations.length === 0,
+    });
 
-      const updatedLocations = [...savedLocations, newLocation];
-
-      const { error } = await supabase
-        .from("shipping_partners")
-        .update({ storage_locations: updatedLocations as any })
-        .eq("id", partnerId);
-
-      if (error) throw error;
-
-      setSavedLocations(updatedLocations);
-      setStorageLocation(newLocation.name);
-      setNewLocationName("");
-      setShowNewLocationInput(false);
-      toast.success("Storage location saved");
-    } catch (error: any) {
-      console.error("Error saving location:", error);
-      toast.error("Failed to save location");
-    }
+    setStorageLocation(newLocationName.trim());
+    setNewLocationName("");
+    setShowNewLocationInput(false);
   };
 
   const addDocumentRequest = () => {

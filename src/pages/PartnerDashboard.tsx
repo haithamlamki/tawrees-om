@@ -61,7 +61,7 @@ const PartnerDashboard = () => {
   const [partner, setPartner] = useState<ShippingPartner | null>(null);
   const [selectedShipment, setSelectedShipment] = useState<PartnerShipment | null>(null);
   const [selectedForAcceptance, setSelectedForAcceptance] = useState<PartnerShipment | null>(null);
-  const [activeTab, setActiveTab] = useState<string>("pending");
+  const [activeTab, setActiveTab] = useState<string>("active"); // Default to Active Shipments
   const [statusFilters, setStatusFilters] = useState<string[]>([
     "received_from_supplier",
     "processing",
@@ -369,41 +369,6 @@ const PartnerDashboard = () => {
                         </CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        {/* Always show basic order info */}
-                        <div className="p-4 bg-muted/20 rounded-lg space-y-3">
-                          <p className="text-sm font-semibold text-foreground mb-2">Order Information</p>
-                          
-                          {/* Delivery Address */}
-                          <div className="space-y-2">
-                            <div className="flex items-start gap-2">
-                              <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-                              <div className="text-sm flex-1">
-                                <p className="font-medium text-foreground">Delivery Address</p>
-                                <p className="text-muted-foreground mt-1">
-                                  {request?.delivery_address || 'No address provided'}
-                                  {request?.delivery_city && `, ${request.delivery_city}`}
-                                  {request?.delivery_country && `, ${request.delivery_country}`}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Contact Information */}
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2 border-t border-border/50">
-                            <div className="text-sm">
-                              <p className="text-xs text-muted-foreground mb-1">Contact Name</p>
-                              <p className="font-medium text-foreground">
-                                {request?.delivery_contact_name || 'Not provided'}
-                              </p>
-                            </div>
-                            <div className="text-sm">
-                              <p className="text-xs text-muted-foreground mb-1">Contact Phone</p>
-                              <p className="font-medium text-foreground">
-                                {request?.delivery_contact_phone || 'Not provided'}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
 
                         {/* Shipment Stats - Always visible */}
                         <div>
