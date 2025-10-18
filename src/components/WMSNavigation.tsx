@@ -428,32 +428,40 @@ export const WMSNavigation = ({ userRole }: WMSNavigationProps) => {
                 };
 
                 return (
-                  <>
-                    <SidebarMenuItem key={item.name}>
+                  <SidebarMenuItem key={item.name}>
+                    {hasSub ? (
+                      <>
+                        <SidebarMenuButton asChild isActive={isActivePath(item.href)}>
+                          <Link to={item.href}>
+                            <Icon className="h-5 w-5" />
+                            <span>{item.name}</span>
+                          </Link>
+                        </SidebarMenuButton>
+                        <SidebarMenuSub>
+                          {item.subItems!.map((sub) => (
+                            <SidebarMenuSubItem key={`${item.name}-${sub.name}`}>
+                              <SidebarMenuSubButton asChild isActive={isActivePath(sub.href)}>
+                                <Link 
+                                  to={sub.href}
+                                  onClick={(e) => handleSubItemClick(e, sub.href)}
+                                >
+                                  {sub.icon && <sub.icon className="h-4 w-4" />}
+                                  <span>{sub.name}</span>
+                                </Link>
+                              </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
+                          ))}
+                        </SidebarMenuSub>
+                      </>
+                    ) : (
                       <SidebarMenuButton asChild isActive={isActivePath(item.href)}>
                         <Link to={item.href}>
                           <Icon className="h-5 w-5" />
                           <span>{item.name}</span>
                         </Link>
                       </SidebarMenuButton>
-                    </SidebarMenuItem>
-
-                    {hasSub && (
-                      item.subItems!.map((sub) => (
-                        <SidebarMenuItem key={`${item.name}-${sub.name}`}>
-                          <SidebarMenuButton asChild isActive={isActivePath(sub.href)} className="pl-8 text-sm">
-                            <Link 
-                              to={sub.href}
-                              onClick={(e) => handleSubItemClick(e, sub.href)}
-                            >
-                              {sub.icon && <sub.icon className="h-4 w-4" />}
-                              <span>{sub.name}</span>
-                            </Link>
-                          </SidebarMenuButton>
-                        </SidebarMenuItem>
-                      ))
                     )}
-                  </>
+                  </SidebarMenuItem>
                 );
               })}
             </SidebarMenu>
