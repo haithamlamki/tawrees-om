@@ -312,11 +312,6 @@ export function ItemDetailsViewer({
         {/* Summary Section */}
         <div className="pt-4 border-t space-y-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <div className="bg-muted/50 p-3 rounded-lg">
-              <p className="text-xs text-muted-foreground mb-1">Total Items</p>
-              <p className="text-lg font-bold">{items.reduce((sum, item) => sum + item.quantity, 0)}</p>
-            </div>
-            
             {totalWeight !== undefined && totalWeight !== null && (
               <div className="bg-muted/50 p-3 rounded-lg">
                 <p className="text-xs text-muted-foreground mb-1">Total Weight</p>
