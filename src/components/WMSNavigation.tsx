@@ -189,6 +189,7 @@ const navigationItems: NavigationItem[] = [
       { name: "Quality Check", href: "/admin#qc", icon: ClipboardCheck },
       { name: "Bulk Operations", href: "/admin#bulk", icon: Workflow },
       { name: "Partner Invoices", href: "/admin#invoices", icon: FileBarChart },
+      { name: "Partner Payments", href: "/admin#payments", icon: DollarSign },
     ],
   },
   {
