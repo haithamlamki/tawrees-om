@@ -42,5 +42,14 @@
   "approved": "Approved",
   "rejected": "Rejected",
   "completed": "Completed",
-  "cancelled": "Cancelled"
+  "cancelled": "Cancelled",
+  "supplier": "Supplier",
+  "suppliers": "Suppliers",
+  "supplierDetails": "Supplier Details",
+  "supplierName": "Supplier Name",
+  "supplierCode": "Supplier Code",
+  "supplierContact": "Supplier Contact",
+  "supplierNotes": "Supplier Notes",
+  "selectSupplier": "Select Supplier",
+  "optionalSupplier": "Supplier (Optional)"
 }

@@ -1317,6 +1317,8 @@ export type Database = {
           requested_delivery_date: string | null
           shipping_type: string
           status: string
+          supplier_id: string | null
+          supplier_notes: string | null
           updated_at: string
           weight_kg: number | null
           width_cm: number | null
@@ -1348,6 +1350,8 @@ export type Database = {
           requested_delivery_date?: string | null
           shipping_type: string
           status?: string
+          supplier_id?: string | null
+          supplier_notes?: string | null
           updated_at?: string
           weight_kg?: number | null
           width_cm?: number | null
@@ -1379,6 +1383,8 @@ export type Database = {
           requested_delivery_date?: string | null
           shipping_type?: string
           status?: string
+          supplier_id?: string | null
+          supplier_notes?: string | null
           updated_at?: string
           weight_kg?: number | null
           width_cm?: number | null
@@ -1403,6 +1409,13 @@ export type Database = {
             columns: ["customer_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shipment_requests_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
             referencedColumns: ["id"]
           },
         ]
@@ -1712,6 +1725,54 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      suppliers: {
+        Row: {
+          address: string | null
+          city: string | null
+          contact_person: string | null
+          country: string | null
+          created_at: string | null
+          email: string | null
+          id: string
+          is_active: boolean | null
+          notes: string | null
+          phone: string | null
+          supplier_code: string | null
+          supplier_name: string
+          updated_at: string | null
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          contact_person?: string | null
+          country?: string | null
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          is_active?: boolean | null
+          notes?: string | null
+          phone?: string | null
+          supplier_code?: string | null
+          supplier_name: string
+          updated_at?: string | null
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          contact_person?: string | null
+          country?: string | null
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          is_active?: boolean | null
+          notes?: string | null
+          phone?: string | null
+          supplier_code?: string | null
+          supplier_name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       surcharges: {
         Row: {

@@ -22,6 +22,7 @@ import AnalyticsExport from "@/components/admin/AnalyticsExport";
 import UserRoleManagement from "@/components/admin/UserRoleManagement";
 import PartnerManagement from "@/components/admin/PartnerManagement";
 import { SurchargeManagement } from "@/components/admin/SurchargeManagement";
+import { SupplierManagement } from "@/components/admin/SupplierManagement";
 import { AuditLogViewer } from "@/components/admin/AuditLogViewer";
 import { LastMileRateManagement } from "@/components/admin/LastMileRateManagement";
 import { RateHistoryViewer } from "@/components/admin/RateHistoryViewer";
@@ -356,6 +357,10 @@ const Admin = () => {
             <TabsTrigger value="partners">
               <Building2 className="mr-2 h-4 w-4" />
               Partners
+            </TabsTrigger>
+            <TabsTrigger value="suppliers">
+              <Building2 className="mr-2 h-4 w-4" />
+              Suppliers
             </TabsTrigger>
             <TabsTrigger value="surcharges">
               <Settings className="mr-2 h-4 w-4" />
@@ -695,6 +700,10 @@ const Admin = () => {
 
           <TabsContent value="partners">
             <PartnerManagement />
+          </TabsContent>
+
+          <TabsContent value="suppliers">
+            <SupplierManagement />
           </TabsContent>
 
           <TabsContent value="surcharges">

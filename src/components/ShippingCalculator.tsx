@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Ship, Plane, Package, Calculator, Plus } from "lucide-react";
@@ -61,11 +62,17 @@ const ShippingCalculator = () => {
   const [quoteBreakdown, setQuoteBreakdown] = useState<QuoteBreakdownType | null>(null);
   const [validUntil, setValidUntil] = useState<Date | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  
+  // Supplier state
+  const [suppliers, setSuppliers] = useState<any[]>([]);
+  const [selectedSupplier, setSelectedSupplier] = useState<string>("");
+  const [supplierNotes, setSupplierNotes] = useState<string>("");
 
   useEffect(() => {
     checkAuth();
     loadContainers();
     loadRates();
+    loadSuppliers();
   }, []);
 
   const checkAuth = async () => {
@@ -99,6 +106,21 @@ const ShippingCalculator = () => {
     }
     
     setRates(data || []);
+  };
+
+  const loadSuppliers = async () => {
+    const { data, error } = await supabase
+      .from("suppliers")
+      .select("*")
+      .eq("is_active", true)
+      .order("supplier_name");
+    
+    if (error) {
+      console.error("Error loading suppliers:", error);
+      return;
+    }
+    
+    setSuppliers(data || []);
   };
 
   const addItem = () => {
@@ -289,6 +311,8 @@ const ShippingCalculator = () => {
       shipping_type: shippingType,
       calculated_cost: quoteBreakdown.total,
       items: JSON.stringify(items),
+      supplier_id: selectedSupplier || null,
+      supplier_notes: supplierNotes.trim() || null,
     };
 
     if (shippingType === "sea") {
@@ -394,6 +418,38 @@ const ShippingCalculator = () => {
             </p>
           </TabsContent>
         </Tabs>
+
+        {/* Supplier Selection */}
+        <div className="space-y-2">
+          <Label htmlFor="supplier-select">Supplier (Optional)</Label>
+          <Select value={selectedSupplier} onValueChange={setSelectedSupplier}>
+            <SelectTrigger id="supplier-select">
+              <SelectValue placeholder="Select a supplier (optional)" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">No Supplier</SelectItem>
+              {suppliers.map((supplier) => (
+                <SelectItem key={supplier.id} value={supplier.id}>
+                  {supplier.supplier_name}
+                  {supplier.supplier_code && ` (${supplier.supplier_code})`}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          
+          {selectedSupplier && selectedSupplier !== "none" && (
+            <div className="space-y-2 mt-2">
+              <Label htmlFor="supplier-notes">Supplier Notes (Optional)</Label>
+              <Textarea
+                id="supplier-notes"
+                value={supplierNotes}
+                onChange={(e) => setSupplierNotes(e.target.value)}
+                placeholder="Add any notes about this supplier for this shipment..."
+                rows={2}
+              />
+            </div>
+          )}
+        </div>
 
         {/* Items Section */}
         <div className="space-y-4">

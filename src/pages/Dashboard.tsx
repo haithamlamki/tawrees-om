@@ -14,6 +14,7 @@ import NotificationSettings from "@/components/notifications/NotificationSetting
 import QuoteView from "@/components/dashboard/QuoteView";
 import InvoiceGenerator from "@/components/dashboard/InvoiceGenerator";
 import { ShippingPartnerDetails } from "@/components/customer/ShippingPartnerDetails";
+import { SupplierDetails } from "@/components/customer/SupplierDetails";
 import { StatusTimeline } from "@/components/shipment/StatusTimeline";
 import { ItemDetailsViewer } from "@/components/admin/ItemDetailsViewer";
 import { QuoteApprovalDialog } from "@/components/customer/QuoteApprovalDialog";
@@ -29,9 +30,22 @@ interface ShipmentRequest {
   cbm_volume?: number;
   weight_kg?: number;
   container_type_id?: string;
+  supplier_id?: string;
+  supplier_notes?: string;
   shipments?: Shipment[];
   container_types?: {
     name: string;
+  };
+  suppliers?: {
+    id: string;
+    supplier_name: string;
+    contact_person: string | null;
+    phone: string | null;
+    email: string | null;
+    address: string | null;
+    city: string | null;
+    country: string | null;
+    supplier_code: string | null;
   };
 }
 
@@ -138,6 +152,17 @@ const Dashboard = () => {
         *,
         container_types (
           name
+        ),
+        suppliers (
+          id,
+          supplier_name,
+          contact_person,
+          phone,
+          email,
+          address,
+          city,
+          country,
+          supplier_code
         ),
         shipments (
           id,
@@ -353,6 +378,23 @@ const Dashboard = () => {
                     )}
 
                     {/* Supplier Details - Always Visible when assigned */}
+                    {request.suppliers && (
+                      <div className="mt-4">
+                        <SupplierDetails
+                          supplierName={request.suppliers.supplier_name}
+                          contactPerson={request.suppliers.contact_person}
+                          phone={request.suppliers.phone}
+                          email={request.suppliers.email}
+                          address={request.suppliers.address}
+                          city={request.suppliers.city}
+                          country={request.suppliers.country}
+                          supplierCode={request.suppliers.supplier_code}
+                          supplierNotes={request.supplier_notes}
+                        />
+                      </div>
+                    )}
+
+                    {/* Shipping Partner Details - Always Visible when assigned */}
                     {request.shipments && request.shipments.length > 0 && (
                       <div className="mt-4 pt-4 border-t">
                         <ShippingPartnerDetails

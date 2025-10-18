@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Package, Truck, Plane, Calendar } from "lucide-react";
 import TrackingTimeline from "@/components/tracking/TrackingTimeline";
+import { SupplierDetails } from "@/components/customer/SupplierDetails";
 
 interface StatusHistoryItem {
   id: string;
@@ -27,6 +28,19 @@ interface Shipment {
   shipment_requests?: {
     shipping_type: string;
     calculated_cost: number;
+    supplier_id?: string;
+    supplier_notes?: string;
+    suppliers?: {
+      id: string;
+      supplier_name: string;
+      contact_person: string | null;
+      phone: string | null;
+      email: string | null;
+      address: string | null;
+      city: string | null;
+      country: string | null;
+      supplier_code: string | null;
+    };
   };
 }
 
@@ -89,7 +103,20 @@ const Tracking = () => {
         *,
         shipment_requests (
           shipping_type,
-          calculated_cost
+          calculated_cost,
+          supplier_id,
+          supplier_notes,
+          suppliers (
+            id,
+            supplier_name,
+            contact_person,
+            phone,
+            email,
+            address,
+            city,
+            country,
+            supplier_code
+          )
         )
       `)
       .eq("tracking_number", trackingNumber)
@@ -220,6 +247,21 @@ const Tracking = () => {
               </div>
             </CardContent>
           </Card>
+
+          {/* Supplier Information - if available */}
+          {shipment.shipment_requests?.suppliers && (
+            <SupplierDetails
+              supplierName={shipment.shipment_requests.suppliers.supplier_name}
+              contactPerson={shipment.shipment_requests.suppliers.contact_person}
+              phone={shipment.shipment_requests.suppliers.phone}
+              email={shipment.shipment_requests.suppliers.email}
+              address={shipment.shipment_requests.suppliers.address}
+              city={shipment.shipment_requests.suppliers.city}
+              country={shipment.shipment_requests.suppliers.country}
+              supplierCode={shipment.shipment_requests.suppliers.supplier_code}
+              supplierNotes={shipment.shipment_requests.supplier_notes}
+            />
+          )}
 
           <Card className="shadow-card">
             <CardHeader>

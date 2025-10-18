@@ -42,5 +42,14 @@
   "approved": "已批准",
   "rejected": "已拒绝",
   "completed": "已完成",
-  "cancelled": "已取消"
+  "cancelled": "已取消",
+  "supplier": "供应商",
+  "suppliers": "供应商",
+  "supplierDetails": "供应商详情",
+  "supplierName": "供应商名称",
+  "supplierCode": "供应商代码",
+  "supplierContact": "供应商联系人",
+  "supplierNotes": "供应商备注",
+  "selectSupplier": "选择供应商",
+  "optionalSupplier": "供应商（可选）"
 }

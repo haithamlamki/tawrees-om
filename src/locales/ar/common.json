@@ -42,5 +42,14 @@
   "approved": "موافق عليه",
   "rejected": "مرفوض",
   "completed": "مكتمل",
-  "cancelled": "ملغى"
+  "cancelled": "ملغى",
+  "supplier": "المورد",
+  "suppliers": "الموردين",
+  "supplierDetails": "تفاصيل المورد",
+  "supplierName": "اسم المورد",
+  "supplierCode": "رمز المورد",
+  "supplierContact": "جهة اتصال المورد",
+  "supplierNotes": "ملاحظات المورد",
+  "selectSupplier": "اختر المورد",
+  "optionalSupplier": "المورد (اختياري)"
 }
