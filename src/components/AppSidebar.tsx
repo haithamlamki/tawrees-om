@@ -42,6 +42,9 @@ import {
   FileCheck,
   Bell,
   User,
+  CheckSquare,
+  Download,
+  ShoppingBag,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -59,7 +62,10 @@ const adminNavigation: NavigationItem[] = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard, group: "Main" },
   { name: "Analytics", href: "/admin/analytics", icon: TrendingUp, group: "Main" },
   { name: "Products", href: "/admin/products", icon: Store, group: "Products" },
+  { name: "Add Product", href: "/admin/products/new", icon: FilePlus, group: "Products" },
+  { name: "Alibaba Import", href: "/admin/products/import/alibaba", icon: Download, group: "Products" },
   { name: "Quote Management", href: "/admin/quotes", icon: FileCheck, group: "Products" },
+  { name: "Product Approvals", href: "/admin/product-approvals", icon: CheckSquare, group: "Products" },
   { name: "Locations", href: "/locations", icon: MapPin, group: "Shipping" },
   { name: "Rates", href: "/rates", icon: DollarSign, group: "Shipping" },
   { name: "WMS Dashboard", href: "/admin/wms", icon: LayoutDashboard, group: "WMS" },
@@ -68,6 +74,7 @@ const adminNavigation: NavigationItem[] = [
   { name: "WMS Contracts", href: "/admin/wms-contracts", icon: FileText, group: "WMS" },
   { name: "WMS Inventory", href: "/admin/wms-inventory", icon: Package, group: "WMS" },
   { name: "WMS Orders", href: "/admin/wms-orders", icon: ShoppingCart, group: "WMS" },
+  { name: "Customer Orders", href: "/admin/wms-customer-orders", icon: ShoppingBag, group: "WMS" },
   { name: "WMS Invoices", href: "/admin/wms-invoices", icon: FileBarChart, group: "WMS" },
   { name: "WMS Drivers", href: "/admin/wms-drivers", icon: Truck, group: "WMS" },
   { name: "WMS Workflow", href: "/admin/wms-workflow", icon: Workflow, group: "WMS" },
@@ -118,11 +125,13 @@ const wmsEmployeeNavigation: NavigationItem[] = [
   { name: "Dashboard", href: "/warehouse/employee-dashboard", icon: UserCog, group: "Main" },
   { name: "Inventory", href: "/warehouse/inventory", icon: Package, group: "Operations" },
   { name: "Orders", href: "/warehouse/orders", icon: ShoppingCart, group: "Operations" },
+  { name: "Product Requests", href: "/warehouse/product-requests", icon: FilePlus, group: "Operations" },
 ];
 
 const wmsAccountantNavigation: NavigationItem[] = [
   { name: "Dashboard", href: "/warehouse/accountant-dashboard", icon: FileBarChart, group: "Main" },
   { name: "Invoices", href: "/warehouse/invoices", icon: FileBarChart, group: "Financial" },
+  { name: "Reports", href: "/warehouse/reports", icon: BarChart3, group: "Financial" },
 ];
 
 export function AppSidebar() {
