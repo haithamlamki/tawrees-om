@@ -164,11 +164,20 @@ const partnerNavigation: NavigationItemWithSub[] = [
   },
   
   // Partner group
-  { name: "Partner Dashboard", href: "/partner", icon: Ship, group: "Partner" },
-  { name: "New Requests", href: "/partner#requests", icon: Package, group: "Partner" },
-  { name: "Active Shipments", href: "/partner#shipments", icon: Truck, group: "Partner" },
-  { name: "Partner Invoices", href: "/partner#invoices", icon: FileBarChart, group: "Partner" },
-  { name: "Partner Locations", href: "/locations", icon: MapPin, group: "Partner" },
+  { 
+    name: "Partner Dashboard", 
+    href: "/partner", 
+    icon: Ship, 
+    group: "Partner",
+    subItems: [
+      { name: "New Requests", href: "/partner#requests", icon: Package },
+      { name: "Active Shipments", href: "/partner#shipments", icon: Truck },
+      { name: "Partner Invoices", href: "/partner#invoices", icon: FileBarChart },
+      { name: "Partner Payments", href: "/partner#payments", icon: DollarSign },
+      { name: "Company Profile", href: "/partner#profile", icon: User },
+    ]
+  },
+  { name: "Locations", href: "/locations", icon: MapPin, group: "Partner" },
   { name: "Rates", href: "/rates", icon: DollarSign, group: "Partner" },
 ];
 
