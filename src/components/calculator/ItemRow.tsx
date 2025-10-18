@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { X, Upload, Image as ImageIcon } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
+import { SupplierSelector } from "@/components/customer/SupplierSelector";
 
 interface ItemRowProps {
   item: ShipmentItem;
@@ -228,6 +229,18 @@ const ItemRow = ({ item, onUpdate, onRemove, canRemove }: ItemRowProps) => {
             <X className="h-4 w-4" />
           </Button>
         </div>
+      </div>
+
+      {/* Supplier Selection */}
+      <div className="col-span-full pt-4 border-t">
+        <SupplierSelector
+          value={item.supplier_id}
+          onChange={(supplierId) => onUpdate(item.id, "supplier_id", supplierId)}
+          onNotesChange={(notes) => onUpdate(item.id, "supplier_notes", notes)}
+          notes={item.supplier_notes}
+          label="Supplier for this item (Optional)"
+          placeholder="Select supplier for this product..."
+        />
       </div>
     </div>
   );

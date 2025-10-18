@@ -51,5 +51,9 @@
   "supplierContact": "供应商联系人",
   "supplierNotes": "供应商备注",
   "selectSupplier": "选择供应商",
-  "optionalSupplier": "供应商（可选）"
+  "optionalSupplier": "供应商（可选）",
+  "supplierPerItem": "该物品的供应商",
+  "requestNewSupplier": "请求新供应商",
+  "supplierForItem": "{itemName} 的供应商",
+  "suppliersForItems": "物品供应商"
 }

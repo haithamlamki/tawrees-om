@@ -51,5 +51,9 @@
   "supplierContact": "جهة اتصال المورد",
   "supplierNotes": "ملاحظات المورد",
   "selectSupplier": "اختر المورد",
-  "optionalSupplier": "المورد (اختياري)"
+  "optionalSupplier": "المورد (اختياري)",
+  "supplierPerItem": "المورد لهذا العنصر",
+  "requestNewSupplier": "طلب مورد جديد",
+  "supplierForItem": "المورد لـ {itemName}",
+  "suppliersForItems": "الموردون للعناصر"
 }

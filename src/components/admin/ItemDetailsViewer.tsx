@@ -1,14 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ShipmentItem } from "@/types/calculator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Package, Image as ImageIcon } from "lucide-react";
+import { Package, Image as ImageIcon, Building2 } from "lucide-react";
 import { isValidBase64Image, getPlaceholderImage, openImageLightbox } from "@/utils/imageUtils";
 import { DIMENSION_CONVERSIONS, WEIGHT_CONVERSIONS, CBM_DIVISOR, IATA_DIVISOR } from "@/types/calculator";
 import { useTranslation } from "react-i18next";
 import { ItemSearchFilter } from "./ItemSearchFilter";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ItemDetailsViewerProps {
   items: ShipmentItem[];
@@ -36,6 +37,37 @@ export function ItemDetailsViewer({
   const { t } = useTranslation();
   const isMobile = useIsMobile();
   const [filteredItems, setFilteredItems] = useState(items);
+  const [suppliers, setSuppliers] = useState<Record<string, any>>({});
+
+  useEffect(() => {
+    loadSuppliers();
+  }, [items]);
+
+  const loadSuppliers = async () => {
+    const supplierIds = items
+      .filter((item) => item.supplier_id)
+      .map((item) => item.supplier_id)
+      .filter((id, index, self) => id && self.indexOf(id) === index);
+
+    if (supplierIds.length === 0) return;
+
+    try {
+      const { data, error } = await supabase
+        .from("suppliers")
+        .select("id, supplier_name, contact_person, phone, email")
+        .in("id", supplierIds);
+
+      if (error) throw error;
+
+      const supplierMap: Record<string, any> = {};
+      data?.forEach((supplier) => {
+        supplierMap[supplier.id] = supplier;
+      });
+      setSuppliers(supplierMap);
+    } catch (error) {
+      console.error("Error loading suppliers:", error);
+    }
+  };
 
   // Calculate individual item metrics
   const calculateItemMetrics = (item: ShipmentItem) => {
@@ -130,6 +162,12 @@ export function ItemDetailsViewer({
                           <div>
                             <span className="font-medium">Quantity:</span> <Badge variant="outline" className="ml-1">{item.quantity}</Badge>
                           </div>
+                          {item.supplier_id && suppliers[item.supplier_id] && (
+                            <div className="flex items-center gap-1 text-primary">
+                              <Building2 className="h-3 w-3" />
+                              <span className="font-medium">Supplier:</span> {suppliers[item.supplier_id].supplier_name}
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -196,11 +234,22 @@ export function ItemDetailsViewer({
                         </TableCell>
                       )}
                       <TableCell>
-                        <div className="min-w-[120px]">
+                        <div className="min-w-[120px] space-y-1">
                           {item.productName ? (
                             <span className="font-medium">{item.productName}</span>
                           ) : (
                             <span className="text-muted-foreground text-sm">Item {index + 1}</span>
+                          )}
+                          {item.supplier_id && suppliers[item.supplier_id] && (
+                            <div className="flex items-center gap-1 text-xs text-primary">
+                              <Building2 className="h-3 w-3" />
+                              {suppliers[item.supplier_id].supplier_name}
+                            </div>
+                          )}
+                          {item.supplier_notes && (
+                            <div className="text-xs text-muted-foreground italic">
+                              {item.supplier_notes}
+                            </div>
                           )}
                         </div>
                       </TableCell>

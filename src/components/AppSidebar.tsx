@@ -70,6 +70,7 @@ const adminNavigation: NavigationItem[] = [
   { name: "Customers", href: "/admin#customers", icon: Users, group: "Dashboard" },
   { name: "User Roles", href: "/admin#users", icon: UserCog, group: "Dashboard" },
   { name: "Partners", href: "/admin#partners", icon: Building2, group: "Dashboard" },
+  { name: "Suppliers", href: "/admin#suppliers", icon: Store, group: "Dashboard" },
   { name: "Surcharges", href: "/admin#surcharges", icon: Settings, group: "Dashboard" },
   { name: "Delivery", href: "/admin#delivery", icon: Truck, group: "Dashboard" },
   { name: "Audit", href: "/admin#audit", icon: FileText, group: "Dashboard" },

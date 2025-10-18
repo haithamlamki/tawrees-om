@@ -9,6 +9,8 @@ export interface ShipmentItem {
   quantity: number;
   productName?: string;
   productImage?: string;
+  supplier_id?: string;
+  supplier_notes?: string;
 }
 
 export interface QuoteBreakdown {

@@ -51,5 +51,9 @@
   "supplierContact": "Supplier Contact",
   "supplierNotes": "Supplier Notes",
   "selectSupplier": "Select Supplier",
-  "optionalSupplier": "Supplier (Optional)"
+  "optionalSupplier": "Supplier (Optional)",
+  "supplierPerItem": "Supplier for this item",
+  "requestNewSupplier": "Request new supplier",
+  "supplierForItem": "Supplier for {itemName}",
+  "suppliersForItems": "Suppliers for Items"
 }
