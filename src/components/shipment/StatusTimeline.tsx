@@ -84,38 +84,42 @@ export function StatusTimeline({ currentStatus, statusHistory = [] }: StatusTime
         <CardTitle>Shipment Progress</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="overflow-x-auto pb-4">
-          <div className="flex items-start gap-2 min-w-max">
+        <div className="w-full">
+          <div className="flex items-start justify-between gap-1">
             {statusSteps.map((step, index) => {
               const stepStatus = getStepStatus(index);
               const historyItem = statusHistory.find((h) => h.status === step.key);
 
               return (
-                <div key={step.key} className="flex items-center">
-                  <div className="flex flex-col items-center min-w-[120px]">
-                    {getIcon(stepStatus)}
+                <div key={step.key} className="flex items-center flex-1">
+                  <div className="flex flex-col items-center w-full min-w-0">
+                    <div className="flex-shrink-0">
+                      {getIcon(stepStatus)}
+                    </div>
                     <p
-                      className={`text-xs font-medium mt-2 text-center ${
+                      className={`text-[10px] sm:text-xs font-medium mt-2 text-center leading-tight px-1 ${
                         stepStatus === "current"
                           ? "text-primary"
                           : stepStatus === "completed"
                           ? "text-success"
                           : "text-muted-foreground"
                       }`}
+                      style={{ wordBreak: "break-word", hyphens: "auto" }}
                     >
                       {step.label}
                     </p>
                     {historyItem && (
-                      <div className="text-xs text-muted-foreground mt-1 text-center">
+                      <div className="text-[9px] sm:text-xs text-muted-foreground mt-1 text-center">
                         <p>{new Date(historyItem.created_at).toLocaleDateString()}</p>
                       </div>
                     )}
                   </div>
                   {index < statusSteps.length - 1 && (
                     <div
-                      className={`h-0.5 w-8 ${
+                      className={`h-0.5 flex-shrink-0 ${
                         stepStatus === "completed" ? "bg-success" : "bg-muted"
                       }`}
+                      style={{ width: "8px", minWidth: "4px" }}
                     />
                   )}
                 </div>
