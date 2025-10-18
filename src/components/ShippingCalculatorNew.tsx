@@ -746,7 +746,7 @@ export const ShippingCalculatorNew = () => {
                   {/* Container Selection with Checkboxes */}
                   <div className="border rounded-lg p-4">
                     <Label className="text-sm font-medium mb-3 block">Select Container</Label>
-                    <div className="space-y-2">
+                    <div className="grid grid-cols-3 gap-3">
                       <div 
                         onClick={() => setSelectedContainer("SEA_CONTAINER_20")}
                         className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-colors hover:bg-muted/50 ${
@@ -853,7 +853,7 @@ export const ShippingCalculatorNew = () => {
                       </div>
                       <div className="p-4 space-y-3">
                         {/* Table Header */}
-                        <div className="grid grid-cols-8 gap-2 text-xs font-medium text-muted-foreground pb-2 border-b">
+                        <div className="grid grid-cols-10 gap-2 text-xs font-medium text-muted-foreground pb-2 border-b">
                           <div>Unit</div>
                           <div>Length</div>
                           <div>Width</div>
@@ -861,12 +861,14 @@ export const ShippingCalculatorNew = () => {
                           <div>Weight</div>
                           <div>Unit</div>
                           <div>Quantity</div>
+                          <div>Product Description (Optional)</div>
+                          <div>Product Image (Optional)</div>
                           <div></div>
                         </div>
                         
                         {/* Product Rows */}
                         {items.map((item, index) => (
-                          <div key={item.id} className="grid grid-cols-8 gap-2 items-center">
+                          <div key={item.id} className="grid grid-cols-10 gap-2 items-center">
                             <Select 
                               value={item.dimensionUnit} 
                               onValueChange={(v) => updateItem(item.id, "dimensionUnit", v)}
@@ -922,6 +924,20 @@ export const ShippingCalculatorNew = () => {
                               onChange={(e) => updateItem(item.id, "quantity", Number(e.target.value))}
                               className="h-9"
                               min="1"
+                            />
+                            <Input 
+                              type="text" 
+                              value={item.productName || ""} 
+                              onChange={(e) => updateItem(item.id, "productName", e.target.value)}
+                              className="h-9"
+                              placeholder="Description"
+                            />
+                            <Input 
+                              type="url" 
+                              value={item.productImage || ""} 
+                              onChange={(e) => updateItem(item.id, "productImage", e.target.value)}
+                              className="h-9"
+                              placeholder="Image URL"
                             />
                             {items.length > 1 && (
                               <Button
