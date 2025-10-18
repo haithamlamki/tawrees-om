@@ -14,7 +14,6 @@ import DocumentManager from "@/components/documents/DocumentManager";
 import NotificationSettings from "@/components/notifications/NotificationSettings";
 import QuoteView from "@/components/dashboard/QuoteView";
 import InvoiceGenerator from "@/components/dashboard/InvoiceGenerator";
-import PaymentButton from "@/components/dashboard/PaymentButton";
 import { ShippingPartnerDetails } from "@/components/customer/ShippingPartnerDetails";
 import { StatusTimeline } from "@/components/shipment/StatusTimeline";
 import { ItemDetailsViewer } from "@/components/admin/ItemDetailsViewer";
@@ -391,13 +390,6 @@ const Dashboard = () => {
                         requestStatus={request.status}
                       />
                     </div>
-
-                    {/* Payment Button */}
-                    <PaymentButton
-                      requestId={request.id}
-                      amount={request.calculated_cost}
-                      requestStatus={request.status}
-                    />
 
                     {/* Show Partner Details and Timeline when shipment is assigned */}
                     {request.shipments && request.shipments.length > 0 && selectedRequestId === request.id && (
