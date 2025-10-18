@@ -10,6 +10,7 @@ import {
   FilePlus,
   Settings,
   Users,
+  User,
   Truck,
   ClipboardCheck,
   Workflow,
@@ -334,6 +335,8 @@ const navigationItems: NavigationItem[] = [
       { name: "New Requests", href: "/partner#requests", icon: Package },
       { name: "Active Shipments", href: "/partner#shipments", icon: Truck },
       { name: "Invoices", href: "/partner#invoices", icon: FileText },
+      { name: "Partner Payments", href: "/partner#payments", icon: DollarSign },
+      { name: "Company Profile", href: "/partner#profile", icon: User },
     ],
   },
   {
