@@ -46,9 +46,36 @@ const PartnerDashboard = () => {
   const [partner, setPartner] = useState<ShippingPartner | null>(null);
   const [selectedShipment, setSelectedShipment] = useState<PartnerShipment | null>(null);
   const [selectedForAcceptance, setSelectedForAcceptance] = useState<PartnerShipment | null>(null);
+  const [activeTab, setActiveTab] = useState<string>("pending");
 
   useEffect(() => {
     checkAuthAndLoadData();
+  }, []);
+
+  useEffect(() => {
+    // Read hash from URL and set active tab
+    const hash = window.location.hash.slice(1); // Remove # prefix
+    // Map hash values to tab values
+    const tabMap: Record<string, string> = {
+      'dashboard': 'pending',
+      'requests': 'pending',
+      'shipments': 'active',
+      'invoices': 'invoices',
+    };
+    if (hash && tabMap[hash]) {
+      setActiveTab(tabMap[hash]);
+    }
+    
+    // Listen for hash changes
+    const handleHashChange = () => {
+      const newHash = window.location.hash.slice(1);
+      if (newHash && tabMap[newHash]) {
+        setActiveTab(tabMap[newHash]);
+      }
+    };
+    
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
   const checkAuthAndLoadData = async () => {
@@ -175,7 +202,7 @@ const PartnerDashboard = () => {
           </Card>
         )}
 
-        <Tabs defaultValue="pending" className="space-y-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="w-full inline-flex h-auto">
             <TabsTrigger value="pending" className="flex-1">
               New Requests ({pendingShipments.length})

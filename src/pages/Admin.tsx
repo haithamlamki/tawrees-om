@@ -85,9 +85,29 @@ const Admin = () => {
   const [margin, setMargin] = useState<string>("");
   const [selectedRequestForQuote, setSelectedRequestForQuote] = useState<string | null>(null);
   const [selectedRequestForApproval, setSelectedRequestForApproval] = useState<ShipmentRequest | null>(null);
+  const [activeTab, setActiveTab] = useState<string>("dashboard");
 
   useEffect(() => {
     checkAdminAndLoadData();
+  }, []);
+
+  useEffect(() => {
+    // Read hash from URL and set active tab
+    const hash = window.location.hash.slice(1); // Remove # prefix
+    if (hash) {
+      setActiveTab(hash);
+    }
+    
+    // Listen for hash changes
+    const handleHashChange = () => {
+      const newHash = window.location.hash.slice(1);
+      if (newHash) {
+        setActiveTab(newHash);
+      }
+    };
+    
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
   const checkAdminAndLoadData = async () => {
@@ -311,7 +331,7 @@ const Admin = () => {
           </div>
         </div>
 
-        <Tabs defaultValue="dashboard" className="space-y-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList>
             <TabsTrigger value="dashboard">
               <BarChart3 className="mr-2 h-4 w-4" />

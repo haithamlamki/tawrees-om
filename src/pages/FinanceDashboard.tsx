@@ -35,9 +35,37 @@ const FinanceDashboard = () => {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [totalRevenue, setTotalRevenue] = useState(0);
+  const [activeTab, setActiveTab] = useState<string>("dashboard");
 
   useEffect(() => {
     checkAuthAndLoadData();
+  }, []);
+
+  useEffect(() => {
+    // Read hash from URL and set active tab
+    const hash = window.location.hash.slice(1); // Remove # prefix
+    // Map hash values to tab values
+    const tabMap: Record<string, string> = {
+      'dashboard': 'payments',
+      'revenue': 'payments',
+      'payments': 'payments',
+      'invoices': 'quotes',
+      'reports': 'export',
+    };
+    if (hash && tabMap[hash]) {
+      setActiveTab(tabMap[hash]);
+    }
+    
+    // Listen for hash changes
+    const handleHashChange = () => {
+      const newHash = window.location.hash.slice(1);
+      if (newHash && tabMap[newHash]) {
+        setActiveTab(tabMap[newHash]);
+      }
+    };
+    
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
   const checkAuthAndLoadData = async () => {
@@ -160,7 +188,7 @@ const FinanceDashboard = () => {
           </CardContent>
         </Card>
 
-        <Tabs defaultValue="payments" className="space-y-4">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
           <TabsList>
             <TabsTrigger value="payments">Payments</TabsTrigger>
             <TabsTrigger value="quotes">Quotes</TabsTrigger>

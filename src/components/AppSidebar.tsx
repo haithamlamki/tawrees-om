@@ -45,6 +45,8 @@ import {
   CheckSquare,
   Download,
   ShoppingBag,
+  History,
+  FolderSync,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -59,15 +61,28 @@ interface NavigationItem {
 }
 
 const adminNavigation: NavigationItem[] = [
-  { name: "Dashboard", href: "/admin", icon: LayoutDashboard, group: "Main" },
-  { name: "Analytics", href: "/admin/analytics", icon: TrendingUp, group: "Main" },
+  { name: "Overview", href: "/admin#dashboard", icon: LayoutDashboard, group: "Dashboard" },
+  { name: "Requests", href: "/admin#requests", icon: Package, group: "Dashboard" },
+  { name: "Shipments", href: "/admin#shipments", icon: Ship, group: "Dashboard" },
+  { name: "Customers", href: "/admin#customers", icon: Users, group: "Dashboard" },
+  { name: "User Roles", href: "/admin#users", icon: UserCog, group: "Dashboard" },
+  { name: "Partners", href: "/admin#partners", icon: Building2, group: "Dashboard" },
+  { name: "Surcharges", href: "/admin#surcharges", icon: Settings, group: "Dashboard" },
+  { name: "Delivery", href: "/admin#delivery", icon: Truck, group: "Dashboard" },
+  { name: "Audit", href: "/admin#audit", icon: FileText, group: "Dashboard" },
+  { name: "Rates", href: "/admin#rates", icon: DollarSign, group: "Dashboard" },
+  { name: "History", href: "/admin#history", icon: History, group: "Dashboard" },
+  { name: "Quality Check", href: "/admin#qc", icon: ClipboardCheck, group: "Dashboard" },
+  { name: "Bulk Operations", href: "/admin#bulk", icon: FolderSync, group: "Dashboard" },
+  { name: "Invoices", href: "/admin#invoices", icon: FileBarChart, group: "Dashboard" },
+  { name: "Analytics", href: "/admin/analytics", icon: TrendingUp, group: "Analytics" },
   { name: "Products", href: "/admin/products", icon: Store, group: "Products" },
   { name: "Add Product", href: "/admin/products/new", icon: FilePlus, group: "Products" },
   { name: "Alibaba Import", href: "/admin/products/import/alibaba", icon: Download, group: "Products" },
   { name: "Quote Management", href: "/admin/quotes", icon: FileCheck, group: "Products" },
   { name: "Product Approvals", href: "/admin/product-approvals", icon: CheckSquare, group: "Products" },
   { name: "Locations", href: "/locations", icon: MapPin, group: "Configuration" },
-  { name: "Rates", href: "/rates", icon: DollarSign, group: "Configuration" },
+  { name: "System Rates", href: "/rates", icon: DollarSign, group: "Configuration" },
   { name: "WMS Dashboard", href: "/admin/wms", icon: LayoutDashboard, group: "WMS" },
   { name: "WMS Customers", href: "/admin/wms-customers", icon: Users, group: "WMS" },
   { name: "WMS Users", href: "/admin/wms-users", icon: UserCog, group: "WMS" },
@@ -96,13 +111,20 @@ const employeeNavigation: NavigationItem[] = [
 ];
 
 const partnerNavigation: NavigationItem[] = [
-  { name: "Dashboard", href: "/partner", icon: Truck, group: "Main" },
+  { name: "Overview", href: "/partner#dashboard", icon: LayoutDashboard, group: "Dashboard" },
+  { name: "New Requests", href: "/partner#requests", icon: Package, group: "Dashboard" },
+  { name: "Active Shipments", href: "/partner#shipments", icon: Ship, group: "Dashboard" },
+  { name: "Invoices", href: "/partner#invoices", icon: FileBarChart, group: "Dashboard" },
   { name: "Locations", href: "/locations", icon: MapPin, group: "Tools" },
   { name: "Rates", href: "/rates", icon: DollarSign, group: "Tools" },
 ];
 
 const accountantNavigation: NavigationItem[] = [
-  { name: "Finance Dashboard", href: "/finance", icon: DollarSign, group: "Main" },
+  { name: "Overview", href: "/finance#dashboard", icon: LayoutDashboard, group: "Finance" },
+  { name: "Revenue", href: "/finance#revenue", icon: TrendingUp, group: "Finance" },
+  { name: "Payments", href: "/finance#payments", icon: DollarSign, group: "Finance" },
+  { name: "Invoices", href: "/finance#invoices", icon: FileBarChart, group: "Finance" },
+  { name: "Reports", href: "/finance#reports", icon: BarChart3, group: "Finance" },
   { name: "Locations", href: "/locations", icon: MapPin, group: "Tools" },
   { name: "Rates", href: "/rates", icon: DollarSign, group: "Tools" },
 ];
@@ -225,6 +247,13 @@ export function AppSidebar() {
     if (path === "/") {
       return location.pathname === "/";
     }
+    
+    // Handle hash-based navigation
+    if (path.includes("#")) {
+      const [pathname, hash] = path.split("#");
+      return location.pathname === pathname && location.hash === `#${hash}`;
+    }
+    
     return location.pathname === path || location.pathname.startsWith(path + "/");
   };
 
