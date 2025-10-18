@@ -116,14 +116,7 @@ const Dashboard = () => {
       .eq("user_id", session.user.id);
     
     const adminRole = roles?.some(r => r.role === "admin");
-    const isPartner = roles?.some(r => r.role === "shipping_partner");
     setIsAdmin(!!adminRole);
-
-    // If user is a shipping partner, redirect them to Partner Dashboard (Active Shipments)
-    if (isPartner) {
-      navigate("/partner#shipments");
-      return;
-    }
 
     await loadRequests(session.user.id, !!adminRole);
     await loadPendingQuotes(session.user.id);
