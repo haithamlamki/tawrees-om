@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Navigation from "@/components/Navigation";
@@ -70,11 +70,8 @@ const PartnerDashboard = () => {
     "at_customs"
   ]);
   const [pendingPaymentsCount, setPendingPaymentsCount] = useState(0);
-  const hasLoaded = useRef(false);
 
   useEffect(() => {
-    if (hasLoaded.current) return;
-    hasLoaded.current = true;
     checkAuthAndLoadData();
   }, []);
 
@@ -151,16 +148,10 @@ const PartnerDashboard = () => {
         supabase
           .from("shipments")
           .select(`
-            id,
-            tracking_number,
-            status,
-            current_location,
-            estimated_delivery,
-            notes,
-            request_id,
-            created_at,
+            *,
             shipment_requests (
               id,
+              customer_id,
               delivery_address,
               delivery_city,
               delivery_country,
@@ -170,6 +161,7 @@ const PartnerDashboard = () => {
               requested_delivery_date,
               calculated_cost,
               currency,
+              items,
               cbm_volume,
               weight_kg,
               profiles (
@@ -178,8 +170,7 @@ const PartnerDashboard = () => {
             )
           `)
           .eq("assigned_partner_id", partnerId)
-          .order("created_at", { ascending: false })
-          .limit(20),
+          .order("created_at", { ascending: false }),
         
         // Load pending payments count
         supabase
