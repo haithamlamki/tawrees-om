@@ -40,13 +40,10 @@ const Auth = () => {
           .select("role")
           .eq("user_id", session.user.id);
         
-        const isPartner = roles?.some(r => r.role === "shipping_partner");
         const returnTo = searchParams.get("returnTo");
         
         if (returnTo) {
           navigate(returnTo);
-        } else if (isPartner) {
-          navigate("/partner#shipments");
         } else {
           navigate("/dashboard");
         }
@@ -92,18 +89,10 @@ const Auth = () => {
         
         if (!signInError && data) {
           // Check user role to determine redirect
-          const { data: roles } = await supabase
-            .from("user_roles")
-            .select("role")
-            .eq("user_id", data.user.id);
-          
-          const isPartner = roles?.some(r => r.role === "shipping_partner");
           const returnTo = searchParams.get("returnTo");
           
           if (returnTo) {
             navigate(returnTo);
-          } else if (isPartner) {
-            navigate("/partner#shipments");
           } else {
             navigate("/dashboard");
           }
@@ -137,21 +126,11 @@ const Auth = () => {
 
       if (error) throw error;
       
-      // Check user role to determine redirect
-      const { data: roles } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", data.user.id);
-      
-      const isPartner = roles?.some(r => r.role === "shipping_partner");
-      
       toast.success("Logged in successfully!");
       
       const returnTo = searchParams.get("returnTo");
       if (returnTo) {
         navigate(returnTo);
-      } else if (isPartner) {
-        navigate("/partner#shipments");
       } else {
         navigate("/dashboard");
       }
