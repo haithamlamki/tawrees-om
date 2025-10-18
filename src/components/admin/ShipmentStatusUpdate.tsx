@@ -301,7 +301,7 @@ const ShipmentStatusUpdate = ({
           value={formData.status}
           onValueChange={(value) => setFormData({ ...formData, status: value })}
         >
-          <SelectTrigger id="status">
+          <SelectTrigger id="status" className={formData.status === "delivered" ? "text-green-600 font-semibold" : ""}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -310,7 +310,7 @@ const ShipmentStatusUpdate = ({
             <SelectItem value="in_transit">In Transit</SelectItem>
             <SelectItem value="customs">At Customs</SelectItem>
             <SelectItem value="out_for_delivery">Out for Delivery</SelectItem>
-            <SelectItem value="delivered">Delivered</SelectItem>
+            <SelectItem value="delivered" className="text-green-600 font-semibold">Delivered</SelectItem>
           </SelectContent>
         </Select>
       </div>
