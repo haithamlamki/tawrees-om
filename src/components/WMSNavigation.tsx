@@ -53,6 +53,36 @@ interface NavigationItem {
 }
 
 const navigationItems: NavigationItem[] = [
+  // ===== PARTNER DASHBOARD =====
+  {
+    name: "Partner Dashboard",
+    href: "/partner",
+    icon: Users,
+    roles: ["shipping_partner", "admin"],
+    group: "Partner",
+    subItems: [
+      { name: "New Requests", href: "/partner#requests", icon: Package },
+      { name: "Active Shipments", href: "/partner#shipments", icon: Truck },
+      { name: "Invoices", href: "/partner#invoices", icon: FileText },
+      { name: "Partner Payments", href: "/partner#payments", icon: DollarSign },
+      { name: "Company Profile", href: "/partner#profile", icon: User },
+    ],
+  },
+  {
+    name: "Locations",
+    href: "/partner/locations",
+    icon: MapPin,
+    roles: ["shipping_partner", "admin"],
+    group: "Partner"
+  },
+  {
+    name: "Rates",
+    href: "/rates",
+    icon: DollarSign,
+    roles: ["shipping_partner", "admin"],
+    group: "Partner"
+  },
+  
   // ===== REGULAR USER / CUSTOMER PAGES =====
   {
     name: "Home",
@@ -322,36 +352,6 @@ const navigationItems: NavigationItem[] = [
     icon: UserCog,
     roles: ["employee", "admin"],
     group: "Employee"
-  },
-  
-  // ===== PARTNER DASHBOARD =====
-  {
-    name: "Partner Dashboard",
-    href: "/partner",
-    icon: Users,
-    roles: ["shipping_partner", "admin"],
-    group: "Partner",
-    subItems: [
-      { name: "New Requests", href: "/partner#requests", icon: Package },
-      { name: "Active Shipments", href: "/partner#shipments", icon: Truck },
-      { name: "Invoices", href: "/partner#invoices", icon: FileText },
-      { name: "Partner Payments", href: "/partner#payments", icon: DollarSign },
-      { name: "Company Profile", href: "/partner#profile", icon: User },
-    ],
-  },
-  {
-    name: "Locations",
-    href: "/partner/locations",
-    icon: MapPin,
-    roles: ["shipping_partner", "admin"],
-    group: "Partner"
-  },
-  {
-    name: "Rates",
-    href: "/rates",
-    icon: DollarSign,
-    roles: ["shipping_partner", "admin"],
-    group: "Partner"
   },
   
   // ===== FINANCE/ACCOUNTANT DASHBOARD =====
