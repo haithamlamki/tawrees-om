@@ -106,8 +106,13 @@ const PartnerDashboard = () => {
       'payments': 'payments',
       'profile': 'profile',
     };
+    
     if (hash && tabMap[hash]) {
       setActiveTab(tabMap[hash]);
+    } else if (!hash) {
+      // If no hash, default to active shipments and update URL
+      window.history.replaceState(null, '', '#shipments');
+      setActiveTab('active');
     }
     
     // Listen for hash changes
