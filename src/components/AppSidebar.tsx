@@ -154,6 +154,7 @@ const partnerNavigation: NavigationItemWithSub[] = [
     subItems: [
       { name: "New Requests", href: "/partner#requests", icon: Package },
       { name: "Active Shipments", href: "/partner#shipments", icon: Truck },
+      { name: "All Shipments", href: "/partner#all-shipments", icon: Ship },
       { name: "Invoices", href: "/partner#invoices", icon: FileBarChart },
       { name: "Payments", href: "/partner#payments", icon: DollarSign },
       { name: "Profile", href: "/partner#profile", icon: User },
