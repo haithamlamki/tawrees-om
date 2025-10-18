@@ -2,8 +2,10 @@ import { ShipmentItem } from "@/types/calculator";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
+import { Trash2, Upload, Image as ImageIcon, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { useRef, useState } from "react";
+import { toast } from "sonner";
 import { 
   calculateItemCBM, 
   calculateItemWeight, 
@@ -22,6 +24,43 @@ interface PackageRowProps {
 
 export const PackageRow = ({ item, index, onUpdate, onRemove, canRemove }: PackageRowProps) => {
   const { t } = useTranslation("calculator");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(item.productImage || null);
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error("Please upload an image file");
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("Image size must be less than 2MB");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64String = reader.result as string;
+      setImagePreview(base64String);
+      onUpdate(item.id, "productImage", base64String);
+      toast.success("Image uploaded successfully");
+    };
+    reader.onerror = () => {
+      toast.error("Failed to upload image");
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveImage = () => {
+    setImagePreview(null);
+    onUpdate(item.id, "productImage", "");
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
   
   // Calculate real-time results
   const volumeM3 = calculateItemCBM(item);
@@ -43,6 +82,77 @@ export const PackageRow = ({ item, index, onUpdate, onRemove, canRemove }: Packa
         <h4 className="text-sm font-semibold text-purple-900">
           {t("packageDetails")} {index + 1}
         </h4>
+      </div>
+
+      {/* Product Info Row (Optional) */}
+      <div className="grid md:grid-cols-2 gap-3 px-4">
+        <div>
+          <label className="text-xs text-muted-foreground mb-1 block">
+            Product Description (Optional)
+          </label>
+          <Input
+            type="text"
+            value={item.productName || ""}
+            onChange={(e) => onUpdate(item.id, "productName", e.target.value)}
+            placeholder="e.g., Electronics, Furniture, etc."
+            className="h-9"
+          />
+        </div>
+        <div>
+          <label className="text-xs text-muted-foreground mb-1 block">
+            Product Image (Optional)
+          </label>
+          <div className="flex gap-2">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
+              className="hidden"
+            />
+            {!imagePreview ? (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+                className="w-full h-9"
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                Upload Image
+              </Button>
+            ) : (
+              <div className="flex items-center gap-2 w-full">
+                <div className="relative w-9 h-9 border rounded overflow-hidden flex-shrink-0">
+                  <img 
+                    src={imagePreview} 
+                    alt="Product preview" 
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex-1 h-9"
+                >
+                  <ImageIcon className="h-4 w-4 mr-2" />
+                  Change
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleRemoveImage}
+                  className="h-9"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Input Row */}

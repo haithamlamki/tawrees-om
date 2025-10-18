@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Plane, Ship, Package, Calculator as CalcIcon, Plus } from "lucide-react";
+import boxDimensionsImage from "@/assets/box-dimensions.png";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { PackageRow } from "./calculator/PackageRow";
@@ -39,7 +40,7 @@ export const ShippingCalculatorNew = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { t } = useTranslation();
-  const [mode, setMode] = useState<ShippingMode>("air");
+  const [mode, setMode] = useState<ShippingMode>("sea_lcl");
   const [origins, setOrigins] = useState<Origin[]>([]);
   const [destinations, setDestinations] = useState<Destination[]>([]);
   const [selectedOrigin, setSelectedOrigin] = useState<string>("");
@@ -51,7 +52,7 @@ export const ShippingCalculatorNew = () => {
       length: 0,
       width: 0,
       height: 0,
-      dimensionUnit: "m",
+      dimensionUnit: "cm",
       weight: 0,
       weightUnit: "kg",
       quantity: 1,
@@ -149,7 +150,7 @@ export const ShippingCalculatorNew = () => {
         length: 0,
         width: 0,
         height: 0,
-        dimensionUnit: "m",
+        dimensionUnit: "cm",
         weight: 0,
         weightUnit: "kg",
         quantity: 1,
@@ -590,6 +591,15 @@ export const ShippingCalculatorNew = () => {
               {/* Air & Sea LCL: Cargo Items */}
               <TabsContent value="air" className="mt-0">
                 <div className="space-y-6">
+                  {/* Dimension Guide Image */}
+                  <div className="flex justify-center mb-4">
+                    <img 
+                      src={boxDimensionsImage} 
+                      alt="Box dimensions guide showing length, width (breadth), and height" 
+                      className="max-w-xs h-auto"
+                    />
+                  </div>
+                  
                   {items.map((item, index) => (
                     <PackageRow
                       key={item.id}
@@ -610,6 +620,15 @@ export const ShippingCalculatorNew = () => {
 
               <TabsContent value="sea_lcl" className="mt-0">
                 <div className="space-y-6">
+                  {/* Dimension Guide Image */}
+                  <div className="flex justify-center mb-4">
+                    <img 
+                      src={boxDimensionsImage} 
+                      alt="Box dimensions guide showing length, width (breadth), and height" 
+                      className="max-w-xs h-auto"
+                    />
+                  </div>
+                  
                   {items.map((item, index) => (
                     <PackageRow
                       key={item.id}
