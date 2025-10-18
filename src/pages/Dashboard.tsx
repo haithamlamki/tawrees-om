@@ -6,8 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Package, Clock, CheckCircle, XCircle, Ship, Settings, User, FileText, Bell, ChevronDown, DollarSign } from "lucide-react";
+import { Package, Clock, CheckCircle, XCircle, Ship, Settings, User, FileText, Bell, DollarSign } from "lucide-react";
 import { toast } from "sonner";
 import ProfileSettings from "@/components/dashboard/ProfileSettings";
 import DocumentManager from "@/components/documents/DocumentManager";
@@ -58,7 +57,6 @@ const Dashboard = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [selectedRequestId, setSelectedRequestId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>("requests");
-  const [expandedItems, setExpandedItems] = useState<string[]>([]);
   const [pendingQuotes, setPendingQuotes] = useState<any[]>([]);
   const [selectedQuoteShipment, setSelectedQuoteShipment] = useState<any | null>(null);
 
@@ -336,64 +334,27 @@ const Dashboard = () => {
                       )}
                     </div>
                     
-                    {/* View My Items Collapsible */}
+                    {/* Items Details - Always Visible */}
                     {request.items && Array.isArray(request.items) && request.items.length > 0 && (
-                      <Collapsible
-                        open={expandedItems.includes(request.id)}
-                        onOpenChange={() => {
-                          setExpandedItems(prev =>
-                            prev.includes(request.id)
-                              ? prev.filter(id => id !== request.id)
-                              : [...prev, request.id]
-                          );
-                        }}
-                      >
-                        <CollapsibleTrigger asChild>
-                          <Button variant="outline" className="w-full">
-                            <Package className="mr-2 h-4 w-4" />
-                            {expandedItems.includes(request.id) ? "Hide" : "View"} My Items ({request.items.length})
-                            <ChevronDown className={`ml-auto h-4 w-4 transition-transform ${expandedItems.includes(request.id) ? "rotate-180" : ""}`} />
-                          </Button>
-                        </CollapsibleTrigger>
-                        <CollapsibleContent className="mt-4">
-                          <ItemDetailsViewer
-                            items={request.items}
-                            shippingType={request.shipping_type as "air" | "sea"}
-                            calculationMethod={request.calculation_method as "cbm" | "container"}
-                            containerType={request.container_types?.name}
-                            totalCBM={request.cbm_volume}
-                            totalWeight={request.weight_kg}
-                          />
-                        </CollapsibleContent>
-                      </Collapsible>
+                      <div className="mt-4">
+                        <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                          <Package className="h-5 w-5" />
+                          Item Details ({request.items.length})
+                        </h3>
+                        <ItemDetailsViewer
+                          items={request.items}
+                          shippingType={request.shipping_type as "air" | "sea"}
+                          calculationMethod={request.calculation_method as "cbm" | "container"}
+                          containerType={request.container_types?.name}
+                          totalCBM={request.cbm_volume}
+                          totalWeight={request.weight_kg}
+                        />
+                      </div>
                     )}
-                    
-                    <div className="flex gap-2 justify-end">
-                      {request.shipments && request.shipments.length > 0 && (
-                        <>
-                          <Button
-                            variant="outline"
-                            onClick={() => setSelectedRequestId(request.id)}
-                          >
-                            View Details
-                          </Button>
-                          <Button
-                            variant="outline"
-                            onClick={() => navigate(`/tracking/${request.shipments![0].tracking_number}`)}
-                          >
-                            Track Shipment
-                          </Button>
-                        </>
-                      )}
-                      <InvoiceGenerator 
-                        requestId={request.id} 
-                        requestStatus={request.status}
-                      />
-                    </div>
 
-                    {/* Show Partner Details and Timeline when shipment is assigned */}
-                    {request.shipments && request.shipments.length > 0 && selectedRequestId === request.id && (
-                      <div className="mt-4 space-y-4 pt-4 border-t">
+                    {/* Supplier Details - Always Visible when assigned */}
+                    {request.shipments && request.shipments.length > 0 && (
+                      <div className="mt-4 pt-4 border-t">
                         <ShippingPartnerDetails
                           partnerName={request.shipments[0].shipping_partners?.company_name || "Unknown"}
                           contactPerson={request.shipments[0].shipping_partners?.contact_person}
@@ -403,11 +364,32 @@ const Dashboard = () => {
                           status={request.shipments[0].status}
                           trackingNumber={request.shipments[0].tracking_number}
                         />
+                      </div>
+                    )}
+                    
+                    {/* Status Timeline */}
+                    {request.shipments && request.shipments.length > 0 && (
+                      <div className="mt-4 pt-4 border-t">
                         <StatusTimeline
                           currentStatus={request.shipments[0].status}
                         />
                       </div>
                     )}
+
+                    <div className="flex gap-2 justify-end mt-4">
+                      {request.shipments && request.shipments.length > 0 && (
+                        <Button
+                          variant="outline"
+                          onClick={() => navigate(`/tracking/${request.shipments![0].tracking_number}`)}
+                        >
+                          Track Shipment
+                        </Button>
+                      )}
+                      <InvoiceGenerator 
+                        requestId={request.id} 
+                        requestStatus={request.status}
+                      />
+                    </div>
 
                     {/* Document Manager */}
                     <DocumentManager shipmentRequestId={request.id} />

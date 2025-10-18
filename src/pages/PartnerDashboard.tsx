@@ -5,7 +5,7 @@ import Navigation from "@/components/Navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Loader2, Package, MapPin, Clock, Building2, FileText, ChevronDown, Box, Weight, DollarSign } from "lucide-react";
+import { Loader2, Package, MapPin, Clock, Building2, FileText, Box, Weight, DollarSign } from "lucide-react";
 import { toast } from "sonner";
 import ShipmentStatusUpdate from "@/components/admin/ShipmentStatusUpdate";
 import { OrderReviewDialog } from "@/components/partner/OrderReviewDialog";
@@ -392,22 +392,22 @@ const PartnerDashboard = () => {
                           </div>
                         )}
 
-                        {/* Expandable Item Details */}
+                        {/* Item Details - Always Visible */}
                         {totalItems > 0 && (
-                          <details className="group border border-border rounded-lg overflow-hidden">
-                            <summary className="flex items-center justify-between p-4 cursor-pointer bg-muted/30 hover:bg-muted/50 transition-colors">
-                              <span className="font-semibold text-foreground">
-                                View Detailed Item List ({totalItems} items)
-                              </span>
-                              <ChevronDown className="h-5 w-5 text-muted-foreground transition-transform group-open:rotate-180" />
-                            </summary>
+                          <div className="border border-border rounded-lg overflow-hidden">
+                            <div className="p-4 bg-muted/30">
+                              <h3 className="font-semibold text-foreground flex items-center gap-2">
+                                <Package className="h-5 w-5" />
+                                Item Details ({totalItems} items)
+                              </h3>
+                            </div>
                             <div className="p-4 bg-background">
                               <ItemDetailsViewer 
                                 items={items} 
                                 shippingType="sea"
                               />
                             </div>
-                          </details>
+                          </div>
                         )}
 
                         {/* Est Delivery */}
