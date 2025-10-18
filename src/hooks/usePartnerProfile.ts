@@ -9,8 +9,42 @@ export interface StorageLocation {
   is_default?: boolean;
 }
 
+export interface PartnerProfile {
+  id: string;
+  company_name: string;
+  contact_person: string;
+  email: string;
+  phone: string;
+  address: string;
+  logo_url?: string;
+  bank_name?: string;
+  bank_account_number?: string;
+  bank_account_name?: string;
+  bank_iban?: string;
+  bank_swift_code?: string;
+  bank_branch?: string;
+  tax_registration_number?: string;
+}
+
 export const usePartnerProfile = (partnerId?: string) => {
   const queryClient = useQueryClient();
+
+  const { data: partnerProfile, isLoading: isLoadingProfile } = useQuery({
+    queryKey: ["partner-profile", partnerId],
+    queryFn: async () => {
+      if (!partnerId) return null;
+
+      const { data, error } = await supabase
+        .from("shipping_partners")
+        .select("id, company_name, contact_person, email, phone, address, logo_url, bank_name, bank_account_number, bank_account_name, bank_iban, bank_swift_code, bank_branch, tax_registration_number")
+        .eq("id", partnerId)
+        .single();
+
+      if (error) throw error;
+      return data as PartnerProfile;
+    },
+    enabled: !!partnerId,
+  });
 
   const { data: storageLocations = [], isLoading } = useQuery({
     queryKey: ["partner-storage-locations", partnerId],
@@ -85,8 +119,9 @@ export const usePartnerProfile = (partnerId?: string) => {
   });
 
   return {
+    partnerProfile,
     storageLocations,
-    isLoading,
+    isLoading: isLoading || isLoadingProfile,
     addLocation: addLocationMutation.mutate,
     removeLocation: removeLocationMutation.mutate,
   };

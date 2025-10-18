@@ -1833,38 +1833,62 @@ export type Database = {
       shipping_partners: {
         Row: {
           address: string | null
+          bank_account_name: string | null
+          bank_account_number: string | null
+          bank_branch: string | null
+          bank_iban: string | null
+          bank_name: string | null
+          bank_swift_code: string | null
           company_name: string
           contact_person: string | null
           created_at: string
           email: string | null
           id: string
           is_active: boolean
+          logo_url: string | null
           phone: string | null
           storage_locations: Json | null
+          tax_registration_number: string | null
           updated_at: string
         }
         Insert: {
           address?: string | null
+          bank_account_name?: string | null
+          bank_account_number?: string | null
+          bank_branch?: string | null
+          bank_iban?: string | null
+          bank_name?: string | null
+          bank_swift_code?: string | null
           company_name: string
           contact_person?: string | null
           created_at?: string
           email?: string | null
           id?: string
           is_active?: boolean
+          logo_url?: string | null
           phone?: string | null
           storage_locations?: Json | null
+          tax_registration_number?: string | null
           updated_at?: string
         }
         Update: {
           address?: string | null
+          bank_account_name?: string | null
+          bank_account_number?: string | null
+          bank_branch?: string | null
+          bank_iban?: string | null
+          bank_name?: string | null
+          bank_swift_code?: string | null
           company_name?: string
           contact_person?: string | null
           created_at?: string
           email?: string | null
           id?: string
           is_active?: boolean
+          logo_url?: string | null
           phone?: string | null
           storage_locations?: Json | null
+          tax_registration_number?: string | null
           updated_at?: string
         }
         Relationships: []

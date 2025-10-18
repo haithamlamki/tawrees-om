@@ -16,6 +16,10 @@ import { ItemDetailsViewer } from "@/components/admin/ItemDetailsViewer";
 import { ShipmentItem } from "@/types/calculator";
 import { PartnerPaymentRequests } from "@/components/partner/PartnerPaymentRequests";
 import { PartnerStorageLocations } from "@/components/partner/PartnerStorageLocations";
+import { PartnerCompanyInfo } from "@/components/partner/PartnerCompanyInfo";
+import { PartnerLogoUpload } from "@/components/partner/PartnerLogoUpload";
+import { PartnerBankDetails } from "@/components/partner/PartnerBankDetails";
+import { usePartnerProfile } from "@/hooks/usePartnerProfile";
 
 interface PartnerShipment {
   id: string;
@@ -53,6 +57,15 @@ interface ShippingPartner {
   contact_person: string | null;
   email: string | null;
   phone: string | null;
+  address: string | null;
+  logo_url: string | null;
+  bank_name: string | null;
+  bank_account_number: string | null;
+  bank_account_name: string | null;
+  bank_iban: string | null;
+  bank_swift_code: string | null;
+  bank_branch: string | null;
+  tax_registration_number: string | null;
 }
 
 const PartnerDashboard = () => {
@@ -810,7 +823,40 @@ const PartnerDashboard = () => {
           </TabsContent>
 
           <TabsContent value="profile">
-            {partner && <PartnerStorageLocations partnerId={partner.id} />}
+            {partner && (
+              <div className="space-y-6">
+                <PartnerCompanyInfo
+                  partnerId={partner.id}
+                  companyData={{
+                    company_name: partner.company_name,
+                    contact_person: partner.contact_person || "",
+                    email: partner.email || "",
+                    phone: partner.phone || "",
+                    address: partner.address || "",
+                    tax_registration_number: partner.tax_registration_number,
+                  }}
+                  onUpdate={() => loadPartnerData(partner.id)}
+                />
+                <PartnerLogoUpload
+                  partnerId={partner.id}
+                  currentLogoUrl={partner.logo_url}
+                  onUpdate={() => loadPartnerData(partner.id)}
+                />
+                <PartnerBankDetails
+                  partnerId={partner.id}
+                  bankData={{
+                    bank_name: partner.bank_name,
+                    bank_account_number: partner.bank_account_number,
+                    bank_account_name: partner.bank_account_name,
+                    bank_iban: partner.bank_iban,
+                    bank_swift_code: partner.bank_swift_code,
+                    bank_branch: partner.bank_branch,
+                  }}
+                  onUpdate={() => loadPartnerData(partner.id)}
+                />
+                <PartnerStorageLocations partnerId={partner.id} />
+              </div>
+            )}
           </TabsContent>
         </Tabs>
 
