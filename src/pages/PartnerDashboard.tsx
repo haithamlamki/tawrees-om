@@ -558,77 +558,23 @@ const PartnerDashboard = () => {
                         </CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        {/* Order Information */}
-                        <div className="p-4 bg-muted/20 rounded-lg space-y-3">
-                          <p className="text-sm font-semibold text-foreground mb-2">Order Information</p>
-                          
-                          {/* Current Location */}
-                          {shipment.current_location && (
-                            <div className="flex items-start gap-2">
-                              <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-                              <div className="text-sm flex-1">
-                                <p className="font-medium text-foreground">Current Location</p>
-                                <p className="text-muted-foreground mt-1">{shipment.current_location}</p>
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Estimated Delivery */}
-                          {shipment.estimated_delivery && (
-                            <div className="flex items-start gap-2">
-                              <Clock className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-                              <div className="text-sm flex-1">
-                                <p className="font-medium text-foreground">Est. Delivery</p>
-                                <p className="text-muted-foreground mt-1">
-                                  {new Date(shipment.estimated_delivery).toLocaleDateString()}
-                                </p>
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Delivery Address */}
-                          <div className="space-y-2 pt-2 border-t border-border/50">
-                            <div className="flex items-start gap-2">
-                              <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-                              <div className="text-sm flex-1">
-                                <p className="font-medium text-foreground">Delivery Address</p>
-                                <p className="text-muted-foreground mt-1">
-                                  {request?.delivery_address || 'No address provided'}
-                                  {request?.delivery_city && `, ${request.delivery_city}`}
-                                  {request?.delivery_country && `, ${request.delivery_country}`}
-                                </p>
-                              </div>
+                        {/* Estimated Delivery */}
+                        {shipment.estimated_delivery && (
+                          <div className="flex items-center gap-2 p-3 bg-muted/20 rounded-lg">
+                            <Clock className="h-4 w-4 text-muted-foreground" />
+                            <div className="text-sm">
+                              <span className="font-medium">Est. Delivery: </span>
+                              <span className="text-muted-foreground">
+                                {new Date(shipment.estimated_delivery).toLocaleDateString()}
+                              </span>
                             </div>
                           </div>
-
-                          {/* Contact Information */}
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2 border-t border-border/50">
-                            <div className="text-sm">
-                              <p className="text-xs text-muted-foreground mb-1">Contact Name</p>
-                              <p className="font-medium text-foreground">
-                                {request?.delivery_contact_name || 'Not provided'}
-                              </p>
-                            </div>
-                            <div className="text-sm">
-                              <p className="text-xs text-muted-foreground mb-1">Contact Phone</p>
-                              <p className="font-medium text-foreground">
-                                {request?.delivery_contact_phone || 'Not provided'}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
+                        )}
 
                         {/* Shipment Stats */}
                         <div>
                           <p className="text-sm font-semibold mb-3">Shipment Details</p>
-                          <div className="grid grid-cols-4 gap-3">
-                            <div className="bg-accent/10 border border-accent/20 rounded-lg p-3">
-                              <div className="flex items-center gap-2 mb-1">
-                                <Package className="h-4 w-4 text-primary" />
-                                <span className="text-xs text-muted-foreground">Items</span>
-                              </div>
-                              <p className="text-lg font-bold text-primary">{totalItems}</p>
-                            </div>
+                          <div className="grid grid-cols-3 gap-3">
                             <div className="bg-accent/10 border border-accent/20 rounded-lg p-3">
                               <div className="flex items-center gap-2 mb-1">
                                 <Box className="h-4 w-4 text-primary" />
@@ -766,77 +712,23 @@ const PartnerDashboard = () => {
                         </CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        {/* Order Information */}
-                        <div className="p-4 bg-muted/20 rounded-lg space-y-3">
-                          <p className="text-sm font-semibold text-foreground mb-2">Order Information</p>
-                          
-                          {/* Current Location */}
-                          {shipment.current_location && (
-                            <div className="flex items-start gap-2">
-                              <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-                              <div className="text-sm flex-1">
-                                <p className="font-medium text-foreground">Current Location</p>
-                                <p className="text-muted-foreground mt-1">{shipment.current_location}</p>
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Estimated Delivery */}
-                          {shipment.estimated_delivery && (
-                            <div className="flex items-start gap-2">
-                              <Clock className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-                              <div className="text-sm flex-1">
-                                <p className="font-medium text-foreground">Est. Delivery</p>
-                                <p className="text-muted-foreground mt-1">
-                                  {new Date(shipment.estimated_delivery).toLocaleDateString()}
-                                </p>
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Delivery Address */}
-                          <div className="space-y-2 pt-2 border-t border-border/50">
-                            <div className="flex items-start gap-2">
-                              <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-                              <div className="text-sm flex-1">
-                                <p className="font-medium text-foreground">Delivery Address</p>
-                                <p className="text-muted-foreground mt-1">
-                                  {request?.delivery_address || 'No address provided'}
-                                  {request?.delivery_city && `, ${request.delivery_city}`}
-                                  {request?.delivery_country && `, ${request.delivery_country}`}
-                                </p>
-                              </div>
+                        {/* Estimated Delivery */}
+                        {shipment.estimated_delivery && (
+                          <div className="flex items-center gap-2 p-3 bg-muted/20 rounded-lg">
+                            <Clock className="h-4 w-4 text-muted-foreground" />
+                            <div className="text-sm">
+                              <span className="font-medium">Est. Delivery: </span>
+                              <span className="text-muted-foreground">
+                                {new Date(shipment.estimated_delivery).toLocaleDateString()}
+                              </span>
                             </div>
                           </div>
-
-                          {/* Contact Information */}
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2 border-t border-border/50">
-                            <div className="text-sm">
-                              <p className="text-xs text-muted-foreground mb-1">Contact Name</p>
-                              <p className="font-medium text-foreground">
-                                {request?.delivery_contact_name || 'Not provided'}
-                              </p>
-                            </div>
-                            <div className="text-sm">
-                              <p className="text-xs text-muted-foreground mb-1">Contact Phone</p>
-                              <p className="font-medium text-foreground">
-                                {request?.delivery_contact_phone || 'Not provided'}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
+                        )}
 
                         {/* Shipment Stats */}
                         <div>
                           <p className="text-sm font-semibold mb-3">Shipment Details</p>
-                          <div className="grid grid-cols-4 gap-3">
-                            <div className="bg-accent/10 border border-accent/20 rounded-lg p-3">
-                              <div className="flex items-center gap-2 mb-1">
-                                <Package className="h-4 w-4 text-primary" />
-                                <span className="text-xs text-muted-foreground">Items</span>
-                              </div>
-                              <p className="text-lg font-bold text-foreground">{totalItems}</p>
-                            </div>
+                          <div className="grid grid-cols-3 gap-3">
                             {request?.cbm_volume && (
                               <div className="bg-accent/10 border border-accent/20 rounded-lg p-3">
                                 <div className="flex items-center gap-2 mb-1">
