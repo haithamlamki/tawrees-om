@@ -57,7 +57,7 @@ const navigationItems: NavigationItem[] = [
     name: "Home",
     href: "/",
     icon: Home,
-    roles: ["user", "store_customer", "branch_manager", "admin"],
+    roles: ["user", "store_customer", "branch_manager", "admin", "shipping_partner"],
     group: "Main"
   },
   {
@@ -344,7 +344,7 @@ const navigationItems: NavigationItem[] = [
     name: "Rates",
     href: "/rates",
     icon: DollarSign,
-    roles: ["shipping_partner"],
+    roles: ["shipping_partner", "admin"],
     group: "Partner"
   },
   
