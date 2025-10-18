@@ -336,7 +336,7 @@ const navigationItems: NavigationItem[] = [
     ],
   },
   {
-    name: "Partner Locations",
+    name: "Locations",
     href: "/partner/locations",
     icon: MapPin,
     roles: ["shipping_partner", "admin"],
