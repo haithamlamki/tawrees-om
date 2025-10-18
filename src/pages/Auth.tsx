@@ -34,8 +34,22 @@ const Auth = () => {
     const checkUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
+        // Check user role to determine redirect
+        const { data: roles } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", session.user.id);
+        
+        const isPartner = roles?.some(r => r.role === "shipping_partner");
         const returnTo = searchParams.get("returnTo");
-        navigate(returnTo || "/dashboard");
+        
+        if (returnTo) {
+          navigate(returnTo);
+        } else if (isPartner) {
+          navigate("/partner#shipments");
+        } else {
+          navigate("/dashboard");
+        }
       }
     };
     checkUser();
@@ -71,13 +85,28 @@ const Auth = () => {
       
       // Auto login after signup
       setTimeout(async () => {
-        const { error: signInError } = await supabase.auth.signInWithPassword({
+        const { data, error: signInError } = await supabase.auth.signInWithPassword({
           email: validation.data.email,
           password: validation.data.password,
         });
-        if (!signInError) {
+        
+        if (!signInError && data) {
+          // Check user role to determine redirect
+          const { data: roles } = await supabase
+            .from("user_roles")
+            .select("role")
+            .eq("user_id", data.user.id);
+          
+          const isPartner = roles?.some(r => r.role === "shipping_partner");
           const returnTo = searchParams.get("returnTo");
-          navigate(returnTo || "/dashboard");
+          
+          if (returnTo) {
+            navigate(returnTo);
+          } else if (isPartner) {
+            navigate("/partner#shipments");
+          } else {
+            navigate("/dashboard");
+          }
         }
       }, 1000);
     } catch (error: any) {
@@ -101,16 +130,31 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: validation.data.email,
         password: validation.data.password,
       });
 
       if (error) throw error;
       
+      // Check user role to determine redirect
+      const { data: roles } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", data.user.id);
+      
+      const isPartner = roles?.some(r => r.role === "shipping_partner");
+      
       toast.success("Logged in successfully!");
-      const returnTo = searchParams.get("returnTo") || "/dashboard";
-      navigate(returnTo);
+      
+      const returnTo = searchParams.get("returnTo");
+      if (returnTo) {
+        navigate(returnTo);
+      } else if (isPartner) {
+        navigate("/partner#shipments");
+      } else {
+        navigate("/dashboard");
+      }
     } catch (error: any) {
       toast.error("Invalid credentials. Please try again.");
       console.error("[Auth] Sign in error:", error);
