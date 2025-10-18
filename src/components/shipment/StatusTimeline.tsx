@@ -84,39 +84,39 @@ export function StatusTimeline({ currentStatus, statusHistory = [] }: StatusTime
         <CardTitle>Shipment Progress</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="pb-4">
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+        <div className="overflow-x-auto pb-4">
+          <div className="flex items-start gap-2 min-w-max">
             {statusSteps.map((step, index) => {
               const stepStatus = getStepStatus(index);
               const historyItem = statusHistory.find((h) => h.status === step.key);
 
               return (
-                <div key={step.key} className="flex flex-col items-center text-center">
-                  <div className="relative">
+                <div key={step.key} className="flex items-center">
+                  <div className="flex flex-col items-center min-w-[120px]">
                     {getIcon(stepStatus)}
-                    {index < statusSteps.length - 1 && (
-                      <div
-                        className={`absolute top-3 left-8 h-0.5 w-[calc(100%+2rem)] hidden lg:block ${
-                          stepStatus === "completed" ? "bg-success" : "bg-muted"
-                        }`}
-                      />
+                    <p
+                      className={`text-xs font-medium mt-2 text-center ${
+                        stepStatus === "current"
+                          ? "text-primary"
+                          : stepStatus === "completed"
+                          ? "text-success"
+                          : "text-muted-foreground"
+                      }`}
+                    >
+                      {step.label}
+                    </p>
+                    {historyItem && (
+                      <div className="text-xs text-muted-foreground mt-1 text-center">
+                        <p>{new Date(historyItem.created_at).toLocaleDateString()}</p>
+                      </div>
                     )}
                   </div>
-                  <p
-                    className={`text-xs font-medium mt-2 ${
-                      stepStatus === "current"
-                        ? "text-primary"
-                        : stepStatus === "completed"
-                        ? "text-success"
-                        : "text-muted-foreground"
-                    }`}
-                  >
-                    {step.label}
-                  </p>
-                  {historyItem && (
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {new Date(historyItem.created_at).toLocaleDateString()}
-                    </p>
+                  {index < statusSteps.length - 1 && (
+                    <div
+                      className={`h-0.5 w-8 ${
+                        stepStatus === "completed" ? "bg-success" : "bg-muted"
+                      }`}
+                    />
                   )}
                 </div>
               );
