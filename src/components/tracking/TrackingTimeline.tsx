@@ -75,25 +75,36 @@ const TrackingTimeline = ({ statusHistory }: TrackingTimelineProps) => {
   }, [statusHistory]);
 
   const getStatusIcon = (status: string, isLatest: boolean) => {
-    const iconClass = isLatest ? "text-primary" : "text-muted-foreground";
+    const colorMap: Record<string, string> = {
+      received_from_supplier: "#FFC000",
+      processing: "#EE0000",
+      in_transit: "#EE0000",
+      customs: "#00B0F0",
+      received_muscat_wh: "#00B050",
+      out_for_delivery: "#00B050",
+      delivered: "#00B050",
+    };
+    
+    const iconColor = isLatest ? (colorMap[status.toLowerCase()] || "hsl(var(--primary))") : "#888";
+    const iconStyle = { color: iconColor };
     
     switch (status.toLowerCase()) {
       case "received_from_supplier":
-        return <Package className={`h-5 w-5 ${iconClass}`} />;
+        return <Package className="h-5 w-5" style={iconStyle} />;
       case "processing":
-        return <Clock className={`h-5 w-5 ${iconClass}`} />;
+        return <Clock className="h-5 w-5" style={iconStyle} />;
       case "in_transit":
-        return <Truck className={`h-5 w-5 ${iconClass}`} />;
+        return <Truck className="h-5 w-5" style={iconStyle} />;
       case "customs":
-        return <Building2 className={`h-5 w-5 ${iconClass}`} />;
+        return <Building2 className="h-5 w-5" style={iconStyle} />;
       case "received_muscat_wh":
-        return <Building2 className={`h-5 w-5 ${iconClass}`} />;
+        return <Building2 className="h-5 w-5" style={iconStyle} />;
       case "out_for_delivery":
-        return <MapPin className={`h-5 w-5 ${iconClass}`} />;
+        return <MapPin className="h-5 w-5" style={iconStyle} />;
       case "delivered":
-        return <CheckCircle className={`h-5 w-5 ${iconClass}`} />;
+        return <CheckCircle className="h-5 w-5" style={iconStyle} />;
       default:
-        return <Clock className={`h-5 w-5 ${iconClass}`} />;
+        return <Clock className="h-5 w-5" style={iconStyle} />;
     }
   };
 
@@ -135,8 +146,19 @@ const TrackingTimeline = ({ statusHistory }: TrackingTimelineProps) => {
             {/* Status icon */}
             <div
               className={`relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 ${
-                isLatest ? "border-primary bg-primary/10" : "border-border bg-background"
+                isLatest ? "bg-primary/10" : "bg-background"
               }`}
+              style={{
+                borderColor: isLatest ? (
+                  item.status === "received_from_supplier" ? "#FFC000" :
+                  item.status === "processing" ? "#EE0000" :
+                  item.status === "in_transit" ? "#EE0000" :
+                  item.status === "customs" ? "#00B0F0" :
+                  item.status === "received_muscat_wh" ? "#00B050" :
+                  item.status === "out_for_delivery" ? "#00B050" :
+                  item.status === "delivered" ? "#00B050" : undefined
+                ) : undefined
+              }}
             >
               {getStatusIcon(item.status, isLatest)}
             </div>
@@ -144,7 +166,20 @@ const TrackingTimeline = ({ statusHistory }: TrackingTimelineProps) => {
             {/* Status details */}
             <div className="flex-1 space-y-1 pt-1">
               <div className="flex items-center justify-between">
-                <p className={`font-semibold ${isLatest ? "text-primary" : "text-foreground"}`}>
+                <p 
+                  className="font-semibold"
+                  style={{
+                    color: isLatest ? (
+                      item.status === "received_from_supplier" ? "#FFC000" :
+                      item.status === "processing" ? "#EE0000" :
+                      item.status === "in_transit" ? "#EE0000" :
+                      item.status === "customs" ? "#00B0F0" :
+                      item.status === "received_muscat_wh" ? "#00B050" :
+                      item.status === "out_for_delivery" ? "#00B050" :
+                      item.status === "delivered" ? "#00B050" : undefined
+                    ) : undefined
+                  }}
+                >
                   {formatStatus(item.status)}
                 </p>
                 <p className="text-sm text-muted-foreground">

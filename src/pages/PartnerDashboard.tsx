@@ -167,19 +167,36 @@ const PartnerDashboard = () => {
   };
 
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-      pending_partner_acceptance: "outline",
-      processing: "secondary",
-      in_transit: "default",
-      delivered: "outline",
-      cancelled: "destructive",
-      rejected: "destructive",
+    const colorMap: Record<string, string> = {
+      received_from_supplier: "#FFC000",
+      processing: "#EE0000",
+      in_transit: "#EE0000",
+      customs: "#00B0F0",
+      received_muscat_wh: "#00B050",
+      out_for_delivery: "#00B050",
+      delivered: "#00B050",
     };
-    return <Badge variant={variants[status] || "default"}>{status.replace(/_/g, " ").toUpperCase()}</Badge>;
+    
+    const color = colorMap[status];
+    const style = color ? { backgroundColor: `${color}20`, color: color, borderColor: color } : {};
+    
+    return (
+      <Badge variant="outline" style={style} className="font-semibold">
+        {status.replace(/_/g, " ").toUpperCase()}
+      </Badge>
+    );
   };
 
   const pendingShipments = shipments.filter(s => s.status === "pending_partner_acceptance");
-  const activeShipments = shipments.filter(s => s.status !== "pending_partner_acceptance" && s.status !== "rejected");
+  // Active shipments: show only up to "customs" status
+  const activeShipments = shipments.filter(s => 
+    s.status !== "pending_partner_acceptance" && 
+    s.status !== "rejected" &&
+    s.status !== "received_muscat_wh" &&
+    s.status !== "out_for_delivery" &&
+    s.status !== "delivered" &&
+    s.status !== "completed"
+  );
 
   if (loading) {
     return (

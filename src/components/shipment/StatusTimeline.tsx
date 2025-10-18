@@ -34,9 +34,26 @@ export function StatusTimeline({ currentStatus, statusHistory = [] }: StatusTime
   };
 
   const getIcon = (status: string) => {
+    const colorMap: Record<string, string> = {
+      received_from_supplier: "#FFC000",
+      processing: "#EE0000",
+      in_transit: "#EE0000",
+      customs: "#00B0F0",
+      received_muscat_wh: "#00B050",
+      out_for_delivery: "#00B050",
+      delivered: "#00B050",
+      completed: "#00B050",
+    };
+    
     if (status === "rejected") return <XCircle className="h-6 w-6 text-destructive" />;
-    if (status === "completed") return <CheckCircle2 className="h-6 w-6 text-success" />;
-    if (status === "current") return <Circle className="h-6 w-6 text-primary fill-primary" />;
+    if (status === "completed") {
+      const color = colorMap[currentStatus] || "#00B050";
+      return <CheckCircle2 className="h-6 w-6" style={{ color }} />;
+    }
+    if (status === "current") {
+      const color = colorMap[currentStatus] || "hsl(var(--primary))";
+      return <Circle className="h-6 w-6" style={{ color, fill: color }} />;
+    }
     return <Circle className="h-6 w-6 text-muted-foreground" />;
   };
 

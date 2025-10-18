@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { Package, Edit, ChevronDown, ChevronUp, Eye } from "lucide-react";
 import ShipmentStatusUpdate from "./ShipmentStatusUpdate";
 import { ShipmentRequestDetails } from "./ShipmentRequestDetails";
+import { getShipmentStatusColor } from "@/lib/utils";
 
 interface Shipment {
   id: string;
@@ -128,7 +129,15 @@ const ShipmentManagement = () => {
                       {shipment.shipment_requests.profiles?.full_name || "Unknown"}
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline">
+                      <Badge 
+                        variant="outline"
+                        style={{
+                          backgroundColor: `${getShipmentStatusColor(shipment.status)}20`,
+                          color: getShipmentStatusColor(shipment.status),
+                          borderColor: getShipmentStatusColor(shipment.status)
+                        }}
+                        className="font-semibold"
+                      >
                         {shipment.status.replace(/_/g, " ").toUpperCase()}
                       </Badge>
                     </TableCell>
