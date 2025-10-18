@@ -47,15 +47,16 @@ export function ItemSupplierEditor({ open, onOpenChange, item, requestId, onUpda
   const loadSuppliers = async () => {
     setLoading(true);
     try {
-      const result: any = await supabase
+      // @ts-expect-error - Supabase type inference can be excessively deep
+      const { data, error } = await supabase
         .from("suppliers")
         .select("id, supplier_name, contact_person, phone, email")
         .eq("active", true)
         .order("supplier_name");
 
-      if (result.error) throw result.error;
+      if (error) throw error;
       
-      setSuppliers((result.data || []) as Supplier[]);
+      setSuppliers((data || []) as Supplier[]);
     } catch (error: any) {
       console.error("Error loading suppliers:", error);
       toast.error("Failed to load suppliers");
