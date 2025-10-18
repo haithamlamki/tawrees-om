@@ -9,7 +9,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Plane, Ship, Package, Calculator as CalcIcon, Plus, Trash2 } from "lucide-react";
+import { Plane, Ship, Package, Calculator as CalcIcon, Plus, Trash2, Upload } from "lucide-react";
 import boxDimensionsImage from "@/assets/box-dimensions.png";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -854,6 +854,8 @@ export const ShippingCalculatorNew = () => {
                       <div className="p-4 space-y-3">
                         {/* Table Header */}
                         <div className="grid grid-cols-10 gap-2 text-xs font-medium text-muted-foreground pb-2 border-b">
+                          <div>Product Description (Optional)</div>
+                          <div>Product Image (Optional)</div>
                           <div>Unit</div>
                           <div>Length</div>
                           <div>Width</div>
@@ -861,14 +863,44 @@ export const ShippingCalculatorNew = () => {
                           <div>Weight</div>
                           <div>Unit</div>
                           <div>Quantity</div>
-                          <div>Product Description (Optional)</div>
-                          <div>Product Image (Optional)</div>
                           <div></div>
                         </div>
                         
                         {/* Product Rows */}
                         {items.map((item, index) => (
                           <div key={item.id} className="grid grid-cols-10 gap-2 items-center">
+                            <Input 
+                              type="text" 
+                              value={item.productName || ""} 
+                              onChange={(e) => updateItem(item.id, "productName", e.target.value)}
+                              className="h-9"
+                              placeholder="Description"
+                            />
+                            <div className="relative">
+                              <Input 
+                                type="file" 
+                                accept="image/*"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) {
+                                    const reader = new FileReader();
+                                    reader.onloadend = () => {
+                                      updateItem(item.id, "productImage", reader.result as string);
+                                    };
+                                    reader.readAsDataURL(file);
+                                  }
+                                }}
+                                className="h-9 hidden"
+                                id={`image-upload-${item.id}`}
+                              />
+                              <label 
+                                htmlFor={`image-upload-${item.id}`}
+                                className="h-9 px-3 py-1 inline-flex items-center justify-center rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground cursor-pointer text-xs w-full"
+                              >
+                                <Upload className="h-3 w-3 mr-1" />
+                                {item.productImage ? "Change" : "Upload"}
+                              </label>
+                            </div>
                             <Select 
                               value={item.dimensionUnit} 
                               onValueChange={(v) => updateItem(item.id, "dimensionUnit", v)}
@@ -924,20 +956,6 @@ export const ShippingCalculatorNew = () => {
                               onChange={(e) => updateItem(item.id, "quantity", Number(e.target.value))}
                               className="h-9"
                               min="1"
-                            />
-                            <Input 
-                              type="text" 
-                              value={item.productName || ""} 
-                              onChange={(e) => updateItem(item.id, "productName", e.target.value)}
-                              className="h-9"
-                              placeholder="Description"
-                            />
-                            <Input 
-                              type="url" 
-                              value={item.productImage || ""} 
-                              onChange={(e) => updateItem(item.id, "productImage", e.target.value)}
-                              className="h-9"
-                              placeholder="Image URL"
                             />
                             {items.length > 1 && (
                               <Button
