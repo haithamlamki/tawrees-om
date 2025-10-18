@@ -46,62 +46,67 @@ export function ShippingPartnerDetails({
           </Badge>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex items-center gap-3">
-          <Building2 className="h-5 w-5 text-muted-foreground" />
-          <div>
-            <p className="text-sm text-muted-foreground">Company</p>
-            <p className="font-medium">{partnerName}</p>
-          </div>
-        </div>
-
-        {contactPerson && (
-          <div className="flex items-center gap-3">
-            <User className="h-5 w-5 text-muted-foreground" />
+      <CardContent>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <div className="flex items-start gap-3">
+            <Building2 className="h-5 w-5 text-muted-foreground mt-1" />
             <div>
-              <p className="text-sm text-muted-foreground">Contact Person</p>
-              <p className="font-medium">{contactPerson}</p>
+              <p className="text-sm text-muted-foreground">Company</p>
+              <p className="font-medium">{partnerName}</p>
             </div>
           </div>
-        )}
 
-        {phone && (
-          <div className="flex items-center gap-3">
-            <Phone className="h-5 w-5 text-muted-foreground" />
+          {contactPerson && (
+            <div className="flex items-start gap-3">
+              <User className="h-5 w-5 text-muted-foreground mt-1" />
+              <div>
+                <p className="text-sm text-muted-foreground">Contact Person</p>
+                <p className="font-medium">{contactPerson}</p>
+              </div>
+            </div>
+          )}
+
+          {phone && (
+            <div className="flex items-start gap-3">
+              <Phone className="h-5 w-5 text-muted-foreground mt-1" />
+              <div>
+                <p className="text-sm text-muted-foreground">Phone</p>
+                <a href={`tel:${phone}`} className="font-medium hover:underline">
+                  {phone}
+                </a>
+              </div>
+            </div>
+          )}
+
+          {email && (
+            <div className="flex items-start gap-3">
+              <Mail className="h-5 w-5 text-muted-foreground mt-1" />
+              <div>
+                <p className="text-sm text-muted-foreground">Email</p>
+                <a href={`mailto:${email}`} className="font-medium hover:underline">
+                  {email}
+                </a>
+              </div>
+            </div>
+          )}
+
+          {address && (
+            <div className="flex items-start gap-3">
+              <MapPin className="h-5 w-5 text-muted-foreground mt-1" />
+              <div>
+                <p className="text-sm text-muted-foreground">Address</p>
+                <p className="font-medium">{address}</p>
+              </div>
+            </div>
+          )}
+
+          <div className="flex items-start gap-3">
+            <div className="h-5 w-5" /> {/* Spacer for alignment */}
             <div>
-              <p className="text-sm text-muted-foreground">Phone</p>
-              <a href={`tel:${phone}`} className="font-medium hover:underline">
-                {phone}
-              </a>
+              <p className="text-sm text-muted-foreground">Tracking Number</p>
+              <p className="font-mono font-medium">{trackingNumber}</p>
             </div>
           </div>
-        )}
-
-        {email && (
-          <div className="flex items-center gap-3">
-            <Mail className="h-5 w-5 text-muted-foreground" />
-            <div>
-              <p className="text-sm text-muted-foreground">Email</p>
-              <a href={`mailto:${email}`} className="font-medium hover:underline">
-                {email}
-              </a>
-            </div>
-          </div>
-        )}
-
-        {address && (
-          <div className="flex items-center gap-3">
-            <MapPin className="h-5 w-5 text-muted-foreground" />
-            <div>
-              <p className="text-sm text-muted-foreground">Address</p>
-              <p className="font-medium">{address}</p>
-            </div>
-          </div>
-        )}
-
-        <div className="pt-4 border-t">
-          <p className="text-sm text-muted-foreground">Tracking Number</p>
-          <p className="font-mono font-medium text-lg">{trackingNumber}</p>
         </div>
       </CardContent>
     </Card>

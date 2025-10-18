@@ -19,6 +19,7 @@ import { StatusTimeline } from "@/components/shipment/StatusTimeline";
 import { ItemDetailsViewer } from "@/components/admin/ItemDetailsViewer";
 import { QuoteApprovalDialog } from "@/components/customer/QuoteApprovalDialog";
 import { BulkItemSupplierEditor } from "@/components/admin/BulkItemSupplierEditor";
+import { CustomerInvoices } from "@/components/dashboard/CustomerInvoices";
 
 interface ShipmentRequest {
   id: string;
@@ -84,14 +85,14 @@ const Dashboard = () => {
   useEffect(() => {
     // Read hash from URL and set active tab
     const hash = window.location.hash.slice(1); // Remove # prefix
-    if (hash && ['requests', 'profile', 'notifications', 'quotes', 'approvals', 'admin'].includes(hash)) {
+    if (hash && ['requests', 'profile', 'notifications', 'quotes', 'approvals', 'invoices', 'admin'].includes(hash)) {
       setActiveTab(hash);
     }
     
     // Listen for hash changes
     const handleHashChange = () => {
       const newHash = window.location.hash.slice(1);
-      if (newHash && ['requests', 'profile', 'notifications', 'quotes', 'approvals', 'admin'].includes(newHash)) {
+      if (newHash && ['requests', 'profile', 'notifications', 'quotes', 'approvals', 'invoices', 'admin'].includes(newHash)) {
         setActiveTab(newHash);
       }
     };
@@ -293,6 +294,10 @@ const Dashboard = () => {
             <TabsTrigger value="approvals">
               <DollarSign className="mr-2 h-4 w-4" />
               Quote Approvals {pendingQuotes.length > 0 && `(${pendingQuotes.length})`}
+            </TabsTrigger>
+            <TabsTrigger value="invoices">
+              <FileText className="mr-2 h-4 w-4" />
+              Invoices
             </TabsTrigger>
             {isAdmin && (
               <TabsTrigger value="admin" onClick={() => navigate("/admin")}>
@@ -570,6 +575,10 @@ const Dashboard = () => {
                 );
               })
             )}
+          </TabsContent>
+
+          <TabsContent value="invoices">
+            <CustomerInvoices />
           </TabsContent>
         </Tabs>
 
