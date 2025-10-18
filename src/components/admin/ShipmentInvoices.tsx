@@ -8,6 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { FileText, Loader2, DollarSign, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { PartnerPaymentDialog } from "./PartnerPaymentDialog";
+import { getPaymentStatusBadgeVariant, getPaymentStatusLabel } from "@/lib/utils";
 
 interface InvoiceData {
   id: string;
@@ -22,6 +23,7 @@ interface InvoiceData {
   partner_amount: number;
   partner_name: string | null;
   partner_id: string | null;
+  payment_status: string;
 }
 
 interface ShipmentInvoicesProps {
@@ -70,6 +72,12 @@ export const ShipmentInvoices = ({ partnerId, isAdmin = false }: ShipmentInvoice
       return;
     }
     
+    // Only allow selecting unpaid invoices
+    if (invoice.payment_status !== 'unpaid') {
+      toast.error("Can only select unpaid invoices");
+      return;
+    }
+    
     setSelectedInvoices(prev => {
       const newSet = new Set(prev);
       if (newSet.has(invoiceId)) {
@@ -82,7 +90,7 @@ export const ShipmentInvoices = ({ partnerId, isAdmin = false }: ShipmentInvoice
   };
 
   const toggleSelectAll = () => {
-    const selectableInvoices = displayedInvoices.filter(inv => inv.partner_id);
+    const selectableInvoices = displayedInvoices.filter(inv => inv.partner_id && inv.payment_status === 'unpaid');
     
     if (selectedInvoices.size === selectableInvoices.length) {
       setSelectedInvoices(new Set());
@@ -189,7 +197,7 @@ export const ShipmentInvoices = ({ partnerId, isAdmin = false }: ShipmentInvoice
                       {isAdmin && (
                         <TableHead className="w-12">
                           <Checkbox
-                            checked={selectedInvoices.size === displayedInvoices.filter(inv => inv.partner_id).length && displayedInvoices.filter(inv => inv.partner_id).length > 0}
+                            checked={selectedInvoices.size === displayedInvoices.filter(inv => inv.partner_id && inv.payment_status === 'unpaid').length && displayedInvoices.filter(inv => inv.partner_id && inv.payment_status === 'unpaid').length > 0}
                             onCheckedChange={toggleSelectAll}
                           />
                         </TableHead>
@@ -199,6 +207,7 @@ export const ShipmentInvoices = ({ partnerId, isAdmin = false }: ShipmentInvoice
                       {isAdmin && <TableHead>Partner</TableHead>}
                       <TableHead>Date</TableHead>
                       <TableHead>Status</TableHead>
+                      <TableHead>Payment Status</TableHead>
                       <TableHead className="text-right">Total Amount</TableHead>
                       <TableHead className="text-right">Cost Amount</TableHead>
                       <TableHead className="text-right">Profit</TableHead>
@@ -210,11 +219,11 @@ export const ShipmentInvoices = ({ partnerId, isAdmin = false }: ShipmentInvoice
                     {displayedInvoices.map((invoice) => (
                       <TableRow key={invoice.id}>
                         {isAdmin && (
-                        <TableCell>
+                         <TableCell>
                           <Checkbox
                             checked={selectedInvoices.has(invoice.id)}
                             onCheckedChange={() => toggleInvoiceSelection(invoice.id)}
-                            disabled={!invoice.partner_id}
+                            disabled={!invoice.partner_id || invoice.payment_status !== 'unpaid'}
                           />
                         </TableCell>
                         )}
@@ -235,37 +244,42 @@ export const ShipmentInvoices = ({ partnerId, isAdmin = false }: ShipmentInvoice
                             {invoice.status}
                           </Badge>
                         </TableCell>
+                        <TableCell>
+                          <Badge variant={getPaymentStatusBadgeVariant(invoice.payment_status)}>
+                            {getPaymentStatusLabel(invoice.payment_status)}
+                          </Badge>
+                        </TableCell>
                         <TableCell className="text-right font-medium">
-                          ${invoice.total_amount.toFixed(2)}
+                          OMR {invoice.total_amount.toFixed(3)}
                         </TableCell>
                         <TableCell className="text-right text-muted-foreground">
-                          ${invoice.cost_amount.toFixed(2)}
+                          OMR {invoice.cost_amount.toFixed(3)}
                         </TableCell>
                         <TableCell className="text-right font-medium text-green-600">
-                          ${invoice.profit.toFixed(2)}
+                          OMR {invoice.profit.toFixed(3)}
                         </TableCell>
                         <TableCell className="text-right font-semibold text-primary">
-                          ${invoice.tawreed_amount.toFixed(2)}
+                          OMR {invoice.tawreed_amount.toFixed(3)}
                         </TableCell>
                         <TableCell className="text-right font-semibold text-blue-600">
-                          ${invoice.partner_amount.toFixed(2)}
+                          OMR {invoice.partner_amount.toFixed(3)}
                         </TableCell>
                       </TableRow>
                     ))}
                     
                     {/* Totals Row */}
                     <TableRow className="bg-muted/50 font-semibold">
-                      <TableCell colSpan={isAdmin ? 6 : 4}>TOTALS</TableCell>
-                      <TableCell className="text-right">${totals.total.toFixed(2)}</TableCell>
-                      <TableCell className="text-right">${totals.cost.toFixed(2)}</TableCell>
+                      <TableCell colSpan={isAdmin ? 7 : 5}>TOTALS</TableCell>
+                      <TableCell className="text-right">OMR {totals.total.toFixed(3)}</TableCell>
+                      <TableCell className="text-right">OMR {totals.cost.toFixed(3)}</TableCell>
                       <TableCell className="text-right text-green-600">
-                        ${totals.profit.toFixed(2)}
+                        OMR {totals.profit.toFixed(3)}
                       </TableCell>
                       <TableCell className="text-right text-primary">
-                        ${totals.tawreed.toFixed(2)}
+                        OMR {totals.tawreed.toFixed(3)}
                       </TableCell>
                       <TableCell className="text-right text-blue-600">
-                        ${totals.partner.toFixed(2)}
+                        OMR {totals.partner.toFixed(3)}
                       </TableCell>
                     </TableRow>
                   </TableBody>
@@ -277,14 +291,14 @@ export const ShipmentInvoices = ({ partnerId, isAdmin = false }: ShipmentInvoice
                 <Card>
                   <CardHeader className="pb-3">
                     <CardDescription>Total Revenue</CardDescription>
-                    <CardTitle className="text-2xl">${totals.total.toFixed(2)}</CardTitle>
+                    <CardTitle className="text-2xl">OMR {totals.total.toFixed(3)}</CardTitle>
                   </CardHeader>
                 </Card>
                 <Card>
                   <CardHeader className="pb-3">
                     <CardDescription>Total Cost</CardDescription>
                     <CardTitle className="text-2xl text-muted-foreground">
-                      ${totals.cost.toFixed(2)}
+                      OMR {totals.cost.toFixed(3)}
                     </CardTitle>
                   </CardHeader>
                 </Card>
@@ -292,7 +306,7 @@ export const ShipmentInvoices = ({ partnerId, isAdmin = false }: ShipmentInvoice
                   <CardHeader className="pb-3">
                     <CardDescription>Total Profit</CardDescription>
                     <CardTitle className="text-2xl text-green-600">
-                      ${totals.profit.toFixed(2)}
+                      OMR {totals.profit.toFixed(3)}
                     </CardTitle>
                   </CardHeader>
                 </Card>
@@ -300,7 +314,7 @@ export const ShipmentInvoices = ({ partnerId, isAdmin = false }: ShipmentInvoice
                   <CardHeader className="pb-3">
                     <CardDescription>Tawreed Share</CardDescription>
                     <CardTitle className="text-2xl text-primary">
-                      ${totals.tawreed.toFixed(2)}
+                      OMR {totals.tawreed.toFixed(3)}
                     </CardTitle>
                   </CardHeader>
                 </Card>
@@ -308,7 +322,7 @@ export const ShipmentInvoices = ({ partnerId, isAdmin = false }: ShipmentInvoice
                   <CardHeader className="pb-3">
                     <CardDescription>Partner Share</CardDescription>
                     <CardTitle className="text-2xl text-blue-600">
-                      ${totals.partner.toFixed(2)}
+                      OMR {totals.partner.toFixed(3)}
                     </CardTitle>
                   </CardHeader>
                 </Card>

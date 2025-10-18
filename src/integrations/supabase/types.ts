@@ -3024,6 +3024,7 @@ export type Database = {
           partner_amount: number
           partner_id: string
           partner_name: string
+          payment_status: string
           profit: number
           status: string
           tawreed_amount: number
