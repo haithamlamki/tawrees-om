@@ -362,6 +362,8 @@ const Dashboard = () => {
                           containerType={request.container_types?.name}
                           totalCBM={request.cbm_volume}
                           totalWeight={request.weight_kg}
+                          requestId={request.id}
+                          onItemUpdate={() => checkAuthAndLoadData()}
                         />
                       </div>
                     )}

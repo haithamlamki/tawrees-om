@@ -177,6 +177,8 @@ export function ShipmentRequestDetails({ requestId, compact = false }: ShipmentR
           totalCBM={request.cbm_volume}
           totalWeight={request.weight_kg}
           compact={compact}
+          requestId={request.id}
+          onItemUpdate={loadRequestDetails}
         />
       )}
 

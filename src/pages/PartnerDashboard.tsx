@@ -405,6 +405,8 @@ const PartnerDashboard = () => {
                               <ItemDetailsViewer 
                                 items={items} 
                                 shippingType="sea"
+                                requestId={request?.id}
+                                onItemUpdate={() => loadPartnerData(partner?.id || '')}
                               />
                             </div>
                           </div>
