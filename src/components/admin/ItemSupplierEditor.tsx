@@ -143,12 +143,11 @@ export function ItemSupplierEditor({ open, onOpenChange, item, requestId, onUpda
 
             <div className="space-y-2">
               <Label htmlFor="supplier">Supplier</Label>
-              <Select value={selectedSupplierId} onValueChange={setSelectedSupplierId}>
+              <Select value={selectedSupplierId || undefined} onValueChange={setSelectedSupplierId}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select supplier..." />
+                  <SelectValue placeholder="Select supplier (optional)..." />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">No Supplier</SelectItem>
                   {suppliers.map((supplier) => (
                     <SelectItem key={supplier.id} value={supplier.id}>
                       {supplier.supplier_name} - {supplier.contact_person}
@@ -156,6 +155,17 @@ export function ItemSupplierEditor({ open, onOpenChange, item, requestId, onUpda
                   ))}
                 </SelectContent>
               </Select>
+              {selectedSupplierId && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSelectedSupplierId("")}
+                  className="text-xs"
+                >
+                  Clear selection
+                </Button>
+              )}
             </div>
 
             <div className="space-y-2">
