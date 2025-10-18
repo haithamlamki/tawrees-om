@@ -254,6 +254,16 @@ const PartnerDashboard = () => {
                         .map((item: any) => item.image_url)
                     : [];
 
+                  console.log('Shipment Request Data:', { 
+                    shipment_id: shipment.id,
+                    has_request: !!request,
+                    items_count: totalItems,
+                    cbm: request?.cbm_volume,
+                    weight: request?.weight_kg,
+                    customer: request?.profiles?.full_name,
+                    delivery_address: request?.delivery_address
+                  });
+
                   return (
                     <Card key={shipment.id} className="border-primary/50">
                       <CardHeader>
@@ -268,105 +278,94 @@ const PartnerDashboard = () => {
                         </CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        {/* Thumbnail Gallery */}
-                        {thumbnails.length > 0 && (
-                          <div className="flex gap-2 overflow-x-auto pb-2">
-                            {thumbnails.map((url: string, idx: number) => (
-                              <div 
-                                key={idx} 
-                                className="relative h-20 w-20 flex-shrink-0 rounded-lg overflow-hidden border-2 border-primary/20"
-                              >
-                                <img 
-                                  src={url} 
-                                  alt={`Item ${idx + 1}`}
-                                  className="h-full w-full object-cover"
-                                />
+                        {/* Always show basic order info */}
+                        <div className="p-4 bg-muted/20 rounded-lg space-y-2">
+                          <p className="text-sm font-semibold text-foreground">Order Information</p>
+                          {request?.delivery_address && (
+                            <div className="flex items-start gap-2">
+                              <MapPin className="h-4 w-4 text-muted-foreground mt-0.5" />
+                              <div className="text-sm">
+                                <p className="font-medium">Delivery Address</p>
+                                <p className="text-muted-foreground">
+                                  {request.delivery_address}
+                                  {request.delivery_city && `, ${request.delivery_city}`}
+                                  {request.delivery_country && `, ${request.delivery_country}`}
+                                </p>
                               </div>
-                            ))}
-                            {totalItems > thumbnails.length && (
-                              <div className="h-20 w-20 flex-shrink-0 rounded-lg border-2 border-dashed border-muted-foreground/30 flex items-center justify-center bg-muted/20">
-                                <span className="text-xs text-muted-foreground font-medium">
-                                  +{totalItems - thumbnails.length}
-                                </span>
-                              </div>
-                            )}
-                          </div>
-                        )}
-
-                        {/* Quick Stats */}
-                        <div className="grid grid-cols-3 gap-2">
-                          <div className="bg-accent/10 border border-accent/20 rounded-lg p-3">
-                            <div className="flex items-center gap-2 mb-1">
-                              <Package className="h-4 w-4 text-primary" />
-                              <span className="text-xs text-muted-foreground">Items</span>
                             </div>
-                            <p className="text-lg font-bold text-primary">{totalItems}</p>
-                          </div>
-                          <div className="bg-accent/10 border border-accent/20 rounded-lg p-3">
-                            <div className="flex items-center gap-2 mb-1">
-                              <Box className="h-4 w-4 text-primary" />
-                              <span className="text-xs text-muted-foreground">CBM</span>
-                            </div>
-                            <p className="text-lg font-bold text-primary">
-                              {request?.cbm_volume ? request.cbm_volume.toFixed(3) : '0.000'}
-                            </p>
-                          </div>
-                          <div className="bg-accent/10 border border-accent/20 rounded-lg p-3">
-                            <div className="flex items-center gap-2 mb-1">
-                              <Weight className="h-4 w-4 text-primary" />
-                              <span className="text-xs text-muted-foreground">Weight</span>
-                            </div>
-                            <p className="text-lg font-bold text-primary">
-                              {request?.weight_kg ? request.weight_kg.toFixed(2) : '0.00'} kg
-                            </p>
-                          </div>
-                        </div>
-
-                        {/* Summary & Delivery Section */}
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                          {/* Totals - CBM */}
-                          <div className="p-4 bg-accent/10 border border-accent/20 rounded-lg">
-                            <p className="text-xs text-muted-foreground mb-2">Total CBM</p>
-                            <p className="text-2xl font-bold text-primary">
-                              {request?.cbm_volume ? request.cbm_volume.toFixed(3) : '0.000'} m³
-                            </p>
-                          </div>
-
-                          {/* Totals - Weight */}
-                          <div className="p-4 bg-accent/10 border border-accent/20 rounded-lg">
-                            <p className="text-xs text-muted-foreground mb-2">Total Weight</p>
-                            <p className="text-2xl font-bold text-primary">
-                              {request?.weight_kg ? request.weight_kg.toFixed(2) : '0.00'} kg
-                            </p>
-                          </div>
-
-                          {/* Delivery Info */}
-                          {request?.delivery_type && (
-                            <div className="p-4 bg-muted/50 rounded-lg text-sm space-y-2">
-                              <p className="font-semibold mb-3 text-foreground">Delivery Information</p>
-                              {request.delivery_contact_name && (
-                                <div className="flex flex-col gap-1">
-                                  <span className="text-xs text-muted-foreground">Contact</span>
-                                  <span className="font-medium">{request.delivery_contact_name}</span>
-                                </div>
-                              )}
+                          )}
+                          {request?.delivery_contact_name && (
+                            <div className="text-sm">
+                              <span className="font-medium">Contact: </span>
+                              <span className="text-muted-foreground">{request.delivery_contact_name}</span>
                               {request.delivery_contact_phone && (
-                                <div className="flex flex-col gap-1">
-                                  <span className="text-xs text-muted-foreground">Phone</span>
-                                  <span className="font-medium">{request.delivery_contact_phone}</span>
-                                </div>
-                              )}
-                              {request.delivery_address && (
-                                <div className="flex flex-col gap-1">
-                                  <span className="text-xs text-muted-foreground">Address</span>
-                                  <span className="font-medium">
-                                    {request.delivery_address}, {request.delivery_city}, {request.delivery_country}
-                                  </span>
-                                </div>
+                                <span className="text-muted-foreground"> - {request.delivery_contact_phone}</span>
                               )}
                             </div>
                           )}
                         </div>
+
+                        {/* Thumbnail Gallery */}
+                        {thumbnails.length > 0 && (
+                          <div>
+                            <p className="text-sm font-semibold mb-2">Product Images</p>
+                            <div className="flex gap-2 overflow-x-auto pb-2">
+                              {thumbnails.map((url: string, idx: number) => (
+                                <div 
+                                  key={idx} 
+                                  className="relative h-20 w-20 flex-shrink-0 rounded-lg overflow-hidden border-2 border-primary/20"
+                                >
+                                  <img 
+                                    src={url} 
+                                    alt={`Item ${idx + 1}`}
+                                    className="h-full w-full object-cover"
+                                  />
+                                </div>
+                              ))}
+                              {totalItems > thumbnails.length && (
+                                <div className="h-20 w-20 flex-shrink-0 rounded-lg border-2 border-dashed border-muted-foreground/30 flex items-center justify-center bg-muted/20">
+                                  <span className="text-xs text-muted-foreground font-medium">
+                                    +{totalItems - thumbnails.length}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Quick Stats - Always show if we have data */}
+                        {(totalItems > 0 || request?.cbm_volume || request?.weight_kg) && (
+                          <div>
+                            <p className="text-sm font-semibold mb-2">Shipment Details</p>
+                            <div className="grid grid-cols-3 gap-2">
+                              <div className="bg-accent/10 border border-accent/20 rounded-lg p-3">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <Package className="h-4 w-4 text-primary" />
+                                  <span className="text-xs text-muted-foreground">Items</span>
+                                </div>
+                                <p className="text-lg font-bold text-primary">{totalItems}</p>
+                              </div>
+                              <div className="bg-accent/10 border border-accent/20 rounded-lg p-3">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <Box className="h-4 w-4 text-primary" />
+                                  <span className="text-xs text-muted-foreground">CBM</span>
+                                </div>
+                                <p className="text-lg font-bold text-primary">
+                                  {request?.cbm_volume ? request.cbm_volume.toFixed(3) : '0.000'}
+                                </p>
+                              </div>
+                              <div className="bg-accent/10 border border-accent/20 rounded-lg p-3">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <Weight className="h-4 w-4 text-primary" />
+                                  <span className="text-xs text-muted-foreground">Weight</span>
+                                </div>
+                                <p className="text-lg font-bold text-primary">
+                                  {request?.weight_kg ? request.weight_kg.toFixed(2) : '0.00'} kg
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
 
                         {/* Expandable Item Details */}
                         {totalItems > 0 && (
@@ -387,17 +386,21 @@ const PartnerDashboard = () => {
                         )}
 
                         {shipment.estimated_delivery && (
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 p-3 bg-muted/20 rounded-lg">
                             <Clock className="h-4 w-4 text-muted-foreground" />
-                            <span className="text-sm">
-                              Est. Delivery: {new Date(shipment.estimated_delivery).toLocaleDateString()}
-                            </span>
+                            <div className="text-sm">
+                              <span className="font-medium">Est. Delivery: </span>
+                              <span className="text-muted-foreground">
+                                {new Date(shipment.estimated_delivery).toLocaleDateString()}
+                              </span>
+                            </div>
                           </div>
                         )}
 
                         <Button 
                           onClick={() => setSelectedForAcceptance(shipment)}
                           className="w-full"
+                          size="lg"
                         >
                           Review & Accept Order
                         </Button>
