@@ -13,8 +13,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ShipmentInvoices } from "@/components/admin/ShipmentInvoices";
 import { ItemDetailsViewer } from "@/components/admin/ItemDetailsViewer";
 import { ShipmentItem } from "@/types/calculator";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
 
 interface PartnerShipment {
   id: string;
@@ -62,12 +60,6 @@ const PartnerDashboard = () => {
   const [selectedShipment, setSelectedShipment] = useState<PartnerShipment | null>(null);
   const [selectedForAcceptance, setSelectedForAcceptance] = useState<PartnerShipment | null>(null);
   const [activeTab, setActiveTab] = useState<string>("pending");
-  const [statusFilters, setStatusFilters] = useState<Record<string, boolean>>({
-    received_from_supplier: true,
-    processing: true,
-    in_transit: true,
-    customs: true,
-  });
 
   useEffect(() => {
     checkAuthAndLoadData();
@@ -197,7 +189,7 @@ const PartnerDashboard = () => {
 
   const pendingShipments = shipments.filter(s => s.status === "pending_partner_acceptance");
   // Active shipments: show only up to "customs" status
-  const allActiveShipments = shipments.filter(s => 
+  const activeShipments = shipments.filter(s => 
     s.status !== "pending_partner_acceptance" && 
     s.status !== "rejected" &&
     s.status !== "received_muscat_wh" &&
@@ -205,23 +197,6 @@ const PartnerDashboard = () => {
     s.status !== "delivered" &&
     s.status !== "completed"
   );
-
-  // Apply status filters
-  const activeShipments = allActiveShipments.filter(s => statusFilters[s.status]);
-
-  const toggleStatusFilter = (status: string) => {
-    setStatusFilters(prev => ({
-      ...prev,
-      [status]: !prev[status]
-    }));
-  };
-
-  const statusOptions = [
-    { value: 'received_from_supplier', label: 'Received from Supplier', color: '#FFC000' },
-    { value: 'processing', label: 'Processing', color: '#EE0000' },
-    { value: 'in_transit', label: 'In Transit', color: '#EE0000' },
-    { value: 'customs', label: 'At Customs', color: '#00B0F0' },
-  ];
 
   if (loading) {
     return (
@@ -483,45 +458,11 @@ const PartnerDashboard = () => {
           </TabsContent>
 
           <TabsContent value="active">
-            {/* Status Filters */}
-            <Card className="mb-6">
-              <CardHeader>
-                <CardTitle className="text-lg">Filter by Status</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-4">
-                  {statusOptions.map((status) => (
-                    <div key={status.value} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`filter-${status.value}`}
-                        checked={statusFilters[status.value]}
-                        onCheckedChange={() => toggleStatusFilter(status.value)}
-                      />
-                      <Label
-                        htmlFor={`filter-${status.value}`}
-                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer flex items-center gap-2"
-                      >
-                        <div 
-                          className="w-3 h-3 rounded-full" 
-                          style={{ backgroundColor: status.color }}
-                        />
-                        {status.label}
-                      </Label>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
             {activeShipments.length === 0 ? (
               <Card>
                 <CardContent className="flex flex-col items-center justify-center py-12">
                   <Package className="h-12 w-12 text-muted-foreground mb-4" />
-                  <p className="text-muted-foreground">
-                    {allActiveShipments.length === 0 
-                      ? "No active shipments"
-                      : "No shipments match the selected filters"}
-                  </p>
+                  <p className="text-muted-foreground">No active shipments</p>
                 </CardContent>
               </Card>
             ) : (
