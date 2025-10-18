@@ -9,8 +9,16 @@ const corsHeaders = {
 
 // Rate limiting
 const rateLimitMap = new Map<string, number[]>();
-const RATE_LIMIT = 20; // requests
-const WINDOW_MS = 60000; // per minute
+const RATE_LIMIT = 20; // requests per minute
+const WINDOW_MS = 60000; // 1 minute
+
+// Input validation schema
+const quoteRequestSchema = z.object({
+  productId: z.string().uuid("Invalid product ID format"),
+  quantity: z.number().int().min(1, "Quantity must be at least 1").max(10000, "Quantity cannot exceed 10000"),
+  deliveryCity: z.string().trim().min(2).max(100).regex(/^[a-zA-Z\s-]+$/, "Invalid city name"),
+  deliveryCountry: z.string().trim().min(2).max(100).regex(/^[a-zA-Z\s]+$/, "Invalid country name")
+});
 
 function checkRateLimit(ip: string): boolean {
   const now = Date.now();
@@ -25,14 +33,6 @@ function checkRateLimit(ip: string): boolean {
   return true;
 }
 
-// Input validation schema
-const quoteRequestSchema = z.object({
-  productId: z.string().uuid("Invalid product ID format"),
-  quantity: z.number().int().min(1, "Quantity must be at least 1").max(10000, "Quantity cannot exceed 10000"),
-  deliveryCity: z.string().trim().min(2, "City name too short").max(100, "City name too long").regex(/^[a-zA-Z\s-]+$/, "Invalid city name format"),
-  deliveryCountry: z.string().trim().min(2, "Country name too short").max(100, "Country name too long")
-});
-
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -44,9 +44,9 @@ serve(async (req) => {
     if (!checkRateLimit(ip)) {
       return new Response(
         JSON.stringify({ error: "Rate limit exceeded. Please try again later." }),
-        { 
+        {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 429 
+          status: 429,
         }
       );
     }
@@ -56,12 +56,12 @@ serve(async (req) => {
     const validation = quoteRequestSchema.safeParse(body);
     
     if (!validation.success) {
-      console.error("[COMPUTE-QUOTE] Validation error:", validation.error);
+      console.error("[COMPUTE-QUOTE] Validation error:", validation.error.errors);
       return new Response(
         JSON.stringify({ error: "Invalid request parameters" }),
         {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 400
+          status: 400,
         }
       );
     }
@@ -80,12 +80,25 @@ serve(async (req) => {
       .single();
 
     if (productError || !product) {
-      throw new Error("Product not found");
+      console.error("[COMPUTE-QUOTE] Product not found:", productId);
+      return new Response(
+        JSON.stringify({ error: "Product not found" }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 404,
+        }
+      );
     }
 
     // Validate quantity
     if (quantity < product.min_order_qty) {
-      throw new Error(`Minimum order quantity is ${product.min_order_qty}`);
+      return new Response(
+        JSON.stringify({ error: `Minimum order quantity is ${product.min_order_qty}` }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 400,
+        }
+      );
     }
 
     // Calculate unit price (check for tiered pricing)
@@ -189,7 +202,13 @@ serve(async (req) => {
       }
     );
   } catch (error: any) {
-    console.error("[COMPUTE-QUOTE] Error:", error);
+    console.error("[COMPUTE-QUOTE] Error:", {
+      message: error.message,
+      code: error.code,
+      stack: error.stack
+    });
+    
+    // Return sanitized error message
     return new Response(
       JSON.stringify({ error: "Unable to compute quote. Please try again." }),
       {
