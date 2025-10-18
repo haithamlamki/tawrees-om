@@ -205,9 +205,18 @@ serve(async (req) => {
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error: any) {
-    console.error('Error in create-wms-contract-user function:', error);
+    // Log full error server-side only
+    console.error('[CREATE-WMS-CONTRACT-USER] Error:', error);
+    
+    // Return sanitized error to client
+    const message = error?.message?.includes('Unauthorized') || error?.message?.includes('authorization')
+      ? 'Unauthorized access'
+      : error?.message?.includes('Forbidden') || error?.message?.includes('permissions')
+      ? 'Insufficient permissions'
+      : 'Unable to create or link user';
+      
     return new Response(
-      JSON.stringify({ success: false, error: error?.message || 'Failed to create or link user' }),
+      JSON.stringify({ success: false, error: message }),
       { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }

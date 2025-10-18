@@ -69,11 +69,16 @@ serve(async (req) => {
       }
     );
   } catch (error) {
-    console.error("Payment verification error:", error);
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    return new Response(JSON.stringify({ error: errorMessage }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 500,
-    });
+    // Log full error server-side only
+    console.error("[VERIFY-INVOICE-PAYMENT] Error:", error);
+    
+    // Return sanitized error to client
+    return new Response(
+      JSON.stringify({ error: "Payment verification failed" }), 
+      {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 500,
+      }
+    );
   }
 });

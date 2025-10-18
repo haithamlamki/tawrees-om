@@ -173,9 +173,18 @@ serve(async (req) => {
     );
 
   } catch (error: any) {
-    console.error('Error creating WMS user:', error);
+    // Log full error server-side only
+    console.error('[CREATE-WMS-USER] Error:', error);
+    
+    // Return sanitized error to client
+    const message = error?.message?.includes('Unauthorized') || error?.message?.includes('authorization')
+      ? 'Unauthorized access'
+      : error?.message?.includes('Only customer')
+      ? 'Insufficient permissions'
+      : 'Unable to create user';
+      
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: message }),
       { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }

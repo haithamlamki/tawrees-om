@@ -84,9 +84,18 @@ serve(async (req) => {
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error: any) {
-    console.error('Error in delete-wms-user function:', error);
+    // Log full error server-side only
+    console.error('[DELETE-WMS-USER] Error:', error);
+    
+    // Return sanitized error to client
+    const message = error?.message?.includes('Unauthorized') || error?.message?.includes('authorization')
+      ? 'Unauthorized access'
+      : error?.message?.includes('Forbidden') || error?.message?.includes('admin')
+      ? 'Admin access required'
+      : 'Unable to delete user';
+      
     return new Response(
-      JSON.stringify({ success: false, error: error?.message || 'Failed to delete user' }),
+      JSON.stringify({ success: false, error: message }),
       { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
