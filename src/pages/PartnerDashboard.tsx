@@ -329,7 +329,7 @@ const PartnerDashboard = () => {
             </TabsTrigger>
             <TabsTrigger value="profile" className="flex-1">
               <User className="h-4 w-4 mr-2" />
-              Profile
+              Company Profile
             </TabsTrigger>
           </TabsList>
 
