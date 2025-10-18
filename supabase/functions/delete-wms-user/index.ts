@@ -84,19 +84,31 @@ serve(async (req) => {
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error: any) {
-    // Log full error server-side only
-    console.error('[DELETE-WMS-USER] Error:', error);
+    // Log full error details server-side only
+    console.error('[DELETE-WMS-USER] Error:', {
+      message: error?.message,
+      code: error?.code,
+      details: error?.details
+    });
     
-    // Return sanitized error to client
-    const message = error?.message?.includes('Unauthorized') || error?.message?.includes('authorization')
-      ? 'Unauthorized access'
-      : error?.message?.includes('Forbidden') || error?.message?.includes('admin')
-      ? 'Admin access required'
-      : 'Unable to delete user';
+    // Map errors to sanitized responses
+    let statusCode = 500;
+    let message = 'Unable to process request';
+    
+    if (error?.message?.includes('Unauthorized') || error?.message?.includes('authorization')) {
+      statusCode = 401;
+      message = 'Authentication required';
+    } else if (error?.message?.includes('Forbidden') || error?.message?.includes('admin')) {
+      statusCode = 403;
+      message = 'Admin access required';
+    } else if (error?.code === '23503') {
+      statusCode = 409;
+      message = 'Cannot delete user with existing references';
+    }
       
     return new Response(
       JSON.stringify({ success: false, error: message }),
-      { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { status: statusCode, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });

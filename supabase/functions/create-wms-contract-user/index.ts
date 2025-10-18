@@ -205,19 +205,31 @@ serve(async (req) => {
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error: any) {
-    // Log full error server-side only
-    console.error('[CREATE-WMS-CONTRACT-USER] Error:', error);
+    // Log full error details server-side only
+    console.error('[CREATE-WMS-CONTRACT-USER] Error:', {
+      message: error?.message,
+      code: error?.code,
+      details: error?.details
+    });
     
-    // Return sanitized error to client
-    const message = error?.message?.includes('Unauthorized') || error?.message?.includes('authorization')
-      ? 'Unauthorized access'
-      : error?.message?.includes('Forbidden') || error?.message?.includes('permissions')
-      ? 'Insufficient permissions'
-      : 'Unable to create or link user';
+    // Map errors to sanitized responses
+    let statusCode = 500;
+    let message = 'Unable to process request';
+    
+    if (error?.message?.includes('Unauthorized') || error?.message?.includes('authorization')) {
+      statusCode = 401;
+      message = 'Authentication required';
+    } else if (error?.message?.includes('Forbidden') || error?.message?.includes('permissions')) {
+      statusCode = 403;
+      message = 'Insufficient permissions';
+    } else if (error?.code === '23505') {
+      statusCode = 409;
+      message = 'User already exists';
+    }
       
     return new Response(
       JSON.stringify({ success: false, error: message }),
-      { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { status: statusCode, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });
