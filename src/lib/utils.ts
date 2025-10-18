@@ -21,7 +21,7 @@ export function getShipmentStatusColor(status: string): string {
 export function getPaymentStatusBadgeVariant(status: string): "default" | "secondary" | "destructive" {
   switch (status) {
     case 'paid':
-      return 'default'; // green
+      return 'default'; // green - success variant
     case 'processed':
       return 'secondary'; // blue
     case 'unpaid':
@@ -39,5 +39,17 @@ export function getPaymentStatusLabel(status: string): string {
     case 'unpaid':
     default:
       return 'Not Paid';
+  }
+}
+
+export function getPaymentStatusClassName(status: string): string {
+  switch (status) {
+    case 'paid':
+      return 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800';
+    case 'processed':
+      return 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800';
+    case 'unpaid':
+    default:
+      return 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800';
   }
 }

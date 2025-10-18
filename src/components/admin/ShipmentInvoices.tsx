@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { FileText, Loader2, DollarSign, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { PartnerPaymentDialog } from "./PartnerPaymentDialog";
-import { getPaymentStatusBadgeVariant, getPaymentStatusLabel } from "@/lib/utils";
+import { getPaymentStatusBadgeVariant, getPaymentStatusLabel, getPaymentStatusClassName } from "@/lib/utils";
 
 interface InvoiceData {
   id: string;
@@ -245,7 +245,7 @@ export const ShipmentInvoices = ({ partnerId, isAdmin = false }: ShipmentInvoice
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          <Badge variant={getPaymentStatusBadgeVariant(invoice.payment_status)}>
+                          <Badge className={getPaymentStatusClassName(invoice.payment_status)}>
                             {getPaymentStatusLabel(invoice.payment_status)}
                           </Badge>
                         </TableCell>
