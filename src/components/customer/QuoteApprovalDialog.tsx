@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -68,11 +68,11 @@ export function QuoteApprovalDialog({
   const [uploading, setUploading] = useState<string | null>(null);
 
   // Load quote and document requests
-  useState(() => {
+  useEffect(() => {
     if (open && quoteId) {
       loadQuoteDetails();
     }
-  });
+  }, [open, quoteId]);
 
   const loadQuoteDetails = async () => {
     try {

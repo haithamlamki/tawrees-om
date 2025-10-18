@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Package, Clock, CheckCircle, XCircle, Ship, Settings, User, FileText, Bell, ChevronDown } from "lucide-react";
+import { Package, Clock, CheckCircle, XCircle, Ship, Settings, User, FileText, Bell, ChevronDown, DollarSign } from "lucide-react";
 import { toast } from "sonner";
 import ProfileSettings from "@/components/dashboard/ProfileSettings";
 import DocumentManager from "@/components/documents/DocumentManager";
@@ -18,6 +18,7 @@ import PaymentButton from "@/components/dashboard/PaymentButton";
 import { ShippingPartnerDetails } from "@/components/customer/ShippingPartnerDetails";
 import { StatusTimeline } from "@/components/shipment/StatusTimeline";
 import { ItemDetailsViewer } from "@/components/admin/ItemDetailsViewer";
+import { QuoteApprovalDialog } from "@/components/customer/QuoteApprovalDialog";
 
 interface ShipmentRequest {
   id: string;
@@ -59,6 +60,8 @@ const Dashboard = () => {
   const [selectedRequestId, setSelectedRequestId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>("requests");
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
+  const [pendingQuotes, setPendingQuotes] = useState<any[]>([]);
+  const [selectedQuoteShipment, setSelectedQuoteShipment] = useState<any | null>(null);
 
   useEffect(() => {
     checkAuthAndLoadData();
@@ -68,14 +71,14 @@ const Dashboard = () => {
   useEffect(() => {
     // Read hash from URL and set active tab
     const hash = window.location.hash.slice(1); // Remove # prefix
-    if (hash && ['requests', 'profile', 'notifications', 'quotes', 'admin'].includes(hash)) {
+    if (hash && ['requests', 'profile', 'notifications', 'quotes', 'approvals', 'admin'].includes(hash)) {
       setActiveTab(hash);
     }
     
     // Listen for hash changes
     const handleHashChange = () => {
       const newHash = window.location.hash.slice(1);
-      if (newHash && ['requests', 'profile', 'notifications', 'quotes', 'admin'].includes(newHash)) {
+      if (newHash && ['requests', 'profile', 'notifications', 'quotes', 'approvals', 'admin'].includes(newHash)) {
         setActiveTab(newHash);
       }
     };
@@ -102,6 +105,7 @@ const Dashboard = () => {
     setIsAdmin(!!adminRole);
 
     await loadRequests(session.user.id, !!adminRole);
+    await loadPendingQuotes(session.user.id);
     setLoading(false);
   };
 
@@ -169,6 +173,44 @@ const Dashboard = () => {
     setRequests(data || []);
   };
 
+  const loadPendingQuotes = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from("shipments")
+        .select(`
+          id,
+          tracking_number,
+          status,
+          assigned_partner_id,
+          request_id,
+          partner_quote_id,
+          shipment_requests!inner (
+            id,
+            customer_id,
+            shipping_type,
+            calculated_cost
+          ),
+          partner_shipping_quotes!inner (
+            id,
+            original_amount,
+            partner_quoted_amount,
+            adjustment_reason,
+            storage_location,
+            status,
+            submitted_at
+          )
+        `)
+        .eq("shipment_requests.customer_id", userId)
+        .eq("status", "pending_customer_approval")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      setPendingQuotes(data || []);
+    } catch (error) {
+      console.error("Error loading pending quotes:", error);
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
       pending: "outline",
@@ -234,6 +276,10 @@ const Dashboard = () => {
             <TabsTrigger value="quotes">
               <FileText className="mr-2 h-4 w-4" />
               My Quotes
+            </TabsTrigger>
+            <TabsTrigger value="approvals">
+              <DollarSign className="mr-2 h-4 w-4" />
+              Quote Approvals {pendingQuotes.length > 0 && `(${pendingQuotes.length})`}
             </TabsTrigger>
             {isAdmin && (
               <TabsTrigger value="admin" onClick={() => navigate("/admin")}>
@@ -421,7 +467,113 @@ const Dashboard = () => {
               </Card>
             )}
           </TabsContent>
+
+          <TabsContent value="approvals" className="space-y-4">
+            {pendingQuotes.length === 0 ? (
+              <Card>
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <DollarSign className="h-12 w-12 text-muted-foreground mb-4" />
+                  <p className="text-muted-foreground">No quotes pending your approval</p>
+                </CardContent>
+              </Card>
+            ) : (
+              pendingQuotes.map((shipment) => {
+                const quote = shipment.partner_shipping_quotes;
+                const amountDifference = quote.partner_quoted_amount - quote.original_amount;
+                const hasAdjustment = Math.abs(amountDifference) > 0.01;
+
+                return (
+                  <Card key={shipment.id} className="border-primary/50">
+                    <CardHeader>
+                      <div className="flex items-center justify-between flex-wrap gap-2">
+                        <CardTitle className="text-xl">
+                          Shipment {shipment.tracking_number}
+                        </CardTitle>
+                        <Badge variant="outline">Pending Your Approval</Badge>
+                      </div>
+                      <CardDescription>
+                        {shipment.shipment_requests?.shipping_type?.toUpperCase()} Shipment
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4 p-4 bg-muted/20 rounded-lg">
+                        <div>
+                          <p className="text-sm text-muted-foreground">Original Estimate</p>
+                          <p className="text-2xl font-bold">
+                            OMR {quote.original_amount.toFixed(3)}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground">Partner Quote</p>
+                          <p className="text-2xl font-bold text-primary">
+                            OMR {quote.partner_quoted_amount.toFixed(3)}
+                          </p>
+                          {hasAdjustment && (
+                            <Badge 
+                              variant={amountDifference > 0 ? "destructive" : "default"}
+                              className="mt-1"
+                            >
+                              {amountDifference > 0 ? "+" : ""}
+                              {amountDifference.toFixed(3)} OMR
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+
+                      {quote.adjustment_reason && (
+                        <div className="p-3 bg-accent/10 rounded-lg">
+                          <p className="text-sm font-medium mb-1">Partner's Note:</p>
+                          <p className="text-sm text-muted-foreground">
+                            {quote.adjustment_reason}
+                          </p>
+                        </div>
+                      )}
+
+                      {quote.storage_location && (
+                        <div className="text-sm">
+                          <span className="font-medium">Storage Location: </span>
+                          <span className="text-muted-foreground">{quote.storage_location}</span>
+                        </div>
+                      )}
+
+                      <div className="text-xs text-muted-foreground">
+                        Submitted: {new Date(quote.submitted_at).toLocaleString()}
+                      </div>
+
+                      <Button
+                        onClick={() => setSelectedQuoteShipment(shipment)}
+                        className="w-full"
+                        size="lg"
+                      >
+                        Review & Approve Quote
+                      </Button>
+                    </CardContent>
+                  </Card>
+                );
+              })
+            )}
+          </TabsContent>
         </Tabs>
+
+        {/* Quote Approval Dialog */}
+        {selectedQuoteShipment && (
+          <QuoteApprovalDialog
+            quoteId={selectedQuoteShipment.partner_quote_id}
+            shipmentId={selectedQuoteShipment.id}
+            trackingNumber={selectedQuoteShipment.tracking_number}
+            partnerId={selectedQuoteShipment.assigned_partner_id}
+            open={!!selectedQuoteShipment}
+            onOpenChange={(open) => !open && setSelectedQuoteShipment(null)}
+            onSuccess={async () => {
+              setSelectedQuoteShipment(null);
+              const { data: { user } } = await supabase.auth.getUser();
+              if (user) {
+                await loadRequests(user.id, isAdmin);
+                await loadPendingQuotes(user.id);
+              }
+            }}
+          />
+        )}
       </main>
     </div>
   );
