@@ -66,8 +66,7 @@ const PartnerDashboard = () => {
     "processing",
     "in_transit",
     "at_customs",
-    "received_muscat_wh",
-    "out_for_delivery"
+    "received_muscat_wh"
   ]);
 
   useEffect(() => {
@@ -219,12 +218,11 @@ const PartnerDashboard = () => {
   };
 
   const statusFilterOptions = [
-    { value: "received_from_supplier", label: "Received from Supplier", color: "#FFC000" },
-    { value: "processing", label: "Processing", color: "#EE0000" },
-    { value: "in_transit", label: "In Transit", color: "#EE0000" },
-    { value: "at_customs", label: "At Customs", color: "#00B0F0" },
-    { value: "received_muscat_wh", label: "Received Muscat WH", color: "#00B050" },
-    { value: "out_for_delivery", label: "Out for Delivery", color: "#00B050" }
+    { value: "received_from_supplier", label: "Received from Supplier" },
+    { value: "processing", label: "Processing" },
+    { value: "in_transit", label: "In Transit" },
+    { value: "at_customs", label: "At Customs" },
+    { value: "received_muscat_wh", label: "Received Muscat WH" }
   ];
 
   if (loading) {
@@ -495,20 +493,19 @@ const PartnerDashboard = () => {
               <CardContent>
                 <div className="flex flex-wrap gap-4">
                   {statusFilterOptions.map(option => (
-                    <div key={option.value} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={option.value}
-                        checked={statusFilters.includes(option.value)}
-                        onCheckedChange={() => toggleStatusFilter(option.value)}
-                      />
-                      <label
-                        htmlFor={option.value}
-                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                        style={{ color: option.color }}
-                      >
-                        {option.label}
-                      </label>
-                    </div>
+                  <div key={option.value} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={option.value}
+                      checked={statusFilters.includes(option.value)}
+                      onCheckedChange={() => toggleStatusFilter(option.value)}
+                    />
+                    <label
+                      htmlFor={option.value}
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                    >
+                      {option.label}
+                    </label>
+                  </div>
                   ))}
                 </div>
               </CardContent>
