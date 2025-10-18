@@ -14,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ShipmentInvoices } from "@/components/admin/ShipmentInvoices";
 import { ItemDetailsViewer } from "@/components/admin/ItemDetailsViewer";
 import { ShipmentItem } from "@/types/calculator";
+import { PartnerPaymentRequests } from "@/components/partner/PartnerPaymentRequests";
 
 interface PartnerShipment {
   id: string;
@@ -67,6 +68,26 @@ const PartnerDashboard = () => {
     "in_transit",
     "at_customs"
   ]);
+  const [pendingPaymentsCount, setPendingPaymentsCount] = useState(0);
+
+  useEffect(() => {
+    // Load pending payments count
+    const loadPendingPaymentsCount = async () => {
+      if (!partner) return;
+      
+      const { data, error } = await supabase
+        .from('partner_payments')
+        .select('id', { count: 'exact' })
+        .eq('partner_id', partner.id)
+        .eq('status', 'pending_confirmation');
+      
+      if (!error && data) {
+        setPendingPaymentsCount(data.length);
+      }
+    };
+    
+    loadPendingPaymentsCount();
+  }, [partner]);
 
   useEffect(() => {
     checkAuthAndLoadData();
@@ -81,6 +102,7 @@ const PartnerDashboard = () => {
       'requests': 'pending',
       'shipments': 'active',
       'invoices': 'invoices',
+      'payments': 'payments',
     };
     if (hash && tabMap[hash]) {
       setActiveTab(tabMap[hash]);
@@ -288,6 +310,15 @@ const PartnerDashboard = () => {
             <TabsTrigger value="invoices" className="flex-1">
               <FileText className="h-4 w-4 mr-2" />
               Invoices
+            </TabsTrigger>
+            <TabsTrigger value="payments" className="flex-1 relative">
+              <DollarSign className="h-4 w-4 mr-2" />
+              Payments
+              {pendingPaymentsCount > 0 && (
+                <Badge className="ml-2 h-5 w-5 flex items-center justify-center p-0 text-xs">
+                  {pendingPaymentsCount}
+                </Badge>
+              )}
             </TabsTrigger>
           </TabsList>
 
@@ -804,6 +835,10 @@ const PartnerDashboard = () => {
 
           <TabsContent value="invoices">
             {partner && <ShipmentInvoices partnerId={partner.id} isAdmin={false} />}
+          </TabsContent>
+
+          <TabsContent value="payments">
+            <PartnerPaymentRequests />
           </TabsContent>
         </Tabs>
 

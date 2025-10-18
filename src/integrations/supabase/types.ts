@@ -491,6 +491,107 @@ export type Database = {
           },
         ]
       }
+      partner_payment_invoices: {
+        Row: {
+          created_at: string
+          id: string
+          invoice_amount: number
+          payment_id: string
+          shipment_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          invoice_amount: number
+          payment_id: string
+          shipment_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          invoice_amount?: number
+          payment_id?: string
+          shipment_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_payment_invoices_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "partner_payments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_payment_invoices_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partner_payments: {
+        Row: {
+          admin_id: string
+          confirmed_at: string | null
+          confirmed_by: string | null
+          created_at: string
+          currency: string
+          id: string
+          notes: string | null
+          partner_id: string
+          partner_notes: string | null
+          payment_date: string
+          payment_reference: string
+          payment_slip_path: string | null
+          status: Database["public"]["Enums"]["payment_status"]
+          total_amount: number
+          updated_at: string
+        }
+        Insert: {
+          admin_id: string
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          notes?: string | null
+          partner_id: string
+          partner_notes?: string | null
+          payment_date?: string
+          payment_reference: string
+          payment_slip_path?: string | null
+          status?: Database["public"]["Enums"]["payment_status"]
+          total_amount: number
+          updated_at?: string
+        }
+        Update: {
+          admin_id?: string
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          notes?: string | null
+          partner_id?: string
+          partner_notes?: string | null
+          payment_date?: string
+          payment_reference?: string
+          payment_slip_path?: string | null
+          status?: Database["public"]["Enums"]["payment_status"]
+          total_amount?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_payments_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "shipping_partners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       partner_shipping_quotes: {
         Row: {
           adjustment_reason: string | null
@@ -1532,6 +1633,8 @@ export type Database = {
           notes: string | null
           partner_accepted_at: string | null
           partner_accepted_by: string | null
+          partner_payment_id: string | null
+          partner_payment_status: string | null
           partner_quote_id: string | null
           partner_rejection_reason: string | null
           request_id: string
@@ -1565,6 +1668,8 @@ export type Database = {
           notes?: string | null
           partner_accepted_at?: string | null
           partner_accepted_by?: string | null
+          partner_payment_id?: string | null
+          partner_payment_status?: string | null
           partner_quote_id?: string | null
           partner_rejection_reason?: string | null
           request_id: string
@@ -1598,6 +1703,8 @@ export type Database = {
           notes?: string | null
           partner_accepted_at?: string | null
           partner_accepted_by?: string | null
+          partner_payment_id?: string | null
+          partner_payment_status?: string | null
           partner_quote_id?: string | null
           partner_rejection_reason?: string | null
           request_id?: string
@@ -1619,6 +1726,13 @@ export type Database = {
             columns: ["assigned_partner_id"]
             isOneToOne: false
             referencedRelation: "shipping_partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shipments_partner_payment_id_fkey"
+            columns: ["partner_payment_id"]
+            isOneToOne: false
+            referencedRelation: "partner_payments"
             referencedColumns: ["id"]
           },
           {
@@ -2870,6 +2984,10 @@ export type Database = {
         Args: { p_customer_id: string }
         Returns: string
       }
+      generate_payment_reference: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       generate_tracking_number: {
         Args: Record<PropertyKey, never>
         Returns: string
@@ -2905,6 +3023,21 @@ export type Database = {
           id: string
           partner_amount: number
           partner_name: string
+          profit: number
+          status: string
+          tawreed_amount: number
+          total_amount: number
+          tracking_number: string
+        }[]
+      }
+      get_unpaid_partner_shipments: {
+        Args: { p_partner_id: string }
+        Returns: {
+          cost_amount: number
+          created_at: string
+          customer_name: string
+          id: string
+          partner_amount: number
           profit: number
           status: string
           tawreed_amount: number
@@ -2962,6 +3095,7 @@ export type Database = {
         | "submitted"
         | "customer_approved"
         | "customer_rejected"
+      payment_status: "pending_confirmation" | "confirmed" | "rejected"
       rate_type:
         | "AIR_KG"
         | "SEA_CBM"
@@ -3130,6 +3264,7 @@ export const Constants = {
         "customer_approved",
         "customer_rejected",
       ],
+      payment_status: ["pending_confirmation", "confirmed", "rejected"],
       rate_type: [
         "AIR_KG",
         "SEA_CBM",

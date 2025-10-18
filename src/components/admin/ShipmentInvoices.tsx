@@ -3,8 +3,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { FileText, Loader2, DollarSign, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
+import { PartnerPaymentDialog } from "./PartnerPaymentDialog";
 
 interface InvoiceData {
   id: string;
@@ -28,6 +31,9 @@ interface ShipmentInvoicesProps {
 export const ShipmentInvoices = ({ partnerId, isAdmin = false }: ShipmentInvoicesProps) => {
   const [loading, setLoading] = useState(true);
   const [invoices, setInvoices] = useState<InvoiceData[]>([]);
+  const [selectedInvoices, setSelectedInvoices] = useState<Set<string>>(new Set());
+  const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
+  const [showUnpaidOnly, setShowUnpaidOnly] = useState(false);
 
   useEffect(() => {
     loadInvoices();
@@ -56,6 +62,32 @@ export const ShipmentInvoices = ({ partnerId, isAdmin = false }: ShipmentInvoice
     }
   };
 
+  const toggleInvoiceSelection = (invoiceId: string) => {
+    setSelectedInvoices(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(invoiceId)) {
+        newSet.delete(invoiceId);
+      } else {
+        newSet.add(invoiceId);
+      }
+      return newSet;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedInvoices.size === displayedInvoices.length) {
+      setSelectedInvoices(new Set());
+    } else {
+      setSelectedInvoices(new Set(displayedInvoices.map(inv => inv.id)));
+    }
+  };
+
+  const getSelectedTotal = () => {
+    return displayedInvoices
+      .filter(inv => selectedInvoices.has(inv.id))
+      .reduce((sum, inv) => sum + inv.partner_amount, 0);
+  };
+
   const getTotals = () => {
     return invoices.reduce(
       (acc, invoice) => ({
@@ -68,6 +100,14 @@ export const ShipmentInvoices = ({ partnerId, isAdmin = false }: ShipmentInvoice
       { total: 0, cost: 0, profit: 0, tawreed: 0, partner: 0 }
     );
   };
+
+  const displayedInvoices = showUnpaidOnly 
+    ? invoices.filter(inv => !inv.partner_name || inv.status !== 'paid')
+    : invoices;
+
+  const selectedInvoicesData = displayedInvoices.filter(inv => selectedInvoices.has(inv.id));
+  const selectedPartnerIds = new Set(selectedInvoicesData.map(inv => inv.partner_name));
+  const canProcessPayment = selectedInvoices.size > 0 && selectedPartnerIds.size === 1;
 
   if (loading) {
     return (
@@ -85,13 +125,45 @@ export const ShipmentInvoices = ({ partnerId, isAdmin = false }: ShipmentInvoice
     <div className="space-y-4">
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5" />
-            Shipment Invoices
-          </CardTitle>
-          <CardDescription>
-            {partnerId ? "Partner earnings breakdown" : "Revenue breakdown by shipment"}
-          </CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5" />
+                Shipment Invoices
+              </CardTitle>
+              <CardDescription>
+                {partnerId ? "Partner earnings breakdown" : "Revenue breakdown by shipment"}
+              </CardDescription>
+            </div>
+            {isAdmin && (
+              <div className="flex items-center gap-4">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowUnpaidOnly(!showUnpaidOnly)}
+                >
+                  {showUnpaidOnly ? "Show All" : "Show Unpaid Only"}
+                </Button>
+                {selectedInvoices.size > 0 && (
+                  <div className="text-sm">
+                    <span className="text-muted-foreground">Selected: </span>
+                    <span className="font-semibold">{selectedInvoices.size} invoices</span>
+                    <span className="text-muted-foreground"> | Total: </span>
+                    <span className="font-bold text-primary">
+                      OMR {getSelectedTotal().toFixed(3)}
+                    </span>
+                  </div>
+                )}
+                <Button
+                  onClick={() => setPaymentDialogOpen(true)}
+                  disabled={!canProcessPayment}
+                  size="lg"
+                >
+                  <DollarSign className="mr-2 h-4 w-4" />
+                  Process Payment
+                </Button>
+              </div>
+            )}
+          </div>
         </CardHeader>
         <CardContent>
           {invoices.length === 0 ? (
@@ -105,6 +177,14 @@ export const ShipmentInvoices = ({ partnerId, isAdmin = false }: ShipmentInvoice
                 <Table>
                   <TableHeader>
                     <TableRow>
+                      {isAdmin && (
+                        <TableHead className="w-12">
+                          <Checkbox
+                            checked={selectedInvoices.size === displayedInvoices.length && displayedInvoices.length > 0}
+                            onCheckedChange={toggleSelectAll}
+                          />
+                        </TableHead>
+                      )}
                       <TableHead>Tracking #</TableHead>
                       <TableHead>Customer</TableHead>
                       {isAdmin && <TableHead>Partner</TableHead>}
@@ -118,8 +198,16 @@ export const ShipmentInvoices = ({ partnerId, isAdmin = false }: ShipmentInvoice
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {invoices.map((invoice) => (
+                    {displayedInvoices.map((invoice) => (
                       <TableRow key={invoice.id}>
+                        {isAdmin && (
+                          <TableCell>
+                            <Checkbox
+                              checked={selectedInvoices.has(invoice.id)}
+                              onCheckedChange={() => toggleInvoiceSelection(invoice.id)}
+                            />
+                          </TableCell>
+                        )}
                         <TableCell className="font-mono text-xs">
                           {invoice.tracking_number}
                         </TableCell>
@@ -157,7 +245,7 @@ export const ShipmentInvoices = ({ partnerId, isAdmin = false }: ShipmentInvoice
                     
                     {/* Totals Row */}
                     <TableRow className="bg-muted/50 font-semibold">
-                      <TableCell colSpan={isAdmin ? 5 : 4}>TOTALS</TableCell>
+                      <TableCell colSpan={isAdmin ? 6 : 4}>TOTALS</TableCell>
                       <TableCell className="text-right">${totals.total.toFixed(2)}</TableCell>
                       <TableCell className="text-right">${totals.cost.toFixed(2)}</TableCell>
                       <TableCell className="text-right text-green-600">
@@ -219,6 +307,26 @@ export const ShipmentInvoices = ({ partnerId, isAdmin = false }: ShipmentInvoice
           )}
         </CardContent>
       </Card>
+
+      {/* Payment Dialog */}
+      {isAdmin && selectedInvoicesData.length > 0 && (
+        <PartnerPaymentDialog
+          open={paymentDialogOpen}
+          onOpenChange={setPaymentDialogOpen}
+          selectedInvoices={selectedInvoicesData.map(inv => ({
+            id: inv.id,
+            tracking_number: inv.tracking_number,
+            partner_amount: inv.partner_amount,
+            customer_name: inv.customer_name,
+          }))}
+          partnerId={selectedInvoicesData[0]?.partner_name || ''}
+          partnerName={selectedInvoicesData[0]?.partner_name || ''}
+          onSuccess={() => {
+            loadInvoices();
+            setSelectedInvoices(new Set());
+          }}
+        />
+      )}
     </div>
   );
 };
