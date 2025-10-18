@@ -5,7 +5,7 @@ import Navigation from "@/components/Navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Loader2, Package, MapPin, Clock, Building2, FileText, Box, Weight, DollarSign } from "lucide-react";
+import { Loader2, Package, MapPin, Clock, Building2, FileText, Box, Weight, DollarSign, CheckCircle2, Circle } from "lucide-react";
 import { toast } from "sonner";
 import ShipmentStatusUpdate from "@/components/admin/ShipmentStatusUpdate";
 import { OrderReviewDialog } from "@/components/partner/OrderReviewDialog";
@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ShipmentInvoices } from "@/components/admin/ShipmentInvoices";
 import { ItemDetailsViewer } from "@/components/admin/ItemDetailsViewer";
 import { ShipmentItem } from "@/types/calculator";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface PartnerShipment {
   id: string;
@@ -642,6 +643,56 @@ const PartnerDashboard = () => {
                             </div>
                           </div>
                         )}
+
+                        {/* Status Progress Checklist */}
+                        <div className="border border-border rounded-lg overflow-hidden">
+                          <div className="p-4 bg-muted/30">
+                            <h3 className="font-semibold text-foreground">Status Progress</h3>
+                          </div>
+                          <div className="p-4 bg-background">
+                            <div className="space-y-3">
+                              {[
+                                { key: "received_from_supplier", label: "Received from Supplier", color: "#FFC000" },
+                                { key: "processing", label: "Processing", color: "#EE0000" },
+                                { key: "in_transit", label: "In Transit", color: "#EE0000" },
+                                { key: "customs", label: "At Customs", color: "#00B0F0" },
+                              ].map((statusItem) => {
+                                const statusOrder = ["received_from_supplier", "processing", "in_transit", "customs"];
+                                const currentIndex = statusOrder.indexOf(shipment.status);
+                                const itemIndex = statusOrder.indexOf(statusItem.key);
+                                const isCompleted = itemIndex <= currentIndex;
+                                
+                                return (
+                                  <div 
+                                    key={statusItem.key}
+                                    className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/30 transition-colors"
+                                  >
+                                    <div className="flex items-center">
+                                      {isCompleted ? (
+                                        <CheckCircle2 
+                                          className="h-5 w-5" 
+                                          style={{ color: statusItem.color }}
+                                        />
+                                      ) : (
+                                        <Circle 
+                                          className="h-5 w-5 text-muted-foreground"
+                                        />
+                                      )}
+                                    </div>
+                                    <span 
+                                      className="text-sm font-medium"
+                                      style={{ 
+                                        color: isCompleted ? statusItem.color : undefined 
+                                      }}
+                                    >
+                                      {statusItem.label}
+                                    </span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </div>
 
                         {shipment.notes && (
                           <div className="p-3 bg-muted/20 rounded-lg">
