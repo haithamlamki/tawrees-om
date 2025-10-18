@@ -1,10 +1,37 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+// Rate limiting
+const rateLimitMap = new Map<string, number[]>();
+const RATE_LIMIT = 20; // requests
+const WINDOW_MS = 60000; // per minute
+
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const requests = rateLimitMap.get(ip)?.filter(t => now - t < WINDOW_MS) || [];
+  
+  if (requests.length >= RATE_LIMIT) {
+    return false;
+  }
+  
+  requests.push(now);
+  rateLimitMap.set(ip, requests);
+  return true;
+}
+
+// Input validation schema
+const quoteRequestSchema = z.object({
+  productId: z.string().uuid("Invalid product ID format"),
+  quantity: z.number().int().min(1, "Quantity must be at least 1").max(10000, "Quantity cannot exceed 10000"),
+  deliveryCity: z.string().trim().min(2, "City name too short").max(100, "City name too long").regex(/^[a-zA-Z\s-]+$/, "Invalid city name format"),
+  deliveryCountry: z.string().trim().min(2, "Country name too short").max(100, "Country name too long")
+});
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -12,7 +39,34 @@ serve(async (req) => {
   }
 
   try {
-    const { productId, quantity, deliveryCity, deliveryCountry } = await req.json();
+    // Rate limiting check
+    const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
+    if (!checkRateLimit(ip)) {
+      return new Response(
+        JSON.stringify({ error: "Rate limit exceeded. Please try again later." }),
+        { 
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 429 
+        }
+      );
+    }
+
+    // Parse and validate input
+    const body = await req.json();
+    const validation = quoteRequestSchema.safeParse(body);
+    
+    if (!validation.success) {
+      console.error("[COMPUTE-QUOTE] Validation error:", validation.error);
+      return new Response(
+        JSON.stringify({ error: "Invalid request parameters" }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 400
+        }
+      );
+    }
+
+    const { productId, quantity, deliveryCity, deliveryCountry } = validation.data;
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -135,9 +189,9 @@ serve(async (req) => {
       }
     );
   } catch (error: any) {
-    console.error("Error computing quote:", error);
+    console.error("[COMPUTE-QUOTE] Error:", error);
     return new Response(
-      JSON.stringify({ error: error.message || "Failed to compute quote" }),
+      JSON.stringify({ error: "Unable to compute quote. Please try again." }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 500,

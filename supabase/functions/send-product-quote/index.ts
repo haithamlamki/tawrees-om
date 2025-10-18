@@ -1,10 +1,59 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+// Rate limiting (more restrictive for email sending)
+const rateLimitMap = new Map<string, number[]>();
+const RATE_LIMIT = 5; // requests
+const WINDOW_MS = 60000; // per minute
+
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const requests = rateLimitMap.get(ip)?.filter(t => now - t < WINDOW_MS) || [];
+  
+  if (requests.length >= RATE_LIMIT) {
+    return false;
+  }
+  
+  requests.push(now);
+  rateLimitMap.set(ip, requests);
+  return true;
+}
+
+// Input validation schemas
+const customerInfoSchema = z.object({
+  customerName: z.string().trim().min(2, "Name too short").max(100, "Name too long"),
+  customerEmail: z.string().trim().email("Invalid email format").max(255, "Email too long"),
+  customerPhone: z.string().trim().min(5, "Phone number too short").max(20, "Phone number too long").optional(),
+  preferredChannel: z.enum(["email", "whatsapp", "phone"]),
+  quantity: z.number().int().min(1).max(10000),
+  deliveryCity: z.string().trim().min(2).max(100).regex(/^[a-zA-Z\s-]+$/),
+  deliveryCountry: z.string().trim().min(2).max(100),
+  notes: z.string().max(500).optional()
+});
+
+const quotePayloadSchema = z.object({
+  product: z.object({
+    id: z.string().uuid(),
+    name: z.string(),
+    quote_validity_days: z.number().optional()
+  }),
+  unitPrice: z.number().positive(),
+  subtotal: z.number().positive(),
+  shippingFee: z.number().nonnegative(),
+  discount: z.string().optional(),
+  discountAmount: z.number().nonnegative().optional(),
+  total: z.number().positive(),
+  eta: z.number().int().positive(),
+  currency: z.string().length(3),
+  breakdown: z.any(),
+  customerInfo: customerInfoSchema
+});
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -12,7 +61,34 @@ serve(async (req) => {
   }
 
   try {
-    const payload = await req.json();
+    // Rate limiting check (stricter for email sending)
+    const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
+    if (!checkRateLimit(ip)) {
+      return new Response(
+        JSON.stringify({ error: "Rate limit exceeded. Please try again later." }),
+        { 
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 429 
+        }
+      );
+    }
+
+    // Parse and validate input
+    const body = await req.json();
+    const validation = quotePayloadSchema.safeParse(body);
+    
+    if (!validation.success) {
+      console.error("[SEND-QUOTE] Validation error:", validation.error);
+      return new Response(
+        JSON.stringify({ error: "Invalid request parameters" }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 400
+        }
+      );
+    }
+
+    const payload = validation.data;
     const {
       product,
       unitPrice,
@@ -166,9 +242,9 @@ serve(async (req) => {
       }
     );
   } catch (error: any) {
-    console.error("Error sending quote:", error);
+    console.error("[SEND-QUOTE] Error:", error);
     return new Response(
-      JSON.stringify({ error: error.message || "Failed to send quote" }),
+      JSON.stringify({ error: "Unable to send quote. Please try again." }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 500,

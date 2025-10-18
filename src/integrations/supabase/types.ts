@@ -3075,6 +3075,20 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_customer_statistics: {
+        Args: { p_customer_id?: string }
+        Returns: {
+          approved_requests: number
+          company_name: string
+          customer_id: string
+          email: string
+          full_name: string
+          last_request_date: string
+          total_requests: number
+          total_shipments: number
+          total_spent: number
+        }[]
+      }
       get_public_active_agreement: {
         Args: { p_destination: string; p_origin: string; p_rate_type: string }
         Returns: {
