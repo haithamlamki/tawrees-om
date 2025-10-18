@@ -30,8 +30,17 @@ import {
   SidebarGroupLabel,
   SidebarMenu, 
   SidebarMenuItem, 
-  SidebarMenuButton 
+  SidebarMenuButton,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
+  SidebarMenuSubButton 
 } from "@/components/ui/sidebar";
+
+interface NavigationSubItem {
+  name: string;
+  href: string;
+  icon?: React.ComponentType<{ className?: string }>;
+}
 
 interface NavigationItem {
   name: string;
@@ -39,6 +48,7 @@ interface NavigationItem {
   icon: React.ComponentType<{ className?: string }>;
   roles: string[];
   group?: string;
+  subItems?: NavigationSubItem[];
 }
 
 const navigationItems: NavigationItem[] = [
@@ -54,14 +64,20 @@ const navigationItems: NavigationItem[] = [
     name: "Dashboard",
     href: "/dashboard",
     icon: LayoutDashboard,
-    roles: ["user", "store_customer", "branch_manager", "admin"],
-    group: "Main"
+    roles: ["user", "store_customer", "branch_manager", "admin", "shipping_partner"],
+    group: "Main",
+    subItems: [
+      { name: "Shipment Requests", href: "/dashboard#requests", icon: Package },
+      { name: "Profile", href: "/dashboard#profile", icon: Users },
+      { name: "Notifications", href: "/dashboard#notifications", icon: MessageSquare },
+      { name: "My Quotes", href: "/dashboard#quotes", icon: FileCheck },
+    ],
   },
   {
     name: "Locations",
     href: "/locations",
     icon: MapPin,
-    roles: ["admin", "shipping_partner", "employee", "accountant", "branch_manager"],
+    roles: ["admin", "employee", "accountant", "branch_manager"],
     group: "Main"
   },
   {
@@ -310,13 +326,25 @@ const navigationItems: NavigationItem[] = [
     href: "/partner",
     icon: Users,
     roles: ["shipping_partner", "admin"],
-    group: "Partner"
+    group: "Partner",
+    subItems: [
+      { name: "New Requests", href: "/partner#requests", icon: Package },
+      { name: "Active Shipments", href: "/partner#shipments", icon: Truck },
+      { name: "Invoices", href: "/partner#invoices", icon: FileText },
+    ],
   },
   {
     name: "Partner Locations",
     href: "/partner/locations",
     icon: MapPin,
     roles: ["shipping_partner", "admin"],
+    group: "Partner"
+  },
+  {
+    name: "Rates",
+    href: "/rates",
+    icon: DollarSign,
+    roles: ["shipping_partner"],
     group: "Partner"
   },
   
@@ -361,17 +389,41 @@ export const WMSNavigation = ({ userRole }: WMSNavigationProps) => {
             <SidebarMenu>
               {items.map((item) => {
                 const Icon = item.icon;
-                const isActive = location.pathname === item.href || location.pathname.startsWith(item.href + "/");
+                const hasSub = item.subItems && item.subItems.length > 0;
+
+                const isActivePath = (path: string) => {
+                  if (path === "/") return location.pathname === "/";
+                  if (path.includes("#")) {
+                    const [pathname, hash] = path.split("#");
+                    return location.pathname === pathname && location.hash === `#${hash}`;
+                  }
+                  return location.pathname === path || location.pathname.startsWith(path + "/");
+                };
 
                 return (
-                  <SidebarMenuItem key={item.name}>
-                    <SidebarMenuButton asChild isActive={isActive}>
-                      <Link to={item.href}>
-                        <Icon className="h-5 w-5" />
-                        <span>{item.name}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
+                  <>
+                    <SidebarMenuItem key={item.name}>
+                      <SidebarMenuButton asChild isActive={isActivePath(item.href)}>
+                        <Link to={item.href}>
+                          <Icon className="h-5 w-5" />
+                          <span>{item.name}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+
+                    {hasSub && (
+                      item.subItems!.map((sub) => (
+                        <SidebarMenuItem key={`${item.name}-${sub.name}`}>
+                          <SidebarMenuButton asChild isActive={isActivePath(sub.href)} className="pl-8 text-sm">
+                            <Link to={sub.href}>
+                              {sub.icon && <sub.icon className="h-4 w-4" />}
+                              <span>{sub.name}</span>
+                            </Link>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                      ))
+                    )}
+                  </>
                 );
               })}
             </SidebarMenu>
