@@ -554,45 +554,43 @@ const Admin = () => {
                          </div>
                        )}
 
-                      {/* Summary & Delivery Row */}
-                      <div className="grid grid-cols-2 gap-4">
-                        {/* Left: Totals */}
-                        <div className="p-3 bg-accent/10 border border-accent/20 rounded-lg">
-                          <div className="grid grid-cols-2 gap-3">
-                            <div>
-                              <p className="text-xs text-muted-foreground mb-1">Total CBM</p>
-                              <p className="text-lg font-bold text-primary">
-                                {request.cbm_volume ? request.cbm_volume.toFixed(3) : '0.000'} m³
-                              </p>
-                            </div>
-                            <div>
-                              <p className="text-xs text-muted-foreground mb-1">Total Weight</p>
-                              <p className="text-lg font-bold text-primary">
-                                {request.weight_kg ? request.weight_kg.toFixed(2) : '0.00'} kg
-                              </p>
-                            </div>
-                          </div>
+                      {/* Summary & Delivery Section */}
+                      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                        {/* Totals - CBM */}
+                        <div className="p-4 bg-accent/10 border border-accent/20 rounded-lg">
+                          <p className="text-xs text-muted-foreground mb-2">Total CBM</p>
+                          <p className="text-2xl font-bold text-primary">
+                            {request.cbm_volume ? request.cbm_volume.toFixed(3) : '0.000'} m³
+                          </p>
                         </div>
 
-                        {/* Right: Delivery Info */}
+                        {/* Totals - Weight */}
+                        <div className="p-4 bg-accent/10 border border-accent/20 rounded-lg">
+                          <p className="text-xs text-muted-foreground mb-2">Total Weight</p>
+                          <p className="text-2xl font-bold text-primary">
+                            {request.weight_kg ? request.weight_kg.toFixed(2) : '0.00'} kg
+                          </p>
+                        </div>
+
+                        {/* Delivery Info */}
                         {request.delivery_type && (
-                          <div className="p-3 bg-muted/50 rounded-lg text-xs space-y-1">
-                            <p className="font-semibold mb-2">Delivery Information</p>
+                          <div className="p-4 bg-muted/50 rounded-lg text-sm space-y-2">
+                            <p className="font-semibold mb-3 text-foreground">Delivery Information</p>
                             {request.delivery_contact_name && (
-                              <div>
-                                <span className="text-muted-foreground">Contact: </span>
+                              <div className="flex flex-col gap-1">
+                                <span className="text-xs text-muted-foreground">Contact</span>
                                 <span className="font-medium">{request.delivery_contact_name}</span>
                               </div>
                             )}
                             {request.delivery_contact_phone && (
-                              <div>
-                                <span className="text-muted-foreground">Phone: </span>
+                              <div className="flex flex-col gap-1">
+                                <span className="text-xs text-muted-foreground">Phone</span>
                                 <span className="font-medium">{request.delivery_contact_phone}</span>
                               </div>
                             )}
                             {request.delivery_address && (
-                              <div>
-                                <span className="text-muted-foreground">Address: </span>
+                              <div className="flex flex-col gap-1">
+                                <span className="text-xs text-muted-foreground">Address</span>
                                 <span className="font-medium">
                                   {request.delivery_address}, {request.delivery_city}, {request.delivery_country}
                                 </span>
