@@ -495,6 +495,7 @@ export type Database = {
         Row: {
           adjustment_reason: string | null
           created_at: string
+          currency: string | null
           customer_notes: string | null
           customer_responded_at: string | null
           estimated_delivery_days: number | null
@@ -502,6 +503,7 @@ export type Database = {
           original_amount: number
           partner_quoted_amount: number
           partner_user_id: string | null
+          requires_customer_approval: boolean | null
           shipment_id: string
           shipping_details: Json | null
           status: Database["public"]["Enums"]["partner_quote_status"]
@@ -512,6 +514,7 @@ export type Database = {
         Insert: {
           adjustment_reason?: string | null
           created_at?: string
+          currency?: string | null
           customer_notes?: string | null
           customer_responded_at?: string | null
           estimated_delivery_days?: number | null
@@ -519,6 +522,7 @@ export type Database = {
           original_amount: number
           partner_quoted_amount: number
           partner_user_id?: string | null
+          requires_customer_approval?: boolean | null
           shipment_id: string
           shipping_details?: Json | null
           status?: Database["public"]["Enums"]["partner_quote_status"]
@@ -529,6 +533,7 @@ export type Database = {
         Update: {
           adjustment_reason?: string | null
           created_at?: string
+          currency?: string | null
           customer_notes?: string | null
           customer_responded_at?: string | null
           estimated_delivery_days?: number | null
@@ -536,6 +541,7 @@ export type Database = {
           original_amount?: number
           partner_quoted_amount?: number
           partner_user_id?: string | null
+          requires_customer_approval?: boolean | null
           shipment_id?: string
           shipping_details?: Json | null
           status?: Database["public"]["Enums"]["partner_quote_status"]
@@ -1291,6 +1297,7 @@ export type Database = {
           cbm_volume: number | null
           container_type_id: string | null
           created_at: string
+          currency: string | null
           customer_id: string
           delivery_address: string | null
           delivery_city: string | null
@@ -1321,6 +1328,7 @@ export type Database = {
           cbm_volume?: number | null
           container_type_id?: string | null
           created_at?: string
+          currency?: string | null
           customer_id: string
           delivery_address?: string | null
           delivery_city?: string | null
@@ -1351,6 +1359,7 @@ export type Database = {
           cbm_volume?: number | null
           container_type_id?: string | null
           created_at?: string
+          currency?: string | null
           customer_id?: string
           delivery_address?: string | null
           delivery_city?: string | null
@@ -1606,6 +1615,7 @@ export type Database = {
           id: string
           is_active: boolean
           phone: string | null
+          storage_locations: Json | null
           updated_at: string
         }
         Insert: {
@@ -1617,6 +1627,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           phone?: string | null
+          storage_locations?: Json | null
           updated_at?: string
         }
         Update: {
@@ -1628,6 +1639,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           phone?: string | null
+          storage_locations?: Json | null
           updated_at?: string
         }
         Relationships: []

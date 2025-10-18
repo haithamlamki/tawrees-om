@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { createInAppNotification } from "@/utils/notificationUtils";
 import { Package, MapPin, User, Calendar, DollarSign, Plus, X } from "lucide-react";
@@ -14,12 +15,31 @@ import { ShipmentItem } from "@/types/calculator";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 
+interface StorageLocation {
+  id: string;
+  name: string;
+  address: string;
+  is_default: boolean;
+}
+
 interface DocumentRequest {
   id: string;
   document_type: string;
   description: string;
   is_required: boolean;
 }
+
+const DOCUMENT_TYPES = [
+  "Commercial Invoice",
+  "Packing List",
+  "Bill of Lading",
+  "Certificate of Origin",
+  "Product Certificate",
+  "Insurance Certificate",
+  "Supplier Invoice",
+  "Custom Documents",
+  "Other (Specify)",
+];
 
 interface OrderReviewDialogProps {
   shipmentId: string;
@@ -30,6 +50,8 @@ interface OrderReviewDialogProps {
   deliveryAddress: string;
   estimatedDelivery: string;
   estimatedAmount: number;
+  currency: string;
+  partnerId: string;
   items: ShipmentItem[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -45,6 +67,8 @@ export function OrderReviewDialog({
   deliveryAddress,
   estimatedDelivery,
   estimatedAmount,
+  currency,
+  partnerId,
   items,
   open,
   onOpenChange,
@@ -54,16 +78,88 @@ export function OrderReviewDialog({
   const [quotedAmount, setQuotedAmount] = useState(estimatedAmount.toString());
   const [adjustmentReason, setAdjustmentReason] = useState("");
   const [storageLocation, setStorageLocation] = useState("");
-  const [estimatedDays, setEstimatedDays] = useState("");
+  const [savedLocations, setSavedLocations] = useState<StorageLocation[]>([]);
+  const [showNewLocationInput, setShowNewLocationInput] = useState(false);
+  const [newLocationName, setNewLocationName] = useState("");
+  const [estimatedDays, setEstimatedDays] = useState("45");
   const [shippingRoute, setShippingRoute] = useState("");
   const [handlingFees, setHandlingFees] = useState("");
   const [documentRequests, setDocumentRequests] = useState<DocumentRequest[]>([]);
   const [newDocType, setNewDocType] = useState("");
+  const [newDocTypeOther, setNewDocTypeOther] = useState("");
   const [newDocDescription, setNewDocDescription] = useState("");
 
+  // Fetch saved storage locations
+  useEffect(() => {
+    if (open && partnerId) {
+      fetchStorageLocations();
+    }
+  }, [open, partnerId]);
+
+  const fetchStorageLocations = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("shipping_partners")
+        .select("storage_locations")
+        .eq("id", partnerId)
+        .single();
+
+      if (error) throw error;
+
+      const locations = Array.isArray(data?.storage_locations) 
+        ? data.storage_locations as unknown as StorageLocation[]
+        : [];
+      setSavedLocations(locations);
+
+      // Set default location if exists
+      const defaultLocation = locations.find((loc) => loc.is_default);
+      if (defaultLocation) {
+        setStorageLocation(defaultLocation.name);
+      }
+    } catch (error) {
+      console.error("Error fetching storage locations:", error);
+    }
+  };
+
+  const handleSaveNewLocation = async () => {
+    if (!newLocationName.trim()) {
+      toast.error("Please enter a location name");
+      return;
+    }
+
+    try {
+      const newLocation: StorageLocation = {
+        id: Math.random().toString(36).substr(2, 9),
+        name: newLocationName.trim(),
+        address: "",
+        is_default: savedLocations.length === 0,
+      };
+
+      const updatedLocations = [...savedLocations, newLocation];
+
+      const { error } = await supabase
+        .from("shipping_partners")
+        .update({ storage_locations: updatedLocations as any })
+        .eq("id", partnerId);
+
+      if (error) throw error;
+
+      setSavedLocations(updatedLocations);
+      setStorageLocation(newLocation.name);
+      setNewLocationName("");
+      setShowNewLocationInput(false);
+      toast.success("Storage location saved");
+    } catch (error: any) {
+      console.error("Error saving location:", error);
+      toast.error("Failed to save location");
+    }
+  };
+
   const addDocumentRequest = () => {
-    if (!newDocType.trim()) {
-      toast.error("Please enter document type");
+    const docType = newDocType === "Other (Specify)" ? newDocTypeOther : newDocType;
+    
+    if (!docType.trim()) {
+      toast.error("Please select or enter document type");
       return;
     }
     
@@ -71,12 +167,13 @@ export function OrderReviewDialog({
       ...documentRequests,
       {
         id: Math.random().toString(),
-        document_type: newDocType,
+        document_type: docType,
         description: newDocDescription,
         is_required: true,
       },
     ]);
     setNewDocType("");
+    setNewDocTypeOther("");
     setNewDocDescription("");
   };
 
@@ -103,6 +200,10 @@ export function OrderReviewDialog({
       return;
     }
 
+    // Determine if customer approval is needed
+    const requiresApproval = hasAdjustment || documentRequests.length > 0;
+    const newStatus = requiresApproval ? "pending_customer_approval" : "in_transit";
+
     setLoading(true);
 
     try {
@@ -127,6 +228,8 @@ export function OrderReviewDialog({
           storage_location: storageLocation,
           estimated_delivery_days: estimatedDays ? parseInt(estimatedDays) : null,
           shipping_details: shippingDetails,
+          currency: currency,
+          requires_customer_approval: requiresApproval,
           status: "submitted",
           submitted_at: new Date().toISOString(),
           partner_user_id: user.id,
@@ -157,23 +260,27 @@ export function OrderReviewDialog({
       const { error: shipmentError } = await supabase
         .from("shipments")
         .update({
-          status: "pending_customer_approval",
+          status: newStatus,
           partner_quote_id: quoteData.id,
         })
         .eq("id", shipmentId);
 
       if (shipmentError) throw shipmentError;
 
-      // 4. Notify customer
-      await createInAppNotification(
-        customerId,
-        "Shipping Quote Ready",
-        `Your shipping partner has submitted a quote for order ${trackingNumber}. Please review and approve.`,
-        "quote",
-        quoteData.id
-      );
+      // 4. Notify customer only if approval needed
+      if (requiresApproval) {
+        await createInAppNotification(
+          customerId,
+          "Shipping Quote Ready",
+          `Your shipping partner has submitted a quote for order ${trackingNumber}. Please review and approve.`,
+          "quote",
+          quoteData.id
+        );
+        toast.success("Quote submitted for customer approval!");
+      } else {
+        toast.success("Order accepted and processing! No customer approval required.");
+      }
 
-      toast.success("Quote submitted successfully!");
       onSuccess();
       onOpenChange(false);
     } catch (error: any) {
@@ -186,6 +293,14 @@ export function OrderReviewDialog({
 
   const amountDifference = parseFloat(quotedAmount || "0") - estimatedAmount;
   const hasAdjustment = Math.abs(amountDifference) > 0.01;
+  const currencySymbol = currency === "USD" ? "$" : currency;
+
+  const formatAmount = (amount: number) => {
+    if (currency === "USD") {
+      return `$${amount.toFixed(2)}`;
+    }
+    return `${currency} ${amount.toFixed(3)}`;
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -231,7 +346,7 @@ export function OrderReviewDialog({
                 <div>
                   <p className="font-medium">Estimated Amount</p>
                   <p className="text-lg font-semibold text-primary">
-                    OMR {estimatedAmount.toFixed(3)}
+                    {formatAmount(estimatedAmount)}
                   </p>
                 </div>
               </div>
@@ -251,11 +366,11 @@ export function OrderReviewDialog({
 
             {/* Quoted Amount */}
             <div className="space-y-2">
-              <Label htmlFor="quotedAmount">Quoted Amount (OMR) *</Label>
+              <Label htmlFor="quotedAmount">Quoted Amount ({currencySymbol}) *</Label>
               <Input
                 id="quotedAmount"
                 type="number"
-                step="0.001"
+                step={currency === "USD" ? "0.01" : "0.001"}
                 value={quotedAmount}
                 onChange={(e) => setQuotedAmount(e.target.value)}
                 placeholder="Enter your quoted amount"
@@ -263,7 +378,7 @@ export function OrderReviewDialog({
               {hasAdjustment && (
                 <Badge variant={amountDifference > 0 ? "destructive" : "default"}>
                   {amountDifference > 0 ? "+" : ""}
-                  {amountDifference.toFixed(3)} OMR from estimate
+                  {formatAmount(Math.abs(amountDifference))} from estimate
                 </Badge>
               )}
             </div>
@@ -285,12 +400,51 @@ export function OrderReviewDialog({
             {/* Storage Location */}
             <div className="space-y-2">
               <Label htmlFor="storageLocation">Storage/Warehouse Location *</Label>
-              <Input
-                id="storageLocation"
-                value={storageLocation}
-                onChange={(e) => setStorageLocation(e.target.value)}
-                placeholder="e.g., Warehouse A, Zone 3, Muscat Industrial Area"
-              />
+              {!showNewLocationInput ? (
+                <div className="space-y-2">
+                  <Select value={storageLocation} onValueChange={(value) => {
+                    if (value === "__add_new__") {
+                      setShowNewLocationInput(true);
+                      setStorageLocation("");
+                    } else {
+                      setStorageLocation(value);
+                    }
+                  }}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select storage location" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {savedLocations.map((loc) => (
+                        <SelectItem key={loc.id} value={loc.name}>
+                          {loc.name} {loc.is_default && "(Default)"}
+                        </SelectItem>
+                      ))}
+                      <SelectItem value="__add_new__">+ Add New Location</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              ) : (
+                <div className="flex gap-2">
+                  <Input
+                    value={newLocationName}
+                    onChange={(e) => setNewLocationName(e.target.value)}
+                    placeholder="Enter new storage location"
+                  />
+                  <Button onClick={handleSaveNewLocation} size="sm">
+                    Save
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => {
+                      setShowNewLocationInput(false);
+                      setNewLocationName("");
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              )}
             </div>
 
             {/* Estimated Delivery Days */}
@@ -367,13 +521,31 @@ export function OrderReviewDialog({
 
             <div className="space-y-2">
               <Label htmlFor="newDocType">Document Type</Label>
-              <Input
-                id="newDocType"
-                value={newDocType}
-                onChange={(e) => setNewDocType(e.target.value)}
-                placeholder="e.g., Supplier Invoice, Product Certificate"
-              />
+              <Select value={newDocType} onValueChange={setNewDocType}>
+                <SelectTrigger id="newDocType">
+                  <SelectValue placeholder="Select document type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {DOCUMENT_TYPES.map((type) => (
+                    <SelectItem key={type} value={type}>
+                      {type}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
+
+            {newDocType === "Other (Specify)" && (
+              <div className="space-y-2">
+                <Label htmlFor="newDocTypeOther">Specify Document Type</Label>
+                <Input
+                  id="newDocTypeOther"
+                  value={newDocTypeOther}
+                  onChange={(e) => setNewDocTypeOther(e.target.value)}
+                  placeholder="Enter custom document type"
+                />
+              </div>
+            )}
 
             <div className="space-y-2">
               <Label htmlFor="newDocDescription">Description</Label>

@@ -34,6 +34,7 @@ interface PartnerShipment {
     delivery_type: string | null;
     requested_delivery_date: string | null;
     calculated_cost: number;
+    currency: string;
     items: any; // Keep as any since Supabase returns Json type
     cbm_volume: number | null;
     weight_kg: number | null;
@@ -143,6 +144,7 @@ const PartnerDashboard = () => {
             delivery_type,
             requested_delivery_date,
             calculated_cost,
+            currency,
             items,
             cbm_volume,
             weight_kg,
@@ -534,6 +536,8 @@ const PartnerDashboard = () => {
             deliveryAddress={selectedForAcceptance.shipment_requests.delivery_address || ""}
             estimatedDelivery={selectedForAcceptance.shipment_requests.requested_delivery_date || ""}
             estimatedAmount={selectedForAcceptance.shipment_requests.calculated_cost || 0}
+            currency={selectedForAcceptance.shipment_requests.currency || "OMR"}
+            partnerId={partner?.id || ""}
             items={selectedForAcceptance.shipment_requests.items}
             open={!!selectedForAcceptance}
             onOpenChange={(open) => !open && setSelectedForAcceptance(null)}
