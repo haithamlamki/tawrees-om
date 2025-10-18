@@ -743,22 +743,55 @@ export const ShippingCalculatorNew = () => {
                     </RadioGroup>
                   </div>
 
-                  {/* Container Selection Dropdown */}
-                  <div>
-                    <Label className="mb-2 block">Select Container</Label>
-                    <Select 
-                      value={selectedContainer || ""} 
-                      onValueChange={(v) => setSelectedContainer(v as RateType)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a container type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="SEA_CONTAINER_20">Standard 20 Feet</SelectItem>
-                        <SelectItem value="SEA_CONTAINER_40">Standard 40 Feet</SelectItem>
-                        <SelectItem value="SEA_CONTAINER_40HC">High Cube 40 Feet</SelectItem>
-                      </SelectContent>
-                    </Select>
+                  {/* Container Selection with Checkboxes */}
+                  <div className="border rounded-lg p-4">
+                    <Label className="text-sm font-medium mb-3 block">Select Container</Label>
+                    <div className="space-y-2">
+                      <div 
+                        onClick={() => setSelectedContainer("SEA_CONTAINER_20")}
+                        className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-colors hover:bg-muted/50 ${
+                          selectedContainer === "SEA_CONTAINER_20" ? "border-purple-600 bg-purple-50 dark:bg-purple-900/20" : ""
+                        }`}
+                      >
+                        <input 
+                          type="checkbox" 
+                          checked={selectedContainer === "SEA_CONTAINER_20"}
+                          onChange={() => setSelectedContainer("SEA_CONTAINER_20")}
+                          className="h-4 w-4 rounded border-gray-300 cursor-pointer"
+                        />
+                        <Label className="cursor-pointer flex-1">Standard 20 Feet</Label>
+                      </div>
+                      
+                      <div 
+                        onClick={() => setSelectedContainer("SEA_CONTAINER_40")}
+                        className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-colors hover:bg-muted/50 ${
+                          selectedContainer === "SEA_CONTAINER_40" ? "border-purple-600 bg-purple-50 dark:bg-purple-900/20" : ""
+                        }`}
+                      >
+                        <input 
+                          type="checkbox" 
+                          checked={selectedContainer === "SEA_CONTAINER_40"}
+                          onChange={() => setSelectedContainer("SEA_CONTAINER_40")}
+                          className="h-4 w-4 rounded border-gray-300 cursor-pointer"
+                        />
+                        <Label className="cursor-pointer flex-1">Standard 40 Feet</Label>
+                      </div>
+                      
+                      <div 
+                        onClick={() => setSelectedContainer("SEA_CONTAINER_40HC")}
+                        className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-colors hover:bg-muted/50 ${
+                          selectedContainer === "SEA_CONTAINER_40HC" ? "border-purple-600 bg-purple-50 dark:bg-purple-900/20" : ""
+                        }`}
+                      >
+                        <input 
+                          type="checkbox" 
+                          checked={selectedContainer === "SEA_CONTAINER_40HC"}
+                          onChange={() => setSelectedContainer("SEA_CONTAINER_40HC")}
+                          className="h-4 w-4 rounded border-gray-300 cursor-pointer"
+                        />
+                        <Label className="cursor-pointer flex-1">High Cube 40 Feet</Label>
+                      </div>
+                    </div>
                   </div>
 
                   {/* Container Info */}
@@ -772,7 +805,7 @@ export const ShippingCalculatorNew = () => {
                     return (
                       <div className="bg-muted/50 p-4 rounded-lg flex justify-between items-center text-sm">
                         <span>Dimensions : {lengthCm.toFixed(0)} X {widthCm.toFixed(0)} X {heightCm.toFixed(0)} cm</span>
-                        <span>Volume : {container.capacity} m3</span>
+                        <span>Volume : {container.capacity.toFixed(1)} m3</span>
                         <span>Weight : {weightKg} kg</span>
                       </div>
                     );
