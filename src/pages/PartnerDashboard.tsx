@@ -65,8 +65,7 @@ const PartnerDashboard = () => {
     "received_from_supplier",
     "processing",
     "in_transit",
-    "at_customs",
-    "received_muscat_wh"
+    "at_customs"
   ]);
 
   useEffect(() => {
@@ -221,8 +220,7 @@ const PartnerDashboard = () => {
     { value: "received_from_supplier", label: "Received from Supplier" },
     { value: "processing", label: "Processing" },
     { value: "in_transit", label: "In Transit" },
-    { value: "at_customs", label: "At Customs" },
-    { value: "received_muscat_wh", label: "Received Muscat WH" }
+    { value: "at_customs", label: "At Customs" }
   ];
 
   if (loading) {
