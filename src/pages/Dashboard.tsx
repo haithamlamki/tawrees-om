@@ -153,17 +153,6 @@ const Dashboard = () => {
         container_types (
           name
         ),
-        suppliers (
-          id,
-          supplier_name,
-          contact_person,
-          phone,
-          email,
-          address,
-          city,
-          country,
-          supplier_code
-        ),
         shipments (
           id,
           tracking_number,
@@ -361,73 +350,19 @@ const Dashboard = () => {
                     
                     {/* Items Details - Always Visible */}
                     {request.items && Array.isArray(request.items) && request.items.length > 0 && (
-                      <div className="mt-4 space-y-4">
-                        {/* Item-level supplier details */}
-                        {(() => {
-                          const itemsWithSuppliers = request.items.filter((item: any) => item.supplier_id);
-                          const supplierMap = new Map();
-                          
-                          itemsWithSuppliers.forEach((item: any) => {
-                            if (!supplierMap.has(item.supplier_id)) {
-                              supplierMap.set(item.supplier_id, []);
-                            }
-                            supplierMap.get(item.supplier_id).push(item);
-                          });
-
-                          return supplierMap.size > 0 ? (
-                            <Card>
-                              <CardHeader>
-                                <CardTitle className="flex items-center gap-2">
-                                  <Building2 className="h-5 w-5" />
-                                  Suppliers for Items
-                                </CardTitle>
-                              </CardHeader>
-                              <CardContent className="space-y-4">
-                                {Array.from(supplierMap.entries()).map(([supplierId, items]: [string, any[]]) => {
-                                  // Find supplier details
-                                  const supplier = request.suppliers?.find((s: any) => s.id === supplierId);
-                                  
-                                  return supplier ? (
-                                    <div key={supplierId} className="border rounded-lg p-4 space-y-2">
-                                      <div className="font-semibold text-lg">{supplier.supplier_name}</div>
-                                      {supplier.contact_person && (
-                                        <p className="text-sm text-muted-foreground">Contact: {supplier.contact_person}</p>
-                                      )}
-                                      <div className="text-sm">
-                                        <span className="font-medium">Items from this supplier:</span>
-                                        <ul className="list-disc list-inside ml-2 mt-1">
-                                          {items.map((item: any, idx: number) => (
-                                            <li key={idx}>
-                                              {item.productName || `Item ${idx + 1}`} (Qty: {item.quantity})
-                                              {item.supplier_notes && (
-                                                <span className="text-muted-foreground"> - {item.supplier_notes}</span>
-                                              )}
-                                            </li>
-                                          ))}
-                                        </ul>
-                                      </div>
-                                    </div>
-                                  ) : null;
-                                })}
-                              </CardContent>
-                            </Card>
-                          ) : null;
-                        })()}
-                        
-                        <div>
-                          <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                            <Package className="h-5 w-5" />
-                            Item Details ({request.items.length})
-                          </h3>
-                          <ItemDetailsViewer
-                            items={request.items}
-                            shippingType={request.shipping_type as "air" | "sea"}
-                            calculationMethod={request.calculation_method as "cbm" | "container"}
-                            containerType={request.container_types?.name}
-                            totalCBM={request.cbm_volume}
-                            totalWeight={request.weight_kg}
-                          />
-                        </div>
+                      <div className="mt-4">
+                        <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                          <Package className="h-5 w-5" />
+                          Item Details ({request.items.length})
+                        </h3>
+                        <ItemDetailsViewer
+                          items={request.items}
+                          shippingType={request.shipping_type as "air" | "sea"}
+                          calculationMethod={request.calculation_method as "cbm" | "container"}
+                          containerType={request.container_types?.name}
+                          totalCBM={request.cbm_volume}
+                          totalWeight={request.weight_kg}
+                        />
                       </div>
                     )}
 
