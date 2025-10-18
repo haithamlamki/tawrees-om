@@ -320,7 +320,7 @@ const PartnerDashboard = () => {
             </TabsTrigger>
             <TabsTrigger value="payments" className="flex-1 relative">
               <DollarSign className="h-4 w-4 mr-2" />
-              Payments
+              Partner Payments
               {pendingPaymentsCount > 0 && (
                 <Badge className="ml-2 h-5 w-5 flex items-center justify-center p-0 text-xs">
                   {pendingPaymentsCount}
