@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Loader2, Package, MapPin, Clock, Building2, FileText, Box, Weight, DollarSign } from "lucide-react";
+import { Loader2, Package, MapPin, Clock, Building2, FileText, Box, Weight, DollarSign, User } from "lucide-react";
 import { toast } from "sonner";
 import ShipmentStatusUpdate from "@/components/admin/ShipmentStatusUpdate";
 import { OrderReviewDialog } from "@/components/partner/OrderReviewDialog";
@@ -15,6 +15,7 @@ import { ShipmentInvoices } from "@/components/admin/ShipmentInvoices";
 import { ItemDetailsViewer } from "@/components/admin/ItemDetailsViewer";
 import { ShipmentItem } from "@/types/calculator";
 import { PartnerPaymentRequests } from "@/components/partner/PartnerPaymentRequests";
+import { PartnerStorageLocations } from "@/components/partner/PartnerStorageLocations";
 
 interface PartnerShipment {
   id: string;
@@ -103,6 +104,7 @@ const PartnerDashboard = () => {
       'shipments': 'active',
       'invoices': 'invoices',
       'payments': 'payments',
+      'profile': 'profile',
     };
     if (hash && tabMap[hash]) {
       setActiveTab(tabMap[hash]);
@@ -319,6 +321,10 @@ const PartnerDashboard = () => {
                   {pendingPaymentsCount}
                 </Badge>
               )}
+            </TabsTrigger>
+            <TabsTrigger value="profile" className="flex-1">
+              <User className="h-4 w-4 mr-2" />
+              Profile
             </TabsTrigger>
           </TabsList>
 
@@ -804,6 +810,10 @@ const PartnerDashboard = () => {
 
           <TabsContent value="payments">
             <PartnerPaymentRequests />
+          </TabsContent>
+
+          <TabsContent value="profile">
+            {partner && <PartnerStorageLocations partnerId={partner.id} />}
           </TabsContent>
         </Tabs>
 
