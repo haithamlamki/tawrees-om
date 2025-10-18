@@ -4,9 +4,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { Progress } from "@/components/ui/progress";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Plane, Ship, Package, Calculator as CalcIcon, Plus } from "lucide-react";
+import { Plane, Ship, Package, Calculator as CalcIcon, Plus, Trash2 } from "lucide-react";
 import boxDimensionsImage from "@/assets/box-dimensions.png";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -46,6 +49,7 @@ export const ShippingCalculatorNew = () => {
   const [selectedOrigin, setSelectedOrigin] = useState<string>("");
   const [selectedDestination, setSelectedDestination] = useState<string>("");
   const [selectedContainer, setSelectedContainer] = useState<RateType | null>(null);
+  const [fclUnitSystem, setFclUnitSystem] = useState<"metric" | "imperial">("metric");
   const [items, setItems] = useState<ShipmentItem[]>([
     {
       id: generateItemId(),
@@ -724,30 +728,201 @@ export const ShippingCalculatorNew = () => {
               {/* Sea FCL: Container Selection */}
               <TabsContent value="sea_fcl" className="mt-0">
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Select Container Type</h3>
-                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <ContainerCard
-                      name="20' Standard Container"
-                      dimensions="5.9m × 2.35m × 2.39m"
-                      capacity={33}
-                      selected={selectedContainer === "SEA_CONTAINER_20"}
-                      onClick={() => setSelectedContainer("SEA_CONTAINER_20")}
-                    />
-                    <ContainerCard
-                      name="40' Standard Container"
-                      dimensions="12.03m × 2.35m × 2.39m"
-                      capacity={67}
-                      selected={selectedContainer === "SEA_CONTAINER_40"}
-                      onClick={() => setSelectedContainer("SEA_CONTAINER_40")}
-                    />
-                    <ContainerCard
-                      name="40' High Cube Container"
-                      dimensions="12.03m × 2.35m × 2.69m"
-                      capacity={76}
-                      selected={selectedContainer === "SEA_CONTAINER_40HC"}
-                      onClick={() => setSelectedContainer("SEA_CONTAINER_40HC")}
-                    />
+                  {/* Unit Selection */}
+                  <div className="bg-purple-100 dark:bg-purple-900/20 p-4 rounded-lg">
+                    <h4 className="text-sm font-semibold mb-3 text-purple-900 dark:text-purple-100">Select Unit of Measurement</h4>
+                    <RadioGroup value={fclUnitSystem} onValueChange={(v) => setFclUnitSystem(v as "metric" | "imperial")} className="flex gap-8">
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="metric" id="metric" />
+                        <Label htmlFor="metric" className="cursor-pointer">kg/cm</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="imperial" id="imperial" />
+                        <Label htmlFor="imperial" className="cursor-pointer">lb/inch</Label>
+                      </div>
+                    </RadioGroup>
                   </div>
+
+                  {/* Container Selection Dropdown */}
+                  <div>
+                    <Label className="mb-2 block">Select Container</Label>
+                    <Select 
+                      value={selectedContainer || ""} 
+                      onValueChange={(v) => setSelectedContainer(v as RateType)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a container type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="SEA_CONTAINER_20">Standard 20 Feet</SelectItem>
+                        <SelectItem value="SEA_CONTAINER_40">Standard 40 Feet</SelectItem>
+                        <SelectItem value="SEA_CONTAINER_40HC">High Cube 40 Feet</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Container Info */}
+                  {selectedContainer && (() => {
+                    const container = CONTAINER_DIMENSIONS[selectedContainer as keyof typeof CONTAINER_DIMENSIONS];
+                    const lengthCm = container.length * 100;
+                    const widthCm = container.width * 100;
+                    const heightCm = container.height * 100;
+                    const weightKg = selectedContainer === "SEA_CONTAINER_20" ? 21770 : 26680;
+                    
+                    return (
+                      <div className="bg-muted/50 p-4 rounded-lg flex justify-between items-center text-sm">
+                        <span>Dimensions : {lengthCm.toFixed(0)} X {widthCm.toFixed(0)} X {heightCm.toFixed(0)} cm</span>
+                        <span>Volume : {container.capacity} m3</span>
+                        <span>Weight : {weightKg} kg</span>
+                      </div>
+                    );
+                  })()}
+
+                  {/* Results Section */}
+                  {selectedContainer && items.some(item => item.length > 0 && item.width > 0 && item.height > 0) && (() => {
+                    const totalCBM = calculateCBM(items);
+                    const totalWeight = calculateActualWeight(items);
+                    const container = CONTAINER_DIMENSIONS[selectedContainer as keyof typeof CONTAINER_DIMENSIONS];
+                    const volumePercent = Math.min((totalCBM / container.capacity) * 100, 100);
+                    const maxWeight = selectedContainer === "SEA_CONTAINER_20" ? 21770 : 26680;
+                    const weightPercent = Math.min((totalWeight / maxWeight) * 100, 100);
+
+                    return (
+                      <div className="bg-purple-100 dark:bg-purple-900/20 rounded-lg overflow-hidden">
+                        <div className="bg-purple-200 dark:bg-purple-800/40 px-4 py-2">
+                          <h4 className="text-sm font-semibold text-purple-900 dark:text-purple-100">Result</h4>
+                        </div>
+                        <div className="p-4 grid grid-cols-2 gap-4">
+                          <div>
+                            <div className="flex justify-between items-center mb-2">
+                              <span className="text-sm">Filled Volume : {totalCBM.toFixed(0)} m3</span>
+                              <span className="text-sm font-bold bg-purple-600 text-white px-3 py-1 rounded">{volumePercent.toFixed(0)}%</span>
+                            </div>
+                            <Progress value={volumePercent} className="h-2" />
+                          </div>
+                          <div>
+                            <div className="flex justify-between items-center mb-2">
+                              <span className="text-sm">Filled Weight : {totalWeight.toFixed(0)} kg.</span>
+                              <span className="text-sm font-bold bg-purple-600 text-white px-3 py-1 rounded">{weightPercent.toFixed(0)}%</span>
+                            </div>
+                            <Progress value={weightPercent} className="h-2" />
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })()}
+
+                  {/* Enter Product Details */}
+                  {selectedContainer && (
+                    <div className="bg-purple-100 dark:bg-purple-900/20 rounded-lg overflow-hidden">
+                      <div className="bg-purple-200 dark:bg-purple-800/40 px-4 py-2">
+                        <h4 className="text-sm font-semibold text-purple-900 dark:text-purple-100">Enter product details</h4>
+                      </div>
+                      <div className="p-4 space-y-3">
+                        {/* Table Header */}
+                        <div className="grid grid-cols-8 gap-2 text-xs font-medium text-muted-foreground pb-2 border-b">
+                          <div>Unit</div>
+                          <div>Length</div>
+                          <div>Width</div>
+                          <div>Height</div>
+                          <div>Weight</div>
+                          <div>Unit</div>
+                          <div>Quantity</div>
+                          <div></div>
+                        </div>
+                        
+                        {/* Product Rows */}
+                        {items.map((item, index) => (
+                          <div key={item.id} className="grid grid-cols-8 gap-2 items-center">
+                            <Select 
+                              value={item.dimensionUnit} 
+                              onValueChange={(v) => updateItem(item.id, "dimensionUnit", v)}
+                            >
+                              <SelectTrigger className="h-9">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="cm">cm</SelectItem>
+                                <SelectItem value="m">m</SelectItem>
+                                <SelectItem value="in">in</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <Input 
+                              type="number" 
+                              value={item.length || ""} 
+                              onChange={(e) => updateItem(item.id, "length", Number(e.target.value))}
+                              className="h-9"
+                            />
+                            <Input 
+                              type="number" 
+                              value={item.width || ""} 
+                              onChange={(e) => updateItem(item.id, "width", Number(e.target.value))}
+                              className="h-9"
+                            />
+                            <Input 
+                              type="number" 
+                              value={item.height || ""} 
+                              onChange={(e) => updateItem(item.id, "height", Number(e.target.value))}
+                              className="h-9"
+                            />
+                            <Input 
+                              type="number" 
+                              value={item.weight || ""} 
+                              onChange={(e) => updateItem(item.id, "weight", Number(e.target.value))}
+                              className="h-9"
+                            />
+                            <Select 
+                              value={item.weightUnit} 
+                              onValueChange={(v) => updateItem(item.id, "weightUnit", v)}
+                            >
+                              <SelectTrigger className="h-9">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="kg">kg</SelectItem>
+                                <SelectItem value="lb">lb</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <Input 
+                              type="number" 
+                              value={item.quantity || 1} 
+                              onChange={(e) => updateItem(item.id, "quantity", Number(e.target.value))}
+                              className="h-9"
+                              min="1"
+                            />
+                            {items.length > 1 && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => removeItem(item.id)}
+                                className="h-9 w-9 p-0"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            )}
+                          </div>
+                        ))}
+                        
+                        {/* Add More Row Button */}
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={addItem}
+                          className="mt-2"
+                        >
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add more row
+                        </Button>
+                        
+                        {/* Total Summary */}
+                        {items.some(item => item.length > 0 && item.width > 0 && item.height > 0) && (
+                          <div className="pt-3 border-t text-center text-sm font-medium text-purple-900 dark:text-purple-100">
+                            Total Volume : {calculateCBM(items).toFixed(0)} m3, Total Weight : {calculateActualWeight(items).toFixed(0)} kg
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </TabsContent>
             </Tabs>
