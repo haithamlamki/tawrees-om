@@ -8,6 +8,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { createInAppNotification, sendNotificationEmail } from "@/utils/notificationUtils";
 import { Package, MapPin, User, Calendar } from "lucide-react";
+import { ItemDetailsViewer } from "@/components/admin/ItemDetailsViewer";
+import { ShipmentItem } from "@/types/calculator";
 
 interface OrderAcceptanceProps {
   shipmentId: string;
@@ -16,7 +18,7 @@ interface OrderAcceptanceProps {
   customerName: string;
   deliveryAddress: string;
   estimatedDelivery: string;
-  items: any;
+  items: ShipmentItem[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess: () => void;
@@ -163,7 +165,7 @@ export function OrderAcceptance({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl">
+      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Order Details - {trackingNumber}</DialogTitle>
         </DialogHeader>
@@ -175,15 +177,15 @@ export function OrderAcceptance({
                 <User className="h-5 w-5 text-muted-foreground mt-0.5" />
                 <div>
                   <p className="font-medium">Customer</p>
-                  <p className="text-sm text-muted-foreground">{customerName}</p>
+                  <p className="text-sm text-muted-foreground break-words">{customerName}</p>
                 </div>
               </div>
 
               <div className="flex items-start gap-2">
                 <MapPin className="h-5 w-5 text-muted-foreground mt-0.5" />
-                <div>
+                <div className="flex-1 min-w-0">
                   <p className="font-medium">Delivery Address</p>
-                  <p className="text-sm text-muted-foreground">{deliveryAddress}</p>
+                  <p className="text-sm text-muted-foreground break-words whitespace-pre-wrap">{deliveryAddress || "No address provided"}</p>
                 </div>
               </div>
 
@@ -192,28 +194,21 @@ export function OrderAcceptance({
                 <div>
                   <p className="font-medium">Estimated Delivery</p>
                   <p className="text-sm text-muted-foreground">
-                    {new Date(estimatedDelivery).toLocaleDateString()}
+                    {estimatedDelivery ? new Date(estimatedDelivery).toLocaleDateString() : "Not specified"}
                   </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-2">
-                <Package className="h-5 w-5 text-muted-foreground mt-0.5" />
-                <div className="flex-1">
-                  <p className="font-medium mb-2">Order Items</p>
-                  {items && typeof items === "object" && (
-                    <div className="text-sm text-muted-foreground space-y-1">
-                      {Object.entries(items).map(([key, value]: [string, any]) => (
-                        <p key={key}>
-                          {key}: {JSON.stringify(value)}
-                        </p>
-                      ))}
-                    </div>
-                  )}
                 </div>
               </div>
             </CardContent>
           </Card>
+
+          {/* Items Details Section */}
+          {items && items.length > 0 && (
+            <ItemDetailsViewer 
+              items={items} 
+              shippingType="sea"
+              compact={true}
+            />
+          )}
 
           {showRejectForm && (
             <div className="space-y-2">

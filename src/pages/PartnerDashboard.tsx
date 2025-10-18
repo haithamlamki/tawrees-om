@@ -12,6 +12,7 @@ import { OrderAcceptance } from "@/components/partner/OrderAcceptance";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ShipmentInvoices } from "@/components/admin/ShipmentInvoices";
 import { ItemDetailsViewer } from "@/components/admin/ItemDetailsViewer";
+import { ShipmentItem } from "@/types/calculator";
 
 interface PartnerShipment {
   id: string;
@@ -30,7 +31,7 @@ interface PartnerShipment {
     delivery_contact_name: string | null;
     delivery_contact_phone: string | null;
     delivery_type: string | null;
-    items: any;
+    items: any; // Keep as any since Supabase returns Json type
     cbm_volume: number | null;
     weight_kg: number | null;
     profiles: {
@@ -148,7 +149,7 @@ const PartnerDashboard = () => {
         .order("created_at", { ascending: false });
 
       if (shipmentsError) throw shipmentsError;
-      setShipments(shipmentsData || []);
+      setShipments((shipmentsData as PartnerShipment[]) || []);
     } catch (error: any) {
       toast.error("Failed to load partner data");
       console.error(error);
