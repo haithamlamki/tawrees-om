@@ -2610,6 +2610,22 @@ export type Database = {
           valid_to: string
         }[]
       }
+      get_shipment_invoices_for_user: {
+        Args: { p_partner_id?: string }
+        Returns: {
+          cost_amount: number
+          created_at: string
+          customer_name: string
+          id: string
+          partner_amount: number
+          partner_name: string
+          profit: number
+          status: string
+          tawreed_amount: number
+          total_amount: number
+          tracking_number: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

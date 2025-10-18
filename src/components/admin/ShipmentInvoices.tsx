@@ -36,74 +36,18 @@ export const ShipmentInvoices = ({ partnerId, isAdmin = false }: ShipmentInvoice
   const loadInvoices = async () => {
     try {
       setLoading(true);
-
-      // Build query
-      let query = supabase
-        .from("shipments")
-        .select(`
-          id,
-          tracking_number,
-          status,
-          created_at,
-          assigned_partner_id,
-          request_id,
-          shipment_requests!inner (
-            calculated_cost,
-            shipping_type,
-            profiles (
-              full_name
-            )
-          ),
-          shipping_partners (
-            company_name
-          )
-        `)
-        .in("status", ["delivered", "completed"]);
-
-      // Filter by partner if specified
-      if (partnerId) {
-        query = query.eq("assigned_partner_id", partnerId);
-      }
-
-      const { data: shipmentsData, error: shipmentsError } = await query.order("created_at", { ascending: false });
-
-      if (shipmentsError) throw shipmentsError;
-
-      // Calculate profit split for each shipment
-      const invoicePromises = (shipmentsData || []).map(async (shipment: any) => {
-        const totalAmount = shipment.shipment_requests?.calculated_cost || 0;
-        
-        // Get the agreement to find cost (buy_price)
-        // We need to get the origin and destination from the shipment request
-        const { data: agreementData } = await supabase
-          .from("agreements")
-          .select("buy_price, sell_price")
-          .eq("rate_type", shipment.shipment_requests?.shipping_type || "air")
-          .eq("active", true)
-          .maybeSingle();
-
-        const costAmount = agreementData?.buy_price || (totalAmount * 0.7); // Default to 70% if no agreement
-        const profit = Math.max(0, totalAmount - costAmount);
-        const tawreedAmount = profit * 0.5;
-        const partnerAmount = profit * 0.5;
-
-        return {
-          id: shipment.id,
-          tracking_number: shipment.tracking_number,
-          customer_name: shipment.shipment_requests?.profiles?.full_name || "Unknown",
-          created_at: shipment.created_at,
-          status: shipment.status,
-          total_amount: totalAmount,
-          cost_amount: costAmount,
-          profit,
-          tawreed_amount: tawreedAmount,
-          partner_amount: partnerAmount,
-          partner_name: shipment.shipping_partners?.company_name || null,
-        };
+      
+      const { data, error } = await supabase.rpc('get_shipment_invoices_for_user', {
+        p_partner_id: partnerId || null
       });
 
-      const invoiceData = await Promise.all(invoicePromises);
-      setInvoices(invoiceData);
+      if (error) {
+        console.error('Error loading shipment invoices:', error);
+        toast.error('Failed to load shipment invoices');
+        return;
+      }
+
+      setInvoices(data || []);
     } catch (error: any) {
       console.error("Error loading invoices:", error);
       toast.error("Failed to load invoices");
