@@ -72,25 +72,6 @@ const PartnerDashboard = () => {
   const [pendingPaymentsCount, setPendingPaymentsCount] = useState(0);
 
   useEffect(() => {
-    // Load pending payments count
-    const loadPendingPaymentsCount = async () => {
-      if (!partner) return;
-      
-      const { data, error } = await supabase
-        .from('partner_payments')
-        .select('id', { count: 'exact' })
-        .eq('partner_id', partner.id)
-        .eq('status', 'pending_confirmation');
-      
-      if (!error && data) {
-        setPendingPaymentsCount(data.length);
-      }
-    };
-    
-    loadPendingPaymentsCount();
-  }, [partner]);
-
-  useEffect(() => {
     checkAuthAndLoadData();
   }, []);
 
@@ -154,46 +135,57 @@ const PartnerDashboard = () => {
 
   const loadPartnerData = async (partnerId: string) => {
     try {
-      // Load partner company info
-      const { data: partnerData, error: partnerError } = await supabase
-        .from("shipping_partners")
-        .select("*")
-        .eq("id", partnerId)
-        .single();
-
-      if (partnerError) throw partnerError;
-      setPartner(partnerData);
-
-      // Load assigned shipments with customer details
-      const { data: shipmentsData, error: shipmentsError } = await supabase
-        .from("shipments")
-        .select(`
-          *,
-          shipment_requests (
-            id,
-            customer_id,
-            delivery_address,
-            delivery_city,
-            delivery_country,
-            delivery_contact_name,
-            delivery_contact_phone,
-            delivery_type,
-            requested_delivery_date,
-            calculated_cost,
-            currency,
-            items,
-            cbm_volume,
-            weight_kg,
-            profiles (
-              full_name
+      // Load all data in parallel for better performance
+      const [partnerResult, shipmentsResult, paymentsResult] = await Promise.all([
+        // Load partner company info
+        supabase
+          .from("shipping_partners")
+          .select("*")
+          .eq("id", partnerId)
+          .single(),
+        
+        // Load assigned shipments with customer details
+        supabase
+          .from("shipments")
+          .select(`
+            *,
+            shipment_requests (
+              id,
+              customer_id,
+              delivery_address,
+              delivery_city,
+              delivery_country,
+              delivery_contact_name,
+              delivery_contact_phone,
+              delivery_type,
+              requested_delivery_date,
+              calculated_cost,
+              currency,
+              items,
+              cbm_volume,
+              weight_kg,
+              profiles (
+                full_name
+              )
             )
-          )
-        `)
-        .eq("assigned_partner_id", partnerId)
-        .order("created_at", { ascending: false });
+          `)
+          .eq("assigned_partner_id", partnerId)
+          .order("created_at", { ascending: false }),
+        
+        // Load pending payments count
+        supabase
+          .from('partner_payments')
+          .select('id', { count: 'exact', head: true })
+          .eq('partner_id', partnerId)
+          .eq('status', 'pending_confirmation')
+      ]);
 
-      if (shipmentsError) throw shipmentsError;
-      setShipments((shipmentsData as PartnerShipment[]) || []);
+      if (partnerResult.error) throw partnerResult.error;
+      if (shipmentsResult.error) throw shipmentsResult.error;
+      
+      setPartner(partnerResult.data);
+      setShipments((shipmentsResult.data as PartnerShipment[]) || []);
+      setPendingPaymentsCount(paymentsResult.count || 0);
     } catch (error: any) {
       toast.error("Failed to load partner data");
       console.error(error);
