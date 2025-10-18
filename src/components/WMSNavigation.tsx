@@ -64,7 +64,7 @@ const navigationItems: NavigationItem[] = [
     name: "Dashboard",
     href: "/dashboard",
     icon: LayoutDashboard,
-    roles: ["user", "store_customer", "branch_manager", "admin", "shipping_partner"],
+    roles: ["user", "store_customer", "branch_manager", "admin"],
     group: "Main",
     subItems: [
       { name: "Shipment Requests", href: "/dashboard#requests", icon: Package },
