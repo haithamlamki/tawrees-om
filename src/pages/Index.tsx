@@ -162,43 +162,6 @@ const Index = () => {
         </div>
       </section>
 
-      {/* FAQ Section */}
-      <section className="py-16 bg-background">
-        <div className="container mx-auto px-4 max-w-4xl">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Frequently Asked Questions
-            </h2>
-          </div>
-          <div className="space-y-6">
-            <div className="border rounded-lg p-6">
-              <h3 className="font-semibold mb-2">Do I need to pay now?</h3>
-              <p className="text-muted-foreground">
-                No, you'll receive an official quote first. Payment is only required after confirmation.
-              </p>
-            </div>
-            <div className="border rounded-lg p-6">
-              <h3 className="font-semibold mb-2">How accurate is the instant quote?</h3>
-              <p className="text-muted-foreground">
-                Very accurate. The final price may vary slightly based on your exact delivery address.
-              </p>
-            </div>
-            <div className="border rounded-lg p-6">
-              <h3 className="font-semibold mb-2">What's included in shipping?</h3>
-              <p className="text-muted-foreground">
-                Port fees, customs clearance, and delivery to your city (if door delivery is selected).
-              </p>
-            </div>
-            <div className="border rounded-lg p-6">
-              <h3 className="font-semibold mb-2">Can I track my order?</h3>
-              <p className="text-muted-foreground">
-                Yes, we provide real-time tracking information once your shipment is dispatched.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
       <QuoteRequestDrawer
         product={selectedProduct}
         open={showQuoteDrawer}
