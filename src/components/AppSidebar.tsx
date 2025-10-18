@@ -13,6 +13,9 @@ import {
   SidebarGroup,
   SidebarGroupLabel,
   SidebarGroupContent,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
+  SidebarMenuSubButton,
   useSidebar,
 } from "@/components/ui/sidebar";
 import {
@@ -113,18 +116,44 @@ const employeeNavigation: NavigationItem[] = [
   { name: "Rates", href: "/rates", icon: DollarSign, group: "Tools" },
 ];
 
-const partnerNavigation: NavigationItem[] = [
-  // Main group - Customer dashboard access
+interface NavigationSubItem {
+  name: string;
+  href: string;
+  icon?: React.ComponentType<{ className?: string }>;
+}
+
+interface NavigationItemWithSub extends NavigationItem {
+  subItems?: NavigationSubItem[];
+}
+
+const partnerNavigation: NavigationItemWithSub[] = [
+  // Main group
   { name: "Home", href: "/", icon: Home, group: "Main" },
-  { name: "Shipment Requests", href: "/dashboard#requests", icon: Package, group: "Main" },
-  { name: "Profile", href: "/dashboard#profile", icon: User, group: "Main" },
-  { name: "Notifications", href: "/dashboard#notifications", icon: Bell, group: "Main" },
-  { name: "My Quotes", href: "/dashboard#quotes", icon: FileText, group: "Main" },
+  { 
+    name: "Dashboard", 
+    href: "/dashboard", 
+    icon: LayoutDashboard, 
+    group: "Main",
+    subItems: [
+      { name: "Shipment Requests", href: "/dashboard#requests", icon: Package },
+      { name: "Profile", href: "/dashboard#profile", icon: User },
+      { name: "Notifications", href: "/dashboard#notifications", icon: Bell },
+      { name: "My Quotes", href: "/dashboard#quotes", icon: FileText },
+    ]
+  },
   
-  // Partner group - Partner-specific features
-  { name: "New Requests", href: "/partner#requests", icon: Package, group: "Partner" },
-  { name: "Active Shipments", href: "/partner#shipments", icon: Ship, group: "Partner" },
-  { name: "Invoices", href: "/partner#invoices", icon: FileBarChart, group: "Partner" },
+  // Partner group
+  { 
+    name: "Partner Dashboard", 
+    href: "/partner", 
+    icon: Ship, 
+    group: "Partner",
+    subItems: [
+      { name: "New Requests", href: "/partner#requests", icon: Package },
+      { name: "Active Shipments", href: "/partner#shipments", icon: Truck },
+      { name: "Invoices", href: "/partner#invoices", icon: FileBarChart },
+    ]
+  },
   { name: "Locations", href: "/locations", icon: MapPin, group: "Partner" },
   { name: "Rates", href: "/rates", icon: DollarSign, group: "Partner" },
 ];
@@ -173,7 +202,7 @@ export function AppSidebar() {
   const navigate = useNavigate();
   const [userRoles, setUserRoles] = useState<string[]>([]);
   const [profile, setProfile] = useState<{ full_name: string | null; email: string | null } | null>(null);
-  const [navigationItems, setNavigationItems] = useState<NavigationItem[]>([]);
+  const [navigationItems, setNavigationItems] = useState<NavigationItemWithSub[]>([]);
 
   useEffect(() => {
     loadUserData();
@@ -203,7 +232,7 @@ export function AppSidebar() {
       setProfile({ full_name: profileData.full_name, email: profileData.email });
 
       // Determine navigation based on roles
-      let nav: NavigationItem[] = [];
+      let nav: NavigationItemWithSub[] = [];
       
       if (rolesList.includes("admin")) {
         nav = adminNavigation;
@@ -251,7 +280,7 @@ export function AppSidebar() {
     }
     acc[group].push(item);
     return acc;
-  }, {} as Record<string, NavigationItem[]>);
+  }, {} as Record<string, NavigationItemWithSub[]>);
 
   const isActive = (path: string) => {
     if (path === "/") {
@@ -284,14 +313,44 @@ export function AppSidebar() {
               <SidebarMenu>
                 {items.map((item) => {
                   const Icon = item.icon;
+                  const hasSubItems = item.subItems && item.subItems.length > 0;
+                  
                   return (
                     <SidebarMenuItem key={item.name}>
-                      <SidebarMenuButton asChild isActive={isActive(item.href)}>
-                        <Link to={item.href} className="flex items-center gap-2">
-                          <Icon className="h-5 w-5 flex-shrink-0" />
-                          {!collapsed && <span>{item.name}</span>}
-                        </Link>
-                      </SidebarMenuButton>
+                      {hasSubItems ? (
+                        <>
+                          <SidebarMenuButton asChild isActive={isActive(item.href)}>
+                            <Link to={item.href} className="flex items-center gap-2">
+                              <Icon className="h-5 w-5 flex-shrink-0" />
+                              {!collapsed && <span>{item.name}</span>}
+                            </Link>
+                          </SidebarMenuButton>
+                          {!collapsed && (
+                            <SidebarMenuSub>
+                              {item.subItems!.map((subItem) => {
+                                const SubIcon = subItem.icon;
+                                return (
+                                  <SidebarMenuSubItem key={subItem.name}>
+                                    <SidebarMenuSubButton asChild isActive={isActive(subItem.href)}>
+                                      <Link to={subItem.href} className="flex items-center gap-2">
+                                        {SubIcon && <SubIcon className="h-4 w-4 flex-shrink-0" />}
+                                        <span>{subItem.name}</span>
+                                      </Link>
+                                    </SidebarMenuSubButton>
+                                  </SidebarMenuSubItem>
+                                );
+                              })}
+                            </SidebarMenuSub>
+                          )}
+                        </>
+                      ) : (
+                        <SidebarMenuButton asChild isActive={isActive(item.href)}>
+                          <Link to={item.href} className="flex items-center gap-2">
+                            <Icon className="h-5 w-5 flex-shrink-0" />
+                            {!collapsed && <span>{item.name}</span>}
+                          </Link>
+                        </SidebarMenuButton>
+                      )}
                     </SidebarMenuItem>
                   );
                 })}
