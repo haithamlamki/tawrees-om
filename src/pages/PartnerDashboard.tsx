@@ -5,10 +5,10 @@ import Navigation from "@/components/Navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Loader2, Package, MapPin, Clock, Building2, FileText, ChevronDown, Box, Weight } from "lucide-react";
+import { Loader2, Package, MapPin, Clock, Building2, FileText, ChevronDown, Box, Weight, DollarSign } from "lucide-react";
 import { toast } from "sonner";
 import ShipmentStatusUpdate from "@/components/admin/ShipmentStatusUpdate";
-import { OrderAcceptance } from "@/components/partner/OrderAcceptance";
+import { OrderReviewDialog } from "@/components/partner/OrderReviewDialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ShipmentInvoices } from "@/components/admin/ShipmentInvoices";
 import { ItemDetailsViewer } from "@/components/admin/ItemDetailsViewer";
@@ -24,6 +24,7 @@ interface PartnerShipment {
   request_id: string;
   created_at: string;
   shipment_requests?: {
+    id: string;
     customer_id: string;
     delivery_address: string;
     delivery_city: string | null;
@@ -31,6 +32,8 @@ interface PartnerShipment {
     delivery_contact_name: string | null;
     delivery_contact_phone: string | null;
     delivery_type: string | null;
+    requested_delivery_date: string | null;
+    calculated_cost: number;
     items: any; // Keep as any since Supabase returns Json type
     cbm_volume: number | null;
     weight_kg: number | null;
@@ -130,6 +133,7 @@ const PartnerDashboard = () => {
         .select(`
           *,
           shipment_requests (
+            id,
             customer_id,
             delivery_address,
             delivery_city,
@@ -137,6 +141,8 @@ const PartnerDashboard = () => {
             delivery_contact_name,
             delivery_contact_phone,
             delivery_type,
+            requested_delivery_date,
+            calculated_cost,
             items,
             cbm_volume,
             weight_kg,
@@ -318,7 +324,7 @@ const PartnerDashboard = () => {
                         {/* Shipment Stats - Always visible */}
                         <div>
                           <p className="text-sm font-semibold mb-3">Shipment Details</p>
-                          <div className="grid grid-cols-3 gap-3">
+                          <div className="grid grid-cols-4 gap-3">
                             <div className="bg-accent/10 border border-accent/20 rounded-lg p-3">
                               <div className="flex items-center gap-2 mb-1">
                                 <Package className="h-4 w-4 text-primary" />
@@ -342,6 +348,15 @@ const PartnerDashboard = () => {
                               </div>
                               <p className="text-lg font-bold text-primary">
                                 {request?.weight_kg ? request.weight_kg.toFixed(2) : '0.00'} kg
+                              </p>
+                            </div>
+                            <div className="bg-primary/10 border border-primary/30 rounded-lg p-3">
+                              <div className="flex items-center gap-2 mb-1">
+                                <DollarSign className="h-4 w-4 text-primary" />
+                                <span className="text-xs text-muted-foreground">Estimate</span>
+                              </div>
+                              <p className="text-lg font-bold text-primary">
+                                {request?.calculated_cost ? `OMR ${request.calculated_cost.toFixed(3)}` : 'N/A'}
                               </p>
                             </div>
                           </div>
@@ -509,15 +524,17 @@ const PartnerDashboard = () => {
           </div>
         )}
 
-        {selectedForAcceptance && (
-          <OrderAcceptance
+        {selectedForAcceptance && selectedForAcceptance.shipment_requests && (
+          <OrderReviewDialog
             shipmentId={selectedForAcceptance.id}
+            requestId={selectedForAcceptance.shipment_requests.id}
             trackingNumber={selectedForAcceptance.tracking_number}
-            customerId={selectedForAcceptance.shipment_requests?.customer_id || ""}
-            customerName={selectedForAcceptance.shipment_requests?.profiles?.full_name || "Unknown"}
-            deliveryAddress={selectedForAcceptance.shipment_requests?.delivery_address || ""}
-            estimatedDelivery={selectedForAcceptance.estimated_delivery || ""}
-            items={selectedForAcceptance.shipment_requests?.items}
+            customerId={selectedForAcceptance.shipment_requests.customer_id}
+            customerName={selectedForAcceptance.shipment_requests.profiles?.full_name || "Unknown"}
+            deliveryAddress={selectedForAcceptance.shipment_requests.delivery_address || ""}
+            estimatedDelivery={selectedForAcceptance.shipment_requests.requested_delivery_date || ""}
+            estimatedAmount={selectedForAcceptance.shipment_requests.calculated_cost || 0}
+            items={selectedForAcceptance.shipment_requests.items}
             open={!!selectedForAcceptance}
             onOpenChange={(open) => !open && setSelectedForAcceptance(null)}
             onSuccess={() => {

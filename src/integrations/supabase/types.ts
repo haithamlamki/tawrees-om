@@ -444,6 +444,115 @@ export type Database = {
         }
         Relationships: []
       }
+      partner_document_requests: {
+        Row: {
+          created_at: string
+          description: string | null
+          document_type: string
+          id: string
+          is_required: boolean
+          quote_id: string
+          status: Database["public"]["Enums"]["document_request_status"]
+          updated_at: string
+          uploaded_at: string | null
+          uploaded_file_path: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          document_type: string
+          id?: string
+          is_required?: boolean
+          quote_id: string
+          status?: Database["public"]["Enums"]["document_request_status"]
+          updated_at?: string
+          uploaded_at?: string | null
+          uploaded_file_path?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          document_type?: string
+          id?: string
+          is_required?: boolean
+          quote_id?: string
+          status?: Database["public"]["Enums"]["document_request_status"]
+          updated_at?: string
+          uploaded_at?: string | null
+          uploaded_file_path?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_document_requests_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "partner_shipping_quotes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partner_shipping_quotes: {
+        Row: {
+          adjustment_reason: string | null
+          created_at: string
+          customer_notes: string | null
+          customer_responded_at: string | null
+          estimated_delivery_days: number | null
+          id: string
+          original_amount: number
+          partner_quoted_amount: number
+          partner_user_id: string | null
+          shipment_id: string
+          shipping_details: Json | null
+          status: Database["public"]["Enums"]["partner_quote_status"]
+          storage_location: string | null
+          submitted_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          adjustment_reason?: string | null
+          created_at?: string
+          customer_notes?: string | null
+          customer_responded_at?: string | null
+          estimated_delivery_days?: number | null
+          id?: string
+          original_amount: number
+          partner_quoted_amount: number
+          partner_user_id?: string | null
+          shipment_id: string
+          shipping_details?: Json | null
+          status?: Database["public"]["Enums"]["partner_quote_status"]
+          storage_location?: string | null
+          submitted_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          adjustment_reason?: string | null
+          created_at?: string
+          customer_notes?: string | null
+          customer_responded_at?: string | null
+          estimated_delivery_days?: number | null
+          id?: string
+          original_amount?: number
+          partner_quoted_amount?: number
+          partner_user_id?: string | null
+          shipment_id?: string
+          shipping_details?: Json | null
+          status?: Database["public"]["Enums"]["partner_quote_status"]
+          storage_location?: string | null
+          submitted_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_shipping_quotes_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payments: {
         Row: {
           amount: number
@@ -1382,6 +1491,7 @@ export type Database = {
           assigned_to: string | null
           created_at: string
           current_location: string | null
+          customer_approved_quote_at: string | null
           customer_confirmation_at: string | null
           customer_feedback: string | null
           customer_rating: number | null
@@ -1392,10 +1502,12 @@ export type Database = {
           delivery_photo_url: string | null
           delivery_signature_url: string | null
           estimated_delivery: string | null
+          final_agreed_amount: number | null
           id: string
           notes: string | null
           partner_accepted_at: string | null
           partner_accepted_by: string | null
+          partner_quote_id: string | null
           partner_rejection_reason: string | null
           request_id: string
           status: string
@@ -1408,6 +1520,7 @@ export type Database = {
           assigned_to?: string | null
           created_at?: string
           current_location?: string | null
+          customer_approved_quote_at?: string | null
           customer_confirmation_at?: string | null
           customer_feedback?: string | null
           customer_rating?: number | null
@@ -1418,10 +1531,12 @@ export type Database = {
           delivery_photo_url?: string | null
           delivery_signature_url?: string | null
           estimated_delivery?: string | null
+          final_agreed_amount?: number | null
           id?: string
           notes?: string | null
           partner_accepted_at?: string | null
           partner_accepted_by?: string | null
+          partner_quote_id?: string | null
           partner_rejection_reason?: string | null
           request_id: string
           status?: string
@@ -1434,6 +1549,7 @@ export type Database = {
           assigned_to?: string | null
           created_at?: string
           current_location?: string | null
+          customer_approved_quote_at?: string | null
           customer_confirmation_at?: string | null
           customer_feedback?: string | null
           customer_rating?: number | null
@@ -1444,10 +1560,12 @@ export type Database = {
           delivery_photo_url?: string | null
           delivery_signature_url?: string | null
           estimated_delivery?: string | null
+          final_agreed_amount?: number | null
           id?: string
           notes?: string | null
           partner_accepted_at?: string | null
           partner_accepted_by?: string | null
+          partner_quote_id?: string | null
           partner_rejection_reason?: string | null
           request_id?: string
           status?: string
@@ -1460,6 +1578,13 @@ export type Database = {
             columns: ["assigned_partner_id"]
             isOneToOne: false
             referencedRelation: "shipping_partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shipments_partner_quote_id_fkey"
+            columns: ["partner_quote_id"]
+            isOneToOne: false
+            referencedRelation: "partner_shipping_quotes"
             referencedColumns: ["id"]
           },
           {
@@ -2682,6 +2807,12 @@ export type Database = {
         | "pending_partner"
         | "approved"
         | "rejected"
+      document_request_status: "pending" | "uploaded" | "approved"
+      partner_quote_status:
+        | "draft"
+        | "submitted"
+        | "customer_approved"
+        | "customer_rejected"
       rate_type:
         | "AIR_KG"
         | "SEA_CBM"
@@ -2842,6 +2973,13 @@ export const Constants = {
         "pending_partner",
         "approved",
         "rejected",
+      ],
+      document_request_status: ["pending", "uploaded", "approved"],
+      partner_quote_status: [
+        "draft",
+        "submitted",
+        "customer_approved",
+        "customer_rejected",
       ],
       rate_type: [
         "AIR_KG",
