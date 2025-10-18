@@ -591,30 +591,104 @@ export const ShippingCalculatorNew = () => {
               {/* Air & Sea LCL: Cargo Items */}
               <TabsContent value="air" className="mt-0">
                 <div className="space-y-6">
-                  {/* Dimension Guide Image */}
-                  <div className="flex justify-center mb-4">
-                    <img 
-                      src={boxDimensionsImage} 
-                      alt="Box dimensions guide showing length, width (breadth), and height" 
-                      className="max-w-xs h-auto"
-                    />
+                  {/* Chargeable Weight Calculator Header */}
+                  <div className="space-y-4">
+                    <h3 className="text-xl font-semibold">Chargeable Weight Calculator</h3>
+                    
+                    <div className="bg-muted/30 p-4 rounded-lg">
+                      <h4 className="text-sm font-medium mb-3">Enter Package Details</h4>
+                      
+                      {/* DIM Factor Selector - Fixed for Air Freight */}
+                      <div className="mb-4">
+                        <Label className="text-sm mb-2 block">Select Chargeable Weight DIM (Dimensional) Factor</Label>
+                        <div className="grid grid-cols-4 gap-2">
+                          <Button variant="outline" className="text-xs opacity-50 cursor-not-allowed" disabled>
+                            Ocean LCL<br/>1:1000
+                          </Button>
+                          <Button variant="outline" className="text-xs opacity-50 cursor-not-allowed" disabled>
+                            Truck LTL (EU)<br/>1:3000
+                          </Button>
+                          <Button variant="outline" className="text-xs opacity-50 cursor-not-allowed" disabled>
+                            Express/Courier<br/>1:5000
+                          </Button>
+                          <Button variant="default" className="text-xs bg-primary">
+                            Air Freight<br/>1:6000
+                          </Button>
+                        </div>
+                      </div>
+                      
+                      {/* Dimension Guide Image */}
+                      <div className="flex justify-center mb-4">
+                        <img 
+                          src={boxDimensionsImage} 
+                          alt="Box dimensions guide showing length, width (breadth), and height" 
+                          className="max-w-xs h-auto"
+                        />
+                      </div>
+                      
+                      {items.map((item, index) => (
+                        <PackageRow
+                          key={item.id}
+                          item={item}
+                          index={index}
+                          onUpdate={updateItem}
+                          onRemove={removeItem}
+                          canRemove={items.length > 1}
+                        />
+                      ))}
+                      
+                      <Button onClick={addItem} variant="outline" className="w-full mt-4">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add more packages
+                      </Button>
+                      
+                      {/* Total Summary */}
+                      {items.some(item => item.length > 0 && item.width > 0 && item.height > 0) && (
+                        <div className="mt-4 pt-4 border-t text-center text-sm font-medium">
+                          Total Volume: {calculateCBM(items).toFixed(2)} m³, Total Weight: {calculateActualWeight(items).toFixed(0)} kg
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Calculation Result */}
+                    {quote && mode === "air" && (
+                      <div className="bg-muted/30 p-4 rounded-lg">
+                        <h4 className="text-lg font-semibold mb-4">Calculation Result</h4>
+                        
+                        {/* First Row: Volume and Weight */}
+                        <div className="grid grid-cols-4 gap-2 mb-2">
+                          <div className="border rounded p-3 bg-background text-center">
+                            <div className="text-sm font-medium text-muted-foreground mb-1">Volume m³</div>
+                            <div className="text-lg font-semibold">{calculateCBM(items).toFixed(2)}</div>
+                          </div>
+                          <div className="border rounded p-3 bg-background text-center">
+                            <div className="text-sm font-medium text-muted-foreground mb-1">Volume ft³</div>
+                            <div className="text-lg font-semibold">{(calculateCBM(items) * 35.3147).toFixed(3)}</div>
+                          </div>
+                          <div className="border rounded p-3 bg-background text-center">
+                            <div className="text-sm font-medium text-muted-foreground mb-1">Weight (Kg)</div>
+                            <div className="text-lg font-semibold">{calculateActualWeight(items).toFixed(0)}</div>
+                          </div>
+                          <div className="border rounded p-3 bg-background text-center">
+                            <div className="text-sm font-medium text-muted-foreground mb-1">Weight (Lb)</div>
+                            <div className="text-lg font-semibold">{(calculateActualWeight(items) * 2.20462).toFixed(3)}</div>
+                          </div>
+                        </div>
+                        
+                        {/* Second Row: Volumetric Weights */}
+                        <div className="grid grid-cols-2 gap-2">
+                          <div className="border rounded p-3 bg-background text-center">
+                            <div className="text-sm font-medium text-muted-foreground mb-1">Volumetric Weight Kg</div>
+                            <div className="text-lg font-semibold">{calculateVolumetricWeight(items).toFixed(3)}</div>
+                          </div>
+                          <div className="border rounded p-3 bg-background text-center">
+                            <div className="text-sm font-medium text-muted-foreground mb-1">Volumetric Weight lbs</div>
+                            <div className="text-lg font-semibold">{(calculateVolumetricWeight(items) * 2.20462).toFixed(3)}</div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  
-                  {items.map((item, index) => (
-                    <PackageRow
-                      key={item.id}
-                      item={item}
-                      index={index}
-                      onUpdate={updateItem}
-                      onRemove={removeItem}
-                      canRemove={items.length > 1}
-                    />
-                  ))}
-                  
-                  <Button onClick={addItem} variant="outline" className="w-full">
-                    <Plus className="h-4 w-4 mr-2" />
-                    {t("calculator:addMoreRows")}
-                  </Button>
                 </div>
               </TabsContent>
 
