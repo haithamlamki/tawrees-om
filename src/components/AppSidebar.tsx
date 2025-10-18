@@ -138,7 +138,7 @@ const partnerNavigation: NavigationItemWithSub[] = [
   { name: "Partner Dashboard", href: "/partner", icon: Ship, group: "Partner" },
   { name: "New Requests", href: "/partner#requests", icon: Package, group: "Partner" },
   { name: "Active Shipments", href: "/partner#shipments", icon: Truck, group: "Partner" },
-  { name: "All Shipments", href: "/partner#all-shipments", icon: Ship, group: "Partner" },
+  { name: "All Shipments", href: "/partner#all", icon: Ship, group: "Partner" },
   { name: "Invoices", href: "/partner#invoices", icon: FileBarChart, group: "Partner" },
   { name: "Payments", href: "/partner#payments", icon: DollarSign, group: "Partner" },
   { name: "Profile", href: "/partner#profile", icon: User, group: "Partner" },
