@@ -22,6 +22,32 @@
   "activeShipments": "活跃货运",
   "pendingQuotes": "待处理报价",
   "topCustomers": "优质客户",
+  "itemDetails": {
+    "title": "物品详情",
+    "productImage": "产品图片",
+    "productDescription": "产品描述",
+    "dimensions": "尺寸（长×宽×高）",
+    "weight": "重量",
+    "quantity": "数量",
+    "itemCBM": "每件立方米",
+    "itemWeight": "每件重量",
+    "totalItems": "总物品数",
+    "totalCBM": "总立方米",
+    "totalWeight": "总重量",
+    "chargeableWeight": "计费重量",
+    "containerType": "集装箱类型",
+    "containerUtilization": "集装箱利用率",
+    "spaceRemaining": "剩余空间",
+    "noImage": "无图片",
+    "viewLarger": "点击查看大图"
+  },
+  "shipmentSummary": {
+    "requestDetails": "请求详情",
+    "shippingMethod": "运输方式",
+    "calculationSummary": "计算摘要",
+    "deliveryInfo": "交付信息",
+    "costBreakdown": "成本明细"
+  },
   "contracts": {
     "title": "仓储管理系统合同",
     "subtitle": "管理客户合同",

@@ -22,6 +22,32 @@
   "activeShipments": "Active Shipments",
   "pendingQuotes": "Pending Quotes",
   "topCustomers": "Top Customers",
+  "itemDetails": {
+    "title": "Item Details",
+    "productImage": "Product Image",
+    "productDescription": "Product Description",
+    "dimensions": "Dimensions (L×W×H)",
+    "weight": "Weight",
+    "quantity": "Quantity",
+    "itemCBM": "CBM per Item",
+    "itemWeight": "Weight per Item",
+    "totalItems": "Total Items",
+    "totalCBM": "Total CBM",
+    "totalWeight": "Total Weight",
+    "chargeableWeight": "Chargeable Weight",
+    "containerType": "Container Type",
+    "containerUtilization": "Container Utilization",
+    "spaceRemaining": "Space Remaining",
+    "noImage": "No image",
+    "viewLarger": "Click to view larger"
+  },
+  "shipmentSummary": {
+    "requestDetails": "Request Details",
+    "shippingMethod": "Shipping Method",
+    "calculationSummary": "Calculation Summary",
+    "deliveryInfo": "Delivery Information",
+    "costBreakdown": "Cost Breakdown"
+  },
   "contracts": {
     "title": "WMS Contracts",
     "subtitle": "Manage customer contracts",

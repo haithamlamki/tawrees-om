@@ -22,6 +22,32 @@
   "activeShipments": "الشحنات النشطة",
   "pendingQuotes": "عروض الأسعار المعلقة",
   "topCustomers": "أفضل العملاء",
+  "itemDetails": {
+    "title": "تفاصيل العناصر",
+    "productImage": "صورة المنتج",
+    "productDescription": "وصف المنتج",
+    "dimensions": "الأبعاد (الطول×العرض×الارتفاع)",
+    "weight": "الوزن",
+    "quantity": "الكمية",
+    "itemCBM": "المتر المكعب لكل عنصر",
+    "itemWeight": "الوزن لكل عنصر",
+    "totalItems": "إجمالي العناصر",
+    "totalCBM": "إجمالي المتر المكعب",
+    "totalWeight": "الوزن الإجمالي",
+    "chargeableWeight": "الوزن القابل للشحن",
+    "containerType": "نوع الحاوية",
+    "containerUtilization": "استخدام الحاوية",
+    "spaceRemaining": "المساحة المتبقية",
+    "noImage": "لا توجد صورة",
+    "viewLarger": "انقر لعرض أكبر"
+  },
+  "shipmentSummary": {
+    "requestDetails": "تفاصيل الطلب",
+    "shippingMethod": "طريقة الشحن",
+    "calculationSummary": "ملخص الحساب",
+    "deliveryInfo": "معلومات التسليم",
+    "costBreakdown": "تفاصيل التكلفة"
+  },
   "contracts": {
     "title": "إدارة عقد جديد",
     "subtitle": "إدارة العقود والأسعار والعملاء",

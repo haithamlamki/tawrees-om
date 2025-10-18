@@ -6,7 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Package, Clock, CheckCircle, XCircle, Ship, Settings, User, FileText, Bell } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Package, Clock, CheckCircle, XCircle, Ship, Settings, User, FileText, Bell, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import ProfileSettings from "@/components/dashboard/ProfileSettings";
 import DocumentManager from "@/components/documents/DocumentManager";
@@ -16,6 +17,7 @@ import InvoiceGenerator from "@/components/dashboard/InvoiceGenerator";
 import PaymentButton from "@/components/dashboard/PaymentButton";
 import { ShippingPartnerDetails } from "@/components/customer/ShippingPartnerDetails";
 import { StatusTimeline } from "@/components/shipment/StatusTimeline";
+import { ItemDetailsViewer } from "@/components/admin/ItemDetailsViewer";
 
 interface ShipmentRequest {
   id: string;
@@ -24,7 +26,14 @@ interface ShipmentRequest {
   calculated_cost: number;
   status: string;
   created_at: string;
+  items?: any;
+  cbm_volume?: number;
+  weight_kg?: number;
+  container_type_id?: string;
   shipments?: Shipment[];
+  container_types?: {
+    name: string;
+  };
 }
 
 interface Shipment {
@@ -49,6 +58,7 @@ const Dashboard = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [selectedRequestId, setSelectedRequestId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>("requests");
+  const [expandedItems, setExpandedItems] = useState<string[]>([]);
 
   useEffect(() => {
     checkAuthAndLoadData();
@@ -125,6 +135,9 @@ const Dashboard = () => {
       .from("shipment_requests")
       .select(`
         *,
+        container_types (
+          name
+        ),
         shipments (
           id,
           tracking_number,
@@ -277,6 +290,38 @@ const Dashboard = () => {
                         </div>
                       )}
                     </div>
+                    
+                    {/* View My Items Collapsible */}
+                    {request.items && Array.isArray(request.items) && request.items.length > 0 && (
+                      <Collapsible
+                        open={expandedItems.includes(request.id)}
+                        onOpenChange={() => {
+                          setExpandedItems(prev =>
+                            prev.includes(request.id)
+                              ? prev.filter(id => id !== request.id)
+                              : [...prev, request.id]
+                          );
+                        }}
+                      >
+                        <CollapsibleTrigger asChild>
+                          <Button variant="outline" className="w-full">
+                            <Package className="mr-2 h-4 w-4" />
+                            {expandedItems.includes(request.id) ? "Hide" : "View"} My Items ({request.items.length})
+                            <ChevronDown className={`ml-auto h-4 w-4 transition-transform ${expandedItems.includes(request.id) ? "rotate-180" : ""}`} />
+                          </Button>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent className="mt-4">
+                          <ItemDetailsViewer
+                            items={request.items}
+                            shippingType={request.shipping_type as "air" | "sea"}
+                            calculationMethod={request.calculation_method as "cbm" | "container"}
+                            containerType={request.container_types?.name}
+                            totalCBM={request.cbm_volume}
+                            totalWeight={request.weight_kg}
+                          />
+                        </CollapsibleContent>
+                      </Collapsible>
+                    )}
                     
                     <div className="flex gap-2 justify-end">
                       {request.shipments && request.shipments.length > 0 && (

@@ -9,6 +9,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { generateTrackingNumber } from "@/utils/calculatorUtils";
 import { sendNotificationEmail, createInAppNotification } from "@/utils/notificationUtils";
+import { ShipmentRequestDetails } from "./ShipmentRequestDetails";
+import { Separator } from "@/components/ui/separator";
 
 interface ShipmentApprovalProps {
   requestId: string;
@@ -180,10 +182,17 @@ export function ShipmentApproval({ requestId, customerId, open, onOpenChange, on
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Approve Order</DialogTitle>
         </DialogHeader>
+
+        {/* Request Details Preview */}
+        <div className="py-4">
+          <ShipmentRequestDetails requestId={requestId} compact />
+        </div>
+
+        <Separator className="my-4" />
 
         <div className="space-y-4 py-4">
           <div className="space-y-2">

@@ -5,9 +5,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { toast } from "sonner";
-import { Package, Edit } from "lucide-react";
+import { Package, Edit, ChevronDown, ChevronUp, Eye } from "lucide-react";
 import ShipmentStatusUpdate from "./ShipmentStatusUpdate";
+import { ShipmentRequestDetails } from "./ShipmentRequestDetails";
 
 interface Shipment {
   id: string;
@@ -30,6 +32,7 @@ const ShipmentManagement = () => {
   const [shipments, setShipments] = useState<Shipment[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedShipment, setSelectedShipment] = useState<Shipment | null>(null);
+  const [expandedRow, setExpandedRow] = useState<string | null>(null);
 
   useEffect(() => {
     loadShipments();
@@ -116,61 +119,87 @@ const ShipmentManagement = () => {
             </TableHeader>
             <TableBody>
               {shipments.map((shipment) => (
-                <TableRow key={shipment.id}>
-                  <TableCell className="font-mono font-semibold">
-                    {shipment.tracking_number}
-                  </TableCell>
-                  <TableCell>
-                    {shipment.shipment_requests.profiles?.full_name || "Unknown"}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline">
-                      {shipment.status.replace(/_/g, " ").toUpperCase()}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-sm">
-                    {shipment.current_location || "-"}
-                  </TableCell>
-                  <TableCell className="text-sm">
-                    {shipment.estimated_delivery
-                      ? new Date(shipment.estimated_delivery).toLocaleDateString()
-                      : "-"}
-                  </TableCell>
-                  <TableCell className="text-sm">
-                    {new Date(shipment.created_at).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell>
-                    <Dialog open={selectedShipment?.id === shipment.id} onOpenChange={(open) => !open && setSelectedShipment(null)}>
-                      <DialogTrigger asChild>
+                <>
+                  <TableRow key={shipment.id}>
+                    <TableCell className="font-mono font-semibold">
+                      {shipment.tracking_number}
+                    </TableCell>
+                    <TableCell>
+                      {shipment.shipment_requests.profiles?.full_name || "Unknown"}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline">
+                        {shipment.status.replace(/_/g, " ").toUpperCase()}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-sm">
+                      {shipment.current_location || "-"}
+                    </TableCell>
+                    <TableCell className="text-sm">
+                      {shipment.estimated_delivery
+                        ? new Date(shipment.estimated_delivery).toLocaleDateString()
+                        : "-"}
+                    </TableCell>
+                    <TableCell className="text-sm">
+                      {new Date(shipment.created_at).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => setSelectedShipment(shipment)}
+                          onClick={() => setExpandedRow(expandedRow === shipment.id ? null : shipment.id)}
                         >
-                          <Edit className="h-4 w-4" />
+                          {expandedRow === shipment.id ? (
+                            <ChevronUp className="h-4 w-4" />
+                          ) : (
+                            <ChevronDown className="h-4 w-4" />
+                          )}
                         </Button>
-                      </DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader>
-                          <DialogTitle>Update Shipment</DialogTitle>
-                          <DialogDescription>
-                            Tracking: {shipment.tracking_number}
-                          </DialogDescription>
-                        </DialogHeader>
-                        
-                        <ShipmentStatusUpdate
-                          shipmentId={shipment.id}
-                          currentStatus={shipment.status}
-                          trackingNumber={shipment.tracking_number}
-                          onUpdate={() => {
-                            setSelectedShipment(null);
-                            loadShipments();
-                          }}
-                        />
-                      </DialogContent>
-                    </Dialog>
-                  </TableCell>
-                </TableRow>
+                        <Dialog open={selectedShipment?.id === shipment.id} onOpenChange={(open) => !open && setSelectedShipment(null)}>
+                          <DialogTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setSelectedShipment(shipment)}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>Update Shipment</DialogTitle>
+                              <DialogDescription>
+                                Tracking: {shipment.tracking_number}
+                              </DialogDescription>
+                            </DialogHeader>
+                            
+                            <ShipmentStatusUpdate
+                              shipmentId={shipment.id}
+                              currentStatus={shipment.status}
+                              trackingNumber={shipment.tracking_number}
+                              onUpdate={() => {
+                                setSelectedShipment(null);
+                                loadShipments();
+                              }}
+                            />
+                          </DialogContent>
+                        </Dialog>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                  
+                  {/* Expandable Row for Request Details */}
+                  {expandedRow === shipment.id && (
+                    <TableRow>
+                      <TableCell colSpan={7} className="bg-muted/30 p-0">
+                        <div className="p-4">
+                          <ShipmentRequestDetails requestId={shipment.request_id} />
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </>
               ))}
             </TableBody>
           </Table>
