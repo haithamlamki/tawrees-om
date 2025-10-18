@@ -301,48 +301,29 @@ const ShipmentStatusUpdate = ({
           value={formData.status}
           onValueChange={(value) => setFormData({ ...formData, status: value })}
         >
-          <SelectTrigger 
-            id="status"
-            style={{
-              color: formData.status === "received_from_supplier" ? "#FFC000" :
-                     formData.status === "processing" ? "#EE0000" :
-                     formData.status === "in_transit" ? "#EE0000" :
-                     formData.status === "customs" ? "#00B0F0" :
-                     formData.status === "received_muscat_wh" ? "#00B050" :
-                     formData.status === "out_for_delivery" ? "#00B050" :
-                     formData.status === "delivered" ? "#00B050" : undefined,
-              fontWeight: formData.status ? "600" : undefined
-            }}
-          >
+          <SelectTrigger id="status">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="received_from_supplier">
-              <span style={{ color: "#FFC000" }}>● </span>
               Received from Supplier
             </SelectItem>
             <SelectItem value="processing">
-              <span style={{ color: "#EE0000" }}>● </span>
               Processing
             </SelectItem>
             <SelectItem value="in_transit">
-              <span style={{ color: "#EE0000" }}>● </span>
               In Transit
             </SelectItem>
             <SelectItem value="customs">
-              <span style={{ color: "#00B0F0" }}>● </span>
               At Customs
             </SelectItem>
             <SelectItem value="received_muscat_wh">
-              <span style={{ color: "#00B050" }}>● </span>
               Received Muscat WH
             </SelectItem>
             <SelectItem value="out_for_delivery">
-              <span style={{ color: "#00B050" }}>● </span>
               Out for Delivery
             </SelectItem>
             <SelectItem value="delivered">
-              <span style={{ color: "#00B050" }}>● </span>
               Delivered
             </SelectItem>
           </SelectContent>
