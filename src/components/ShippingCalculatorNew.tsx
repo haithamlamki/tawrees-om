@@ -798,198 +798,470 @@ export const ShippingCalculatorNew = () => {
           </CardContent>
         </Card>
 
-        {/* Educational Content Section */}
-        <div className="mt-12 space-y-8">
-          {/* Introduction */}
-          <section className="prose prose-slate max-w-none">
-            <h2 className="text-3xl font-bold mb-4">Cubic Meter Calculator</h2>
-            <p className="text-lg text-muted-foreground leading-relaxed">
-              Our cubic meter calculator helps you quickly and accurately calculate the volume of your cargo in cubic meters (m³). With this tool, you can enter the dimensions of a single package or multiple products and instantly get the CBM value.
-            </p>
-            <p className="text-muted-foreground leading-relaxed">
-              You can enter package dimensions in centimeters (cm), millimeters (mm), meters (m), inches (in), feet (ft), or yards (yd), making it flexible for users worldwide. The calculator automatically converts the entered values into cubic meters and cubic feet, so you can easily compare both units.
-            </p>
-            <p className="text-muted-foreground leading-relaxed">
-              This CBM calculator is especially useful for shipping, freight forwarding, and logistics planning, as it helps determine how much space your cargo will occupy inside a container. You can also check how many products will fit into standard shipping containers such as 20ft, 40ft, and 40ft High Cube.
-            </p>
-            <p className="text-muted-foreground leading-relaxed">
-              Whether you are exporting goods, planning air freight, or calculating volumetric weight for courier shipments, our cubic meter calculator makes the process simple and reliable.
-            </p>
-          </section>
+        {/* Educational Content Section - Mode Specific */}
+        {mode === "sea_lcl" && (
+          <div className="mt-12 space-y-8">
+            <section className="prose prose-slate max-w-none">
+              <h2 className="text-3xl font-bold mb-4">Cubic Meter Calculator</h2>
+              <p className="text-lg text-muted-foreground leading-relaxed">
+                Our cubic meter calculator helps you quickly and accurately calculate the volume of your cargo in cubic meters (m³). With this tool, you can enter the dimensions of a single package or multiple products and instantly get the CBM value.
+              </p>
+              <p className="text-muted-foreground leading-relaxed">
+                You can enter package dimensions in centimeters (cm), millimeters (mm), meters (m), inches (in), feet (ft), or yards (yd), making it flexible for users worldwide. The calculator automatically converts the entered values into cubic meters and cubic feet, so you can easily compare both units.
+              </p>
+              <p className="text-muted-foreground leading-relaxed">
+                This CBM calculator is especially useful for shipping, freight forwarding, and logistics planning, as it helps determine how much space your cargo will occupy inside a container. You can also check how many products will fit into standard shipping containers such as 20ft, 40ft, and 40ft High Cube.
+              </p>
+              <p className="text-muted-foreground leading-relaxed">
+                Whether you are exporting goods, planning air freight, or calculating volumetric weight for courier shipments, our cubic meter calculator makes the process simple and reliable.
+              </p>
+            </section>
 
-          {/* Features */}
-          <section>
-            <h3 className="text-2xl font-semibold mb-4">With this tool, you can:</h3>
-            <ul className="list-disc list-inside space-y-2 text-muted-foreground">
-              <li>Calculate CBM for single or multiple packages</li>
-              <li>Convert between cubic meters and cubic feet</li>
-              <li>Optimize container loading for sea freight</li>
-              <li>Estimate volumetric weight for air and courier shipments</li>
-            </ul>
-          </section>
+            <section>
+              <h3 className="text-2xl font-semibold mb-4">With this tool, you can:</h3>
+              <ul className="list-disc list-inside space-y-2 text-muted-foreground">
+                <li>Calculate CBM for single or multiple packages</li>
+                <li>Convert between cubic meters and cubic feet</li>
+                <li>Optimize container loading for sea freight</li>
+                <li>Estimate volumetric weight for air and courier shipments</li>
+              </ul>
+            </section>
 
-          {/* Formula */}
-          <section className="bg-muted/50 p-6 rounded-lg">
-            <h3 className="text-2xl font-semibold mb-4">Cubic Meter Calculator Formula</h3>
-            <div className="bg-background p-4 rounded border font-mono text-sm mb-4">
-              Length (in centimeter) × Width (in centimeter) × Height (in centimeter) / 1,000,000 = Cubic meter (m³)
-            </div>
-            <p className="text-muted-foreground">
-              We can input dimensions in Centimeter, millimeter, meter, inch, feet or yard
-            </p>
-          </section>
-
-          {/* How to Use */}
-          <section>
-            <h3 className="text-2xl font-semibold mb-4">How to use Cubic Meter Calculator in Meter for Multiple Products?</h3>
-            <p className="text-muted-foreground mb-4">
-              On this calculator you can add up to 10 products to get Volume Weight in meter (m³), Volume Weight in feet (ft³), Number of Packages Minimum & Maximum in Standard 20 FT Container, Number of Packages Minimum & Maximum in Standard 40 FT Container, and Number of packages Minimum & Maximum in Standard 40 FT High Cube Container.
-            </p>
-            
-            <div className="grid md:grid-cols-2 gap-8 mt-6">
-              {/* Steps */}
-              <div>
-                <h4 className="text-xl font-semibold mb-3">Steps (in case you enter dimensions in cm):</h4>
-                <dl className="space-y-3">
-                  <div>
-                    <dt className="font-semibold">Length (cm):</dt>
-                    <dd className="text-muted-foreground">Your package length in centimeter</dd>
-                  </div>
-                  <div>
-                    <dt className="font-semibold">Breadth (cm):</dt>
-                    <dd className="text-muted-foreground">Your package breadth in centimeter</dd>
-                  </div>
-                  <div>
-                    <dt className="font-semibold">Height (cm):</dt>
-                    <dd className="text-muted-foreground">Your package height in centimeter</dd>
-                  </div>
-                  <div>
-                    <dt className="font-semibold">Weight (kg):</dt>
-                    <dd className="text-muted-foreground">Your package weight in kilogram</dd>
-                  </div>
-                  <div>
-                    <dt className="font-semibold">Quantity:</dt>
-                    <dd className="text-muted-foreground">Number of packages, it only affects the Weight, Volume Weight, and shipment volume.</dd>
-                  </div>
-                </dl>
+            <section className="bg-muted/50 p-6 rounded-lg">
+              <h3 className="text-2xl font-semibold mb-4">Cubic Meter Calculator Formula</h3>
+              <div className="bg-background p-4 rounded border font-mono text-sm mb-4">
+                Length (in centimeter) × Width (in centimeter) × Height (in centimeter) / 1,000,000 = Cubic meter (m³)
               </div>
+              <p className="text-muted-foreground">
+                We can input dimensions in Centimeter, millimeter, meter, inch, feet or yard
+              </p>
+            </section>
 
-              {/* Results */}
-              <div>
-                <h4 className="text-xl font-semibold mb-3">Results:</h4>
-                <dl className="space-y-3">
-                  <div>
-                    <dt className="font-semibold">Weight kg/lbs:</dt>
-                    <dd className="text-muted-foreground">Shipment weight in kg/lbs</dd>
-                  </div>
-                  <div>
-                    <dt className="font-semibold">Volume Weight kg/lbs:</dt>
-                    <dd className="text-muted-foreground">Volume weight of shipment in kg/lbs</dd>
-                  </div>
-                  <div>
-                    <dt className="font-semibold">Volume m³/ft³:</dt>
-                    <dd className="text-muted-foreground">Shipment volume in m³/ft³</dd>
-                  </div>
-                  <div>
-                    <dt className="font-semibold">20 FT min/max:</dt>
-                    <dd className="text-muted-foreground">Approx. minimum & maximum of packages which can be placed inside standard 20 FT container</dd>
-                  </div>
-                  <div>
-                    <dt className="font-semibold">40 FT min/max:</dt>
-                    <dd className="text-muted-foreground">Approx. minimum & maximum number of packages which can be placed inside standard 40 FT container</dd>
-                  </div>
-                  <div>
-                    <dt className="font-semibold">40 FT HC min/max:</dt>
-                    <dd className="text-muted-foreground">Approx. minimum & maximum number of packages which can be placed inside standard 40 FT High Cube container</dd>
-                  </div>
-                </dl>
-              </div>
-            </div>
-          </section>
-
-          {/* Container Dimensions Table */}
-          <section>
-            <h3 className="text-2xl font-semibold mb-4">Container Dimensions</h3>
-            <p className="text-muted-foreground mb-4">For above calculation we had used following container dimensions:</p>
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse border border-border">
-                <thead>
-                  <tr className="bg-muted">
-                    <th className="border border-border px-4 py-3 text-left font-semibold">Container / Dimensions</th>
-                    <th className="border border-border px-4 py-3 text-left font-semibold">Length (cm)</th>
-                    <th className="border border-border px-4 py-3 text-left font-semibold">Width (cm)</th>
-                    <th className="border border-border px-4 py-3 text-left font-semibold">Height (cm)</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td className="border border-border px-4 py-3">20 FT Container</td>
-                    <td className="border border-border px-4 py-3">589</td>
-                    <td className="border border-border px-4 py-3">230</td>
-                    <td className="border border-border px-4 py-3">230</td>
-                  </tr>
-                  <tr className="bg-muted/50">
-                    <td className="border border-border px-4 py-3">40 FT Container</td>
-                    <td className="border border-border px-4 py-3">1200</td>
-                    <td className="border border-border px-4 py-3">230</td>
-                    <td className="border border-border px-4 py-3">230</td>
-                  </tr>
-                  <tr>
-                    <td className="border border-border px-4 py-3">40 FT HIGH CUBE Container</td>
-                    <td className="border border-border px-4 py-3">1200</td>
-                    <td className="border border-border px-4 py-3">230</td>
-                    <td className="border border-border px-4 py-3">260</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </section>
-
-          {/* FAQs */}
-          <section>
-            <h3 className="text-2xl font-semibold mb-6">Frequently Asked Questions (FAQs)</h3>
-            <div className="space-y-6">
-              <div>
-                <h4 className="text-lg font-semibold mb-2">What is a cubic meter (CBM)?</h4>
-                <p className="text-muted-foreground">
-                  A cubic meter (m³) is a unit of volume that represents the space occupied by a cube measuring 1 meter × 1 meter × 1 meter. In shipping, CBM is used to calculate how much space cargo will take inside a container.
-                </p>
-              </div>
-
-              <div>
-                <h4 className="text-lg font-semibold mb-2">How do I calculate CBM manually?</h4>
-                <p className="text-muted-foreground mb-2">To calculate CBM:</p>
-                <div className="bg-muted/50 p-3 rounded font-mono text-sm">
-                  CBM = Length (m) × Width (m) × Height (m)
+            <section>
+              <h3 className="text-2xl font-semibold mb-4">How to use Cubic Meter Calculator in Meter for Multiple Products?</h3>
+              <p className="text-muted-foreground mb-4">
+                On this calculator you can add up to 10 products to get Volume Weight in meter (m³), Volume Weight in feet (ft³), Number of Packages Minimum & Maximum in Standard 20 FT Container, Number of Packages Minimum & Maximum in Standard 40 FT Container, and Number of packages Minimum & Maximum in Standard 40 FT High Cube Container.
+              </p>
+              
+              <div className="grid md:grid-cols-2 gap-8 mt-6">
+                <div>
+                  <h4 className="text-xl font-semibold mb-3">Steps (in case you enter dimensions in cm):</h4>
+                  <dl className="space-y-3">
+                    <div>
+                      <dt className="font-semibold">Length (cm):</dt>
+                      <dd className="text-muted-foreground">Your package length in centimeter</dd>
+                    </div>
+                    <div>
+                      <dt className="font-semibold">Breadth (cm):</dt>
+                      <dd className="text-muted-foreground">Your package breadth in centimeter</dd>
+                    </div>
+                    <div>
+                      <dt className="font-semibold">Height (cm):</dt>
+                      <dd className="text-muted-foreground">Your package height in centimeter</dd>
+                    </div>
+                    <div>
+                      <dt className="font-semibold">Weight (kg):</dt>
+                      <dd className="text-muted-foreground">Your package weight in kilogram</dd>
+                    </div>
+                    <div>
+                      <dt className="font-semibold">Quantity:</dt>
+                      <dd className="text-muted-foreground">Number of packages, it only affects the Weight, Volume Weight, and shipment volume.</dd>
+                    </div>
+                  </dl>
                 </div>
-                <p className="text-muted-foreground mt-2">
-                  If your measurements are in cm, mm, inches, or feet, convert them to meters first before multiplying.
-                </p>
-              </div>
 
-              <div>
-                <h4 className="text-lg font-semibold mb-2">Why is CBM important in shipping?</h4>
-                <p className="text-muted-foreground">
-                  CBM helps shipping companies determine how much cargo can fit inside a container. Freight charges are often calculated based on either weight or CBM, whichever is higher, making it crucial for cost estimation.
-                </p>
+                <div>
+                  <h4 className="text-xl font-semibold mb-3">Results:</h4>
+                  <dl className="space-y-3">
+                    <div>
+                      <dt className="font-semibold">Weight kg/lbs:</dt>
+                      <dd className="text-muted-foreground">Shipment weight in kg/lbs</dd>
+                    </div>
+                    <div>
+                      <dt className="font-semibold">Volume Weight kg/lbs:</dt>
+                      <dd className="text-muted-foreground">Volume weight of shipment in kg/lbs</dd>
+                    </div>
+                    <div>
+                      <dt className="font-semibold">Volume m³/ft³:</dt>
+                      <dd className="text-muted-foreground">Shipment volume in m³/ft³</dd>
+                    </div>
+                    <div>
+                      <dt className="font-semibold">20 FT min/max:</dt>
+                      <dd className="text-muted-foreground">Approx. minimum & maximum of packages which can be placed inside standard 20 FT container</dd>
+                    </div>
+                    <div>
+                      <dt className="font-semibold">40 FT min/max:</dt>
+                      <dd className="text-muted-foreground">Approx. minimum & maximum number of packages which can be placed inside standard 40 FT container</dd>
+                    </div>
+                    <div>
+                      <dt className="font-semibold">40 FT HC min/max:</dt>
+                      <dd className="text-muted-foreground">Approx. minimum & maximum number of packages which can be placed inside standard 40 FT High Cube container</dd>
+                    </div>
+                  </dl>
+                </div>
               </div>
+            </section>
 
-              <div>
-                <h4 className="text-lg font-semibold mb-2">How many cubic meters are in a 20ft container?</h4>
-                <p className="text-muted-foreground">
-                  A standard 20ft container can hold approximately 33.2 CBM of cargo, depending on the cargo's shape and packing method.
-                </p>
+            <section>
+              <h3 className="text-2xl font-semibold mb-4">Container Dimensions</h3>
+              <p className="text-muted-foreground mb-4">For above calculation we had used following container dimensions:</p>
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse border border-border">
+                  <thead>
+                    <tr className="bg-muted">
+                      <th className="border border-border px-4 py-3 text-left font-semibold">Container / Dimensions</th>
+                      <th className="border border-border px-4 py-3 text-left font-semibold">Length (cm)</th>
+                      <th className="border border-border px-4 py-3 text-left font-semibold">Width (cm)</th>
+                      <th className="border border-border px-4 py-3 text-left font-semibold">Height (cm)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td className="border border-border px-4 py-3">20 FT Container</td>
+                      <td className="border border-border px-4 py-3">589</td>
+                      <td className="border border-border px-4 py-3">230</td>
+                      <td className="border border-border px-4 py-3">230</td>
+                    </tr>
+                    <tr className="bg-muted/50">
+                      <td className="border border-border px-4 py-3">40 FT Container</td>
+                      <td className="border border-border px-4 py-3">1200</td>
+                      <td className="border border-border px-4 py-3">230</td>
+                      <td className="border border-border px-4 py-3">230</td>
+                    </tr>
+                    <tr>
+                      <td className="border border-border px-4 py-3">40 FT HIGH CUBE Container</td>
+                      <td className="border border-border px-4 py-3">1200</td>
+                      <td className="border border-border px-4 py-3">230</td>
+                      <td className="border border-border px-4 py-3">260</td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
+            </section>
 
-              <div>
-                <h4 className="text-lg font-semibold mb-2">How many cubic feet are in one cubic meter?</h4>
-                <p className="text-muted-foreground">
-                  1 cubic meter (m³) equals 35.315 cubic feet (ft³).
-                </p>
+            <section>
+              <h3 className="text-2xl font-semibold mb-6">Frequently Asked Questions (FAQs)</h3>
+              <div className="space-y-6">
+                <div>
+                  <h4 className="text-lg font-semibold mb-2">What is a cubic meter (CBM)?</h4>
+                  <p className="text-muted-foreground">
+                    A cubic meter (m³) is a unit of volume that represents the space occupied by a cube measuring 1 meter × 1 meter × 1 meter. In shipping, CBM is used to calculate how much space cargo will take inside a container.
+                  </p>
+                </div>
+
+                <div>
+                  <h4 className="text-lg font-semibold mb-2">How do I calculate CBM manually?</h4>
+                  <p className="text-muted-foreground mb-2">To calculate CBM:</p>
+                  <div className="bg-muted/50 p-3 rounded font-mono text-sm">
+                    CBM = Length (m) × Width (m) × Height (m)
+                  </div>
+                  <p className="text-muted-foreground mt-2">
+                    If your measurements are in cm, mm, inches, or feet, convert them to meters first before multiplying.
+                  </p>
+                </div>
+
+                <div>
+                  <h4 className="text-lg font-semibold mb-2">Why is CBM important in shipping?</h4>
+                  <p className="text-muted-foreground">
+                    CBM helps shipping companies determine how much cargo can fit inside a container. Freight charges are often calculated based on either weight or CBM, whichever is higher, making it crucial for cost estimation.
+                  </p>
+                </div>
+
+                <div>
+                  <h4 className="text-lg font-semibold mb-2">How many cubic meters are in a 20ft container?</h4>
+                  <p className="text-muted-foreground">
+                    A standard 20ft container can hold approximately 33.2 CBM of cargo, depending on the cargo's shape and packing method.
+                  </p>
+                </div>
+
+                <div>
+                  <h4 className="text-lg font-semibold mb-2">How many cubic feet are in one cubic meter?</h4>
+                  <p className="text-muted-foreground">
+                    1 cubic meter (m³) equals 35.315 cubic feet (ft³).
+                  </p>
+                </div>
               </div>
-            </div>
-          </section>
-        </div>
+            </section>
+          </div>
+        )}
+
+        {mode === "air" && (
+          <div className="mt-12 space-y-8">
+            <section className="prose prose-slate max-w-none">
+              <h2 className="text-3xl font-bold mb-4">Volumetric Weight Calculator</h2>
+              <p className="text-lg text-muted-foreground leading-relaxed">
+                If your parcel is large but lightweight, the shipping cost may be determined by its size rather than its weight. Our volumetric weight calculator can help you find the chargeable weight for your parcel. When sending bulky parcels, many couriers charge based on volumetric weight instead of actual weight. This weight is calculated from the dimensions of the parcel.
+              </p>
+            </section>
+
+            <section>
+              <h3 className="text-2xl font-semibold mb-4">What is Volumetric Weight?</h3>
+              <p className="text-muted-foreground leading-relaxed">
+                Volumetric weight represents the calculated weight of a parcel based on its length, width, and height, converted to volumetric kilograms. The calculation method for volumetric weight can vary depending on the courier and the specific service. For example, some couriers may use different formulas for express versus economy services.
+              </p>
+            </section>
+
+            <section>
+              <h3 className="text-2xl font-semibold mb-4">Why is Volumetric Weight Charged?</h3>
+              <p className="text-muted-foreground leading-relaxed">
+                Larger items occupy more space on vehicles or aircraft, increasing the cost to transport them. Therefore, if an item is bulky but not heavy, shipping costs are often based on size instead of actual weight.
+              </p>
+            </section>
+
+            <section>
+              <h3 className="text-2xl font-semibold mb-4">Calculate Volumetric Weight for Courier Delivery</h3>
+              <p className="text-muted-foreground leading-relaxed mb-4">
+                Different courier companies may use various formulas, but the most common method involves multiplying the parcel's three dimensions in centimeters and dividing by 5,000.
+              </p>
+              <p className="text-muted-foreground leading-relaxed mb-4">
+                No need to worry—the tool above automatically calculates this for you. However, if you'd like to do it manually, simply multiply the length, width, and height (in cm) of your parcel and then divide by 5,000.
+              </p>
+              <h4 className="text-xl font-semibold mb-3">Compare to Physical Weight</h4>
+              <p className="text-muted-foreground leading-relaxed">
+                If the volumetric weight is higher than the actual physical weight, your shipment will be billed based on the volumetric weight.
+              </p>
+            </section>
+
+            <section>
+              <h3 className="text-2xl font-semibold mb-4">Calculate Volumetric Weight for Freight Delivery</h3>
+              <p className="text-muted-foreground leading-relaxed">
+                For most road freight, air freight services, and airlines, a divisor of 6,000 is used. To find the volumetric weight for freight, multiply the length, width, and height of the shipment in centimeters, then divide by 6,000.
+              </p>
+            </section>
+
+            <section>
+              <h3 className="text-2xl font-semibold mb-4">Calculate Total Chargeable Weight of a Shipment</h3>
+              <p className="text-muted-foreground leading-relaxed">
+                Different couriers have their own methods for calculating the total chargeable weight, which can impact the cost significantly. It's important to understand how these variations might affect the final price of your shipment.
+              </p>
+            </section>
+
+            <section className="bg-muted/50 p-6 rounded-lg">
+              <h3 className="text-2xl font-semibold mb-4">Why correct Volumetric Weight Calculation is important?</h3>
+              <p className="text-muted-foreground leading-relaxed">
+                Accurate volumetric weight calculation is essential when shipping bulky packages with low actual weight because shipping costs are often based on the space a package occupies rather than its physical weight. This is particularly important for large, lightweight items that take up significant space in a cargo hold or container. By calculating the volumetric weight, which reflects the package's dimensions, shipping carriers can ensure that pricing accurately reflects the space utilized. Without this, carriers may incur losses from undercharged shipments, and shippers might face unexpected costs due to inaccurate weight estimates. Therefore, correctly calculating volumetric weight helps in fair cost allocation and efficient use of space, benefiting both carriers and customers.
+              </p>
+            </section>
+
+            <section>
+              <h3 className="text-2xl font-semibold mb-4">How to Use Volumetric Weight Calculator</h3>
+              <ol className="list-decimal list-inside space-y-2 text-muted-foreground">
+                <li>Select Divisor (Chargeable Weight DIM Factor): Choose the divisor according to your shipping agent. By default, the calculation uses a divisor of 1000.</li>
+                <li>Select the Unit of Measurement for Package Dimensions (cm/mm/inch/meter/feet).</li>
+                <li>Enter the Package Dimensions: Length, Width (Breadth), and Height.</li>
+                <li>Select the Unit of Measurement for Package Weight (kg/lb).</li>
+                <li>Enter the Package Weight.</li>
+                <li>Enter the Package Quantity.</li>
+                <li>Add More Packages using the "Add More Package" option.</li>
+                <li>Delete a Package using the "Delete" icon.</li>
+              </ol>
+            </section>
+
+            <section>
+              <h3 className="text-2xl font-semibold mb-4">Understand the Result</h3>
+              <dl className="space-y-3">
+                <div>
+                  <dt className="font-semibold">Volume (m³):</dt>
+                  <dd className="text-muted-foreground">Total volume of all packages in cubic meters.</dd>
+                </div>
+                <div>
+                  <dt className="font-semibold">Volume (ft³):</dt>
+                  <dd className="text-muted-foreground">Total volume of all packages in cubic feet.</dd>
+                </div>
+                <div>
+                  <dt className="font-semibold">Weight (kg):</dt>
+                  <dd className="text-muted-foreground">Total weight in kilograms (single package weight × quantity).</dd>
+                </div>
+                <div>
+                  <dt className="font-semibold">Weight (lb):</dt>
+                  <dd className="text-muted-foreground">Total weight in pounds (single package weight × quantity).</dd>
+                </div>
+                <div>
+                  <dt className="font-semibold">Volumetric Weight (kg):</dt>
+                  <dd className="text-muted-foreground">Total volumetric weight in kilograms.</dd>
+                </div>
+                <div>
+                  <dt className="font-semibold">Volumetric Weight (lb):</dt>
+                  <dd className="text-muted-foreground">Total volumetric weight in pounds.</dd>
+                </div>
+              </dl>
+            </section>
+          </div>
+        )}
+
+        {mode === "sea_fcl" && (
+          <div className="mt-12 space-y-8">
+            <section className="prose prose-slate max-w-none">
+              <h2 className="text-3xl font-bold mb-4">Single Shipping Container Calculator</h2>
+              <p className="text-lg text-muted-foreground leading-relaxed">
+                Our Single Shipping Container Calculator allows you to easily check how much space your cargo occupies inside a selected container. Users can enter multiple packages, whether they are the same product or different product types, and the tool will calculate both volume utilization (%) and weight utilization (%) of the container.
+              </p>
+              <p className="text-muted-foreground leading-relaxed">
+                This feature is especially useful for exporters, importers, freight forwarders, and logistics companies who need to know how efficiently their goods are filling a container. By understanding the occupied percentage of CBM (Cubic Meter) and weight, you can estimate whether the chosen container is the right size or if you need to switch to another container type for cost optimization.
+              </p>
+              <p className="text-muted-foreground leading-relaxed">
+                You can select from standard shipping containers such as 20-foot, 40-foot, and 40-foot high cube. After entering the package dimensions and weights, the calculator will instantly show you:
+              </p>
+              <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
+                <li>Total cargo volume in cubic meters and cubic feet</li>
+                <li>Total cargo weight in kilograms and pounds</li>
+                <li>Percentage of container volume filled</li>
+                <li>Percentage of container weight capacity utilized</li>
+              </ul>
+              <p className="text-muted-foreground leading-relaxed mt-4">
+                This helps you make smarter shipping decisions, reduce wasted space, and optimize freight costs. Whether you are shipping a single product in bulk or mixed cargo with different dimensions, the Single Shipping Container Calculator makes planning fast, simple, and accurate.
+              </p>
+            </section>
+
+            <section>
+              <h3 className="text-2xl font-semibold mb-4">Container Utilization Calculator</h3>
+              <p className="text-muted-foreground leading-relaxed">
+                The CBM Calculator is a simple and accurate tool that helps you calculate how much cargo can fit inside a single shipping container. It works as a container utilization calculator, showing both volume percentage and weight percentage filled inside your selected container.
+              </p>
+              <p className="text-muted-foreground leading-relaxed mt-4">
+                You can use the calculator for different types of shipment containers, including:
+              </p>
+              <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4 mt-2">
+                <li>Standard 20-Foot Container</li>
+                <li>Standard 40-Foot Container</li>
+                <li>High Cube 40-Foot Container</li>
+                <li>Upgraded 20-Foot Container</li>
+                <li>Reefer 20-Foot Container</li>
+                <li>Reefer 40-Foot Container</li>
+                <li>Reefer 40-Foot High Cube Container</li>
+              </ul>
+              <p className="text-muted-foreground leading-relaxed mt-4">
+                Once you select a container, you can add multiple products or packages. These can be of different dimensions and weights, making it easy to calculate cargo space for mixed shipments.
+              </p>
+            </section>
+
+            <section>
+              <h3 className="text-2xl font-semibold mb-4">Package Information You Can Enter</h3>
+              <p className="text-muted-foreground leading-relaxed mb-4">
+                You can enter cargo details in different measurement units for flexibility:
+              </p>
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <h4 className="text-lg font-semibold mb-3">Dimensions:</h4>
+                  <p className="text-muted-foreground">Yard, Feet, Inch, Meter, Centimeter, or Millimeter</p>
+                </div>
+                <div>
+                  <h4 className="text-lg font-semibold mb-3">Product Weight:</h4>
+                  <p className="text-muted-foreground">Kilograms (kg), Grams (g), or Pounds (lb)</p>
+                </div>
+              </div>
+              <p className="text-muted-foreground leading-relaxed mt-4">
+                For each product or package, you can specify:
+              </p>
+              <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4 mt-2">
+                <li>Length</li>
+                <li>Width (Breadth)</li>
+                <li>Height</li>
+                <li>Quantity</li>
+                <li>Product Weight</li>
+              </ul>
+            </section>
+
+            <section>
+              <h3 className="text-2xl font-semibold mb-4">What the Container Loading Calculator Shows</h3>
+              <p className="text-muted-foreground leading-relaxed">
+                The single shipping container calculator automatically calculates and displays:
+              </p>
+              <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4 mt-2">
+                <li>Total Cargo Volume (CBM and Cubic Feet)</li>
+                <li>Total Cargo Weight (kg and lb)</li>
+                <li>Container-wise filled percentage of volume</li>
+                <li>Container-wise filled percentage of weight</li>
+              </ul>
+              <p className="text-muted-foreground leading-relaxed mt-4">
+                This makes it easy to see how efficiently your cargo is utilizing the selected shipping container.
+              </p>
+            </section>
+
+            <section>
+              <h3 className="text-2xl font-semibold mb-4">How to Use the Single Shipping Container Calculator</h3>
+              <ol className="list-decimal list-inside space-y-2 text-muted-foreground">
+                <li>Select a Container – Choose from 20ft, 40ft, High Cube, or Reefer containers.</li>
+                <li>Enter Package Details – Input product length, width, height, weight, and total quantity.</li>
+                <li>View Results – Instantly see total cargo volume, total weight, and container utilization percentages.</li>
+                <li>Add Multiple Products – Use the "Add More Row" option to calculate mixed shipments with different product sizes.</li>
+                <li>Delete Products Anytime – Remove any product or package by clicking the "Delete" button.</li>
+                <li>Switch Containers – Change the container type at any time to view updated calculations for your shipment.</li>
+              </ol>
+              <p className="text-muted-foreground leading-relaxed mt-4">
+                This tool is widely used by exporters, importers, freight forwarders, and logistics companies to plan shipments, optimize container space, and reduce transportation costs. Whether you're shipping a single product in bulk or multiple items with different dimensions, the CBM Calculator for shipping makes container planning quick, accurate, and hassle-free.
+              </p>
+            </section>
+
+            <section className="bg-muted/50 p-6 rounded-lg">
+              <h3 className="text-2xl font-semibold mb-4">Example: How to Calculate Filled Volume & Weight %</h3>
+              <p className="text-muted-foreground mb-4">Suppose you have the following cargo to ship:</p>
+              <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
+                <li>Package dimensions: 60 cm × 40 cm × 40 cm</li>
+                <li>Weight per package: 25 kg</li>
+                <li>Quantity: 200 packages</li>
+                <li>Selected container: 20ft Standard Container</li>
+              </ul>
+              <div className="mt-4 space-y-3">
+                <p className="text-muted-foreground"><strong>Step 1:</strong> Enter package dimensions and weight into the calculator.</p>
+                <p className="text-muted-foreground"><strong>Step 2:</strong> Enter the total quantity of packages.</p>
+                <p className="text-muted-foreground"><strong>Step 3:</strong> Select "20ft Container."</p>
+              </div>
+              <div className="mt-4 bg-background p-4 rounded border">
+                <h4 className="font-semibold mb-2">Result:</h4>
+                <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                  <li>Total Cargo Volume = 19.2 m³ (678 ft³)</li>
+                  <li>Total Cargo Weight = 5,000 kg (11,023 lbs)</li>
+                  <li>20ft Container Volume Utilization = 34%</li>
+                  <li>20ft Container Weight Utilization = 18%</li>
+                </ul>
+              </div>
+              <p className="text-muted-foreground mt-4">
+                This means your cargo uses 34% of the available space but only 18% of the weight limit. In this case, the cargo is light but bulky, and you might be able to fit more goods before reaching the maximum container volume.
+              </p>
+            </section>
+
+            <section>
+              <h3 className="text-2xl font-semibold mb-6">Frequently Asked Questions (FAQs)</h3>
+              <div className="space-y-6">
+                <div>
+                  <h4 className="text-lg font-semibold mb-2">How do I calculate container utilization?</h4>
+                  <p className="text-muted-foreground">
+                    Container utilization is calculated by dividing the total cargo volume (CBM) or cargo weight by the maximum capacity of the selected shipping container, then converting it into a percentage. Our calculator does this automatically and shows you both volume utilization and weight utilization.
+                  </p>
+                </div>
+
+                <div>
+                  <h4 className="text-lg font-semibold mb-2">What is the maximum weight for a 20ft and 40ft container?</h4>
+                  <p className="text-muted-foreground">
+                    A 20ft container can usually carry up to around 28,000 kg (62,000 lbs) of cargo, depending on shipping line restrictions. A 40ft container can typically carry a similar weight, but has more volume space for lighter goods. Always check with your freight forwarder for exact limits.
+                  </p>
+                </div>
+
+                <div>
+                  <h4 className="text-lg font-semibold mb-2">Why is container volume utilization important?</h4>
+                  <p className="text-muted-foreground">
+                    If your cargo fills only 50% of the container volume but reaches the maximum weight limit, you may be paying for unused space. On the other hand, if the container is filled by volume before reaching the weight limit, you may need to choose a larger container to avoid multiple shipments.
+                  </p>
+                </div>
+
+                <div>
+                  <h4 className="text-lg font-semibold mb-2">Can I use this tool for mixed cargo shipments?</h4>
+                  <p className="text-muted-foreground">
+                    Yes. You can input different package sizes and weights, and the calculator will combine them to give you the overall filled percentage for the selected container.
+                  </p>
+                </div>
+
+                <div>
+                  <h4 className="text-lg font-semibold mb-2">What is CBM in shipping?</h4>
+                  <p className="text-muted-foreground">
+                    CBM stands for Cubic Meter and is the standard unit used in shipping to measure the volume of cargo. It helps in determining how much space your cargo will occupy inside a container.
+                  </p>
+                </div>
+              </div>
+            </section>
+          </div>
+        )}
       </div>
     </>
   );
