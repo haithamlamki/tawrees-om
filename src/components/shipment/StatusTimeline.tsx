@@ -12,6 +12,8 @@ interface StatusTimelineProps {
 }
 
 const statusSteps = [
+  { key: "received_from_supplier", label: "Received from Supplier" },
+  { key: "processing", label: "Processing" },
   { key: "pending_partner_acceptance", label: "Pending Partner Acceptance" },
   { key: "in_transit", label: "In Transit" },
   { key: "customs", label: "Customs Clearance" },

@@ -9,11 +9,23 @@
   "estimatedDelivery": "التسليم المتوقع",
   "actualDelivery": "التسليم الفعلي",
   "status": {
+    "received_from_supplier": "تم الاستلام من المورد",
     "processing": "قيد المعالجة",
     "in_transit": "في الطريق",
     "customs": "في الجمارك",
     "out_for_delivery": "خارج للتسليم",
     "delivered": "تم التسليم",
     "on_hold": "معلق"
-  }
+  },
+  "containerNumber": "رقم الحاوية",
+  "containerTracking": "تتبع الحاوية",
+  "viewTracking": "عرض التتبع المباشر",
+  "trackContainer": "تتبع الحاوية مباشرة",
+  "assignDriver": "تعيين سائق",
+  "driverDetails": "تفاصيل السائق",
+  "callDriver": "الاتصال بالسائق",
+  "uploadPhotos": "تحميل الصور",
+  "photoLimit": "الحد الأقصى 5 صور",
+  "photos": "الصور",
+  "containerFormat": "التنسيق: 4 أحرف + 7 أرقام"
 }

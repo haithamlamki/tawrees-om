@@ -9,11 +9,23 @@
   "estimatedDelivery": "Estimated Delivery",
   "actualDelivery": "Actual Delivery",
   "status": {
+    "received_from_supplier": "Received from Supplier",
     "processing": "Processing",
     "in_transit": "In Transit",
     "customs": "In Customs",
     "out_for_delivery": "Out for Delivery",
     "delivered": "Delivered",
     "on_hold": "On Hold"
-  }
+  },
+  "containerNumber": "Container Number",
+  "containerTracking": "Container Tracking",
+  "viewTracking": "View Live Tracking",
+  "trackContainer": "Track Container Live",
+  "assignDriver": "Assign Driver",
+  "driverDetails": "Driver Details",
+  "callDriver": "Call Driver",
+  "uploadPhotos": "Upload Photos",
+  "photoLimit": "Maximum 5 photos",
+  "photos": "Photos",
+  "containerFormat": "Format: 4 letters + 7 digits"
 }

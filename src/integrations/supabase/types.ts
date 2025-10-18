@@ -1496,8 +1496,11 @@ export type Database = {
       shipments: {
         Row: {
           actual_delivery: string | null
+          assigned_driver_id: string | null
           assigned_partner_id: string | null
           assigned_to: string | null
+          container_number: string | null
+          container_tracking_url: string | null
           created_at: string
           current_location: string | null
           customer_approved_quote_at: string | null
@@ -1520,13 +1523,17 @@ export type Database = {
           partner_rejection_reason: string | null
           request_id: string
           status: string
+          status_metadata: Json | null
           tracking_number: string
           updated_at: string
         }
         Insert: {
           actual_delivery?: string | null
+          assigned_driver_id?: string | null
           assigned_partner_id?: string | null
           assigned_to?: string | null
+          container_number?: string | null
+          container_tracking_url?: string | null
           created_at?: string
           current_location?: string | null
           customer_approved_quote_at?: string | null
@@ -1549,13 +1556,17 @@ export type Database = {
           partner_rejection_reason?: string | null
           request_id: string
           status?: string
+          status_metadata?: Json | null
           tracking_number: string
           updated_at?: string
         }
         Update: {
           actual_delivery?: string | null
+          assigned_driver_id?: string | null
           assigned_partner_id?: string | null
           assigned_to?: string | null
+          container_number?: string | null
+          container_tracking_url?: string | null
           created_at?: string
           current_location?: string | null
           customer_approved_quote_at?: string | null
@@ -1578,10 +1589,18 @@ export type Database = {
           partner_rejection_reason?: string | null
           request_id?: string
           status?: string
+          status_metadata?: Json | null
           tracking_number?: string
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "shipments_assigned_driver_id_fkey"
+            columns: ["assigned_driver_id"]
+            isOneToOne: false
+            referencedRelation: "wms_drivers"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "shipments_assigned_partner_id_fkey"
             columns: ["assigned_partner_id"]

@@ -9,11 +9,23 @@
   "estimatedDelivery": "预计送达",
   "actualDelivery": "实际送达",
   "status": {
+    "received_from_supplier": "已从供应商处收货",
     "processing": "处理中",
     "in_transit": "运输中",
     "customs": "清关中",
     "out_for_delivery": "派送中",
     "delivered": "已送达",
     "on_hold": "暂停"
-  }
+  },
+  "containerNumber": "集装箱号",
+  "containerTracking": "集装箱追踪",
+  "viewTracking": "查看实时追踪",
+  "trackContainer": "实时追踪集装箱",
+  "assignDriver": "分配司机",
+  "driverDetails": "司机详情",
+  "callDriver": "呼叫司机",
+  "uploadPhotos": "上传照片",
+  "photoLimit": "最多5张照片",
+  "photos": "照片",
+  "containerFormat": "格式：4个字母 + 7个数字"
 }
