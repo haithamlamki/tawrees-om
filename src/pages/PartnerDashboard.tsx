@@ -176,16 +176,16 @@ const PartnerDashboard = () => {
         )}
 
         <Tabs defaultValue="pending" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3 h-auto">
-            <TabsTrigger value="pending" className="flex-wrap">
+          <TabsList className="w-full inline-flex h-auto">
+            <TabsTrigger value="pending" className="flex-1">
               New Requests ({pendingShipments.length})
             </TabsTrigger>
-            <TabsTrigger value="active" className="flex-wrap">
+            <TabsTrigger value="active" className="flex-1">
               Active Shipments ({activeShipments.length})
             </TabsTrigger>
-            <TabsTrigger value="invoices" className="flex items-center justify-center gap-2">
-              <FileText className="h-4 w-4" />
-              <span>Invoices</span>
+            <TabsTrigger value="invoices" className="flex-1">
+              <FileText className="h-4 w-4 mr-2" />
+              Invoices
             </TabsTrigger>
           </TabsList>
 
