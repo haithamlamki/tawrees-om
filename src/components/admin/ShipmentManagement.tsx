@@ -5,11 +5,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { toast } from "sonner";
-import { Package, Edit, ChevronDown, ChevronUp, Eye } from "lucide-react";
+import { Package, Edit, ChevronDown, ChevronUp, Eye, MoreVertical } from "lucide-react";
 import ShipmentStatusUpdate from "./ShipmentStatusUpdate";
 import { ShipmentRequestDetails } from "./ShipmentRequestDetails";
+import { ShipmentStorageDialog } from "./ShipmentStorageDialog";
 import { getShipmentStatusColor } from "@/lib/utils";
 
 interface Shipment {
@@ -34,6 +36,9 @@ const ShipmentManagement = () => {
   const [loading, setLoading] = useState(true);
   const [selectedShipment, setSelectedShipment] = useState<Shipment | null>(null);
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
+  const [isStorageDialogOpen, setIsStorageDialogOpen] = useState(false);
+  const [storageShipmentId, setStorageShipmentId] = useState<string>("");
+  const [storageTrackingNumber, setStorageTrackingNumber] = useState<string>("");
 
   useEffect(() => {
     loadShipments();
@@ -165,35 +170,34 @@ const ShipmentManagement = () => {
                             <ChevronDown className="h-4 w-4" />
                           )}
                         </Button>
-                        <Dialog open={selectedShipment?.id === shipment.id} onOpenChange={(open) => !open && setSelectedShipment(null)}>
-                          <DialogTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setSelectedShipment(shipment)}
-                            >
-                              <Edit className="h-4 w-4" />
+                        
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm">
+                              <MoreVertical className="h-4 w-4" />
                             </Button>
-                          </DialogTrigger>
-                          <DialogContent>
-                            <DialogHeader>
-                              <DialogTitle>Update Shipment</DialogTitle>
-                              <DialogDescription>
-                                Tracking: {shipment.tracking_number}
-                              </DialogDescription>
-                            </DialogHeader>
-                            
-                            <ShipmentStatusUpdate
-                              shipmentId={shipment.id}
-                              currentStatus={shipment.status}
-                              trackingNumber={shipment.tracking_number}
-                              onUpdate={() => {
-                                setSelectedShipment(null);
-                                loadShipments();
-                              }}
-                            />
-                          </DialogContent>
-                        </Dialog>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => setSelectedShipment(shipment)}>
+                              <Edit className="mr-2 h-4 w-4" />
+                              Update Status
+                            </DropdownMenuItem>
+                            {shipment.status === "delivered" && (
+                              <DropdownMenuItem 
+                                onClick={() => {
+                                  setStorageShipmentId(shipment.id);
+                                  setStorageTrackingNumber(shipment.tracking_number);
+                                  setIsStorageDialogOpen(true);
+                                }}
+                              >
+                                <Package className="mr-2 h-4 w-4" />
+                                Store in WMS
+                              </DropdownMenuItem>
+                            )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -214,6 +218,40 @@ const ShipmentManagement = () => {
           </Table>
         )}
       </CardContent>
+      
+      {selectedShipment && (
+        <Dialog open={!!selectedShipment} onOpenChange={(open) => !open && setSelectedShipment(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Update Shipment</DialogTitle>
+              <DialogDescription>
+                Tracking: {selectedShipment.tracking_number}
+              </DialogDescription>
+            </DialogHeader>
+            
+            <ShipmentStatusUpdate
+              shipmentId={selectedShipment.id}
+              currentStatus={selectedShipment.status}
+              trackingNumber={selectedShipment.tracking_number}
+              onUpdate={() => {
+                setSelectedShipment(null);
+                loadShipments();
+              }}
+            />
+          </DialogContent>
+        </Dialog>
+      )}
+
+      <ShipmentStorageDialog
+        open={isStorageDialogOpen}
+        onOpenChange={setIsStorageDialogOpen}
+        shipmentId={storageShipmentId}
+        trackingNumber={storageTrackingNumber}
+        onSuccess={() => {
+          toast.success("Shipment stored successfully");
+          loadShipments();
+        }}
+      />
     </Card>
   );
 };

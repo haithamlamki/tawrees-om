@@ -208,3 +208,22 @@ export interface WMSInvoiceWithDetails extends WMSInvoice {
   customer?: WMSCustomer;
   order?: WMSOrder;
 }
+
+export interface WMSShipmentStorage {
+  id: string;
+  shipment_id: string;
+  customer_id: string;
+  contract_id?: string;
+  storage_request_date: string;
+  storage_start_date?: string;
+  storage_end_date?: string;
+  status: 'pending' | 'active' | 'completed' | 'cancelled';
+  storage_location?: string;
+  storage_notes?: string;
+  monthly_storage_fee: number;
+  shipment_details?: any;
+  requested_by?: string;
+  approved_by?: string;
+  created_at: string;
+  updated_at: string;
+}

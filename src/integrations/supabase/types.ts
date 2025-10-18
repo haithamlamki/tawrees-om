@@ -1559,6 +1559,85 @@ export type Database = {
           },
         ]
       }
+      shipment_storage: {
+        Row: {
+          approved_by: string | null
+          contract_id: string | null
+          created_at: string
+          customer_id: string
+          id: string
+          monthly_storage_fee: number | null
+          requested_by: string | null
+          shipment_details: Json | null
+          shipment_id: string
+          status: string
+          storage_end_date: string | null
+          storage_location: string | null
+          storage_notes: string | null
+          storage_request_date: string
+          storage_start_date: string | null
+          updated_at: string
+        }
+        Insert: {
+          approved_by?: string | null
+          contract_id?: string | null
+          created_at?: string
+          customer_id: string
+          id?: string
+          monthly_storage_fee?: number | null
+          requested_by?: string | null
+          shipment_details?: Json | null
+          shipment_id: string
+          status?: string
+          storage_end_date?: string | null
+          storage_location?: string | null
+          storage_notes?: string | null
+          storage_request_date?: string
+          storage_start_date?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approved_by?: string | null
+          contract_id?: string | null
+          created_at?: string
+          customer_id?: string
+          id?: string
+          monthly_storage_fee?: number | null
+          requested_by?: string | null
+          shipment_details?: Json | null
+          shipment_id?: string
+          status?: string
+          storage_end_date?: string | null
+          storage_location?: string | null
+          storage_notes?: string | null
+          storage_request_date?: string
+          storage_start_date?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shipment_storage_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "wms_contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shipment_storage_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "wms_customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shipment_storage_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: true
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shipment_surcharges: {
         Row: {
           amount: number

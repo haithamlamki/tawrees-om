@@ -328,23 +328,30 @@ const ShipmentStatusUpdate = ({
               In Transit
             </SelectItem>
             <SelectItem value="customs">
-              At Customs
+              Customs
             </SelectItem>
-            {!isPartner && (
-              <>
-                <SelectItem value="received_muscat_wh">
-                  Received Muscat WH
-                </SelectItem>
-                <SelectItem value="out_for_delivery">
-                  Out for Delivery
-                </SelectItem>
-                <SelectItem value="delivered">
-                  Delivered
-                </SelectItem>
-              </>
-            )}
+            <SelectItem value="received_muscat_wh">
+              Received Muscat WH
+            </SelectItem>
+            <SelectItem value="out_for_delivery">
+              Out for Delivery
+            </SelectItem>
+            <SelectItem value="delivered">
+              Delivered
+            </SelectItem>
+            <SelectItem value="on_hold">
+              On Hold
+            </SelectItem>
           </SelectContent>
         </Select>
+        
+        {formData.status === "delivered" && (
+          <div className="mt-2 p-3 bg-muted rounded-md">
+            <p className="text-sm text-muted-foreground">
+              💡 Tip: You can store this delivered shipment in WMS for the customer
+            </p>
+          </div>
+        )}
       </div>
 
       <div className="space-y-2">

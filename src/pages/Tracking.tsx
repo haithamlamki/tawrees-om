@@ -4,9 +4,12 @@ import { supabase } from "@/integrations/supabase/client";
 import Navigation from "@/components/Navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Package, Truck, Plane, Calendar } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Package as PackageIcon, Truck, Plane, Calendar, Package } from "lucide-react";
 import TrackingTimeline from "@/components/tracking/TrackingTimeline";
 import { SupplierDetails } from "@/components/customer/SupplierDetails";
+import { ShipmentStorageDialog } from "@/components/admin/ShipmentStorageDialog";
+import { toast } from "sonner";
 
 interface StatusHistoryItem {
   id: string;
@@ -51,9 +54,18 @@ const Tracking = () => {
   const [shipment, setShipment] = useState<Shipment | null>(null);
   const [statusHistory, setStatusHistory] = useState<StatusHistoryItem[]>([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isStorageDialogOpen, setIsStorageDialogOpen] = useState(false);
+  const [hasStorageRequest, setHasStorageRequest] = useState(false);
 
   useEffect(() => {
-    checkAuthAndLoadShipment();
+    const loadData = async () => {
+      const loadedShipment = await checkAuthAndLoadShipment();
+      if (loadedShipment) {
+        await loadStatusHistory(loadedShipment.id);
+        await checkStorageRequest(loadedShipment.id);
+      }
+    };
+    loadData();
     
     // Subscribe to realtime updates
     const channel = supabase
@@ -67,7 +79,7 @@ const Tracking = () => {
           filter: `tracking_number=eq.${trackingNumber}`
         },
         () => {
-          checkAuthAndLoadShipment();
+          loadData();
         }
       )
       .on(
@@ -78,7 +90,7 @@ const Tracking = () => {
           table: 'shipment_status_history'
         },
         () => {
-          loadStatusHistory();
+          loadData();
         }
       )
       .subscribe();
@@ -94,7 +106,7 @@ const Tracking = () => {
 
     if (!trackingNumber) {
       navigate("/dashboard");
-      return;
+      return null;
     }
 
     const { data, error } = await supabase
@@ -125,12 +137,27 @@ const Tracking = () => {
     if (error || !data) {
       console.error("Error loading shipment:", error);
       setLoading(false);
-      return;
+      return null;
     }
 
     setShipment(data as any);
-    await loadStatusHistory(data.id);
     setLoading(false);
+    return data;
+  };
+
+  const checkStorageRequest = async (shipmentId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from("shipment_storage")
+        .select("id")
+        .eq("shipment_id", shipmentId)
+        .maybeSingle();
+
+      if (error) throw error;
+      setHasStorageRequest(!!data);
+    } catch (error) {
+      console.error("Error checking storage request:", error);
+    }
   };
 
   const loadStatusHistory = async (shipmentId?: string) => {
@@ -185,16 +212,30 @@ const Tracking = () => {
         <div className="max-w-4xl mx-auto space-y-6">
           <Card className="shadow-card">
             <CardHeader>
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between flex-wrap gap-4">
                 <div>
                   <CardTitle className="text-2xl">Track Your Shipment</CardTitle>
                   <CardDescription className="text-lg mt-1">
                     Tracking Number: <span className="font-mono font-semibold">{trackingNumber}</span>
                   </CardDescription>
                 </div>
-                <Badge variant="default" className="text-sm px-4 py-2">
-                  {shipment.status.replace(/_/g, " ").toUpperCase()}
-                </Badge>
+                <div className="flex items-center gap-3">
+                  <Badge variant="default" className="text-sm px-4 py-2">
+                    {shipment.status.replace(/_/g, " ").toUpperCase()}
+                  </Badge>
+                  
+                  {shipment.status === "delivered" && !hasStorageRequest && isAuthenticated && (
+                    <Button 
+                      onClick={() => setIsStorageDialogOpen(true)}
+                      variant="outline"
+                      size="sm"
+                      className="gap-2"
+                    >
+                      <Package className="h-4 w-4" />
+                      Request Storage
+                    </Button>
+                  )}
+                </div>
               </div>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -280,6 +321,19 @@ const Tracking = () => {
           </Card>
         </div>
       </main>
+
+      {shipment && (
+        <ShipmentStorageDialog
+          open={isStorageDialogOpen}
+          onOpenChange={setIsStorageDialogOpen}
+          shipmentId={shipment.id}
+          trackingNumber={shipment.tracking_number}
+          onSuccess={async () => {
+            toast.success("Storage request submitted successfully");
+            await checkStorageRequest(shipment.id);
+          }}
+        />
+      )}
     </div>
   );
 };
