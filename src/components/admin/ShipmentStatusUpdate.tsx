@@ -309,6 +309,7 @@ const ShipmentStatusUpdate = ({
             <SelectItem value="processing">Processing</SelectItem>
             <SelectItem value="in_transit">In Transit</SelectItem>
             <SelectItem value="customs">At Customs</SelectItem>
+            <SelectItem value="received_muscat_wh">Received Muscat WH</SelectItem>
             <SelectItem value="out_for_delivery">Out for Delivery</SelectItem>
             <SelectItem value="delivered" className="text-green-600 font-semibold">Delivered</SelectItem>
           </SelectContent>

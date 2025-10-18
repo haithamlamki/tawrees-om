@@ -13,6 +13,7 @@
     "processing": "处理中",
     "in_transit": "运输中",
     "customs": "清关中",
+    "received_muscat_wh": "已收货至马斯喀特仓库",
     "out_for_delivery": "派送中",
     "delivered": "已送达",
     "on_hold": "暂停"

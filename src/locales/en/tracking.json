@@ -12,7 +12,8 @@
     "received_from_supplier": "Received from Supplier",
     "processing": "Processing",
     "in_transit": "In Transit",
-    "customs": "In Customs",
+    "customs": "At Customs",
+    "received_muscat_wh": "Received Muscat WH",
     "out_for_delivery": "Out for Delivery",
     "delivered": "Delivered",
     "on_hold": "On Hold"

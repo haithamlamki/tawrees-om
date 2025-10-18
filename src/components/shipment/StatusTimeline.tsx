@@ -17,6 +17,7 @@ const statusSteps = [
   { key: "pending_partner_acceptance", label: "Pending Partner Acceptance" },
   { key: "in_transit", label: "In Transit" },
   { key: "customs", label: "Customs Clearance" },
+  { key: "received_muscat_wh", label: "Received Muscat WH" },
   { key: "out_for_delivery", label: "Out for Delivery" },
   { key: "delivered", label: "Delivered" },
   { key: "completed", label: "Completed" },

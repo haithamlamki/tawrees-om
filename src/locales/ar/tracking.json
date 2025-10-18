@@ -13,6 +13,7 @@
     "processing": "قيد المعالجة",
     "in_transit": "في الطريق",
     "customs": "في الجمارك",
+    "received_muscat_wh": "تم الاستلام في مستودع مسقط",
     "out_for_delivery": "خارج للتسليم",
     "delivered": "تم التسليم",
     "on_hold": "معلق"

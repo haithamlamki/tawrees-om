@@ -86,6 +86,8 @@ const TrackingTimeline = ({ statusHistory }: TrackingTimelineProps) => {
         return <Truck className={`h-5 w-5 ${iconClass}`} />;
       case "customs":
         return <Building2 className={`h-5 w-5 ${iconClass}`} />;
+      case "received_muscat_wh":
+        return <Building2 className={`h-5 w-5 ${iconClass}`} />;
       case "out_for_delivery":
         return <MapPin className={`h-5 w-5 ${iconClass}`} />;
       case "delivered":
@@ -101,6 +103,7 @@ const TrackingTimeline = ({ statusHistory }: TrackingTimelineProps) => {
       processing: "Processing",
       in_transit: "In Transit",
       customs: "At Customs",
+      received_muscat_wh: "Received Muscat WH",
       out_for_delivery: "Out for Delivery",
       delivered: "Delivered",
     };
