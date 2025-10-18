@@ -114,12 +114,19 @@ const employeeNavigation: NavigationItem[] = [
 ];
 
 const partnerNavigation: NavigationItem[] = [
-  { name: "Overview", href: "/partner#dashboard", icon: LayoutDashboard, group: "Dashboard" },
-  { name: "New Requests", href: "/partner#requests", icon: Package, group: "Dashboard" },
-  { name: "Active Shipments", href: "/partner#shipments", icon: Ship, group: "Dashboard" },
-  { name: "Invoices", href: "/partner#invoices", icon: FileBarChart, group: "Dashboard" },
-  { name: "Locations", href: "/locations", icon: MapPin, group: "Tools" },
-  { name: "Rates", href: "/rates", icon: DollarSign, group: "Tools" },
+  // Main group - Customer dashboard access
+  { name: "Home", href: "/", icon: Home, group: "Main" },
+  { name: "Shipment Requests", href: "/dashboard#requests", icon: Package, group: "Main" },
+  { name: "Profile", href: "/dashboard#profile", icon: User, group: "Main" },
+  { name: "Notifications", href: "/dashboard#notifications", icon: Bell, group: "Main" },
+  { name: "My Quotes", href: "/dashboard#quotes", icon: FileText, group: "Main" },
+  
+  // Partner group - Partner-specific features
+  { name: "New Requests", href: "/partner#requests", icon: Package, group: "Partner" },
+  { name: "Active Shipments", href: "/partner#shipments", icon: Ship, group: "Partner" },
+  { name: "Invoices", href: "/partner#invoices", icon: FileBarChart, group: "Partner" },
+  { name: "Locations", href: "/locations", icon: MapPin, group: "Partner" },
+  { name: "Rates", href: "/rates", icon: DollarSign, group: "Partner" },
 ];
 
 const accountantNavigation: NavigationItem[] = [
