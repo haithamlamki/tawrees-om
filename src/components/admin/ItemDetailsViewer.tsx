@@ -39,25 +39,32 @@ export function ItemDetailsViewer({
 
   // Calculate individual item metrics
   const calculateItemMetrics = (item: ShipmentItem) => {
-    const lengthCm = item.length * DIMENSION_CONVERSIONS[item.dimensionUnit];
-    const widthCm = item.width * DIMENSION_CONVERSIONS[item.dimensionUnit];
-    const heightCm = item.height * DIMENSION_CONVERSIONS[item.dimensionUnit];
-    const weightKg = item.weight * WEIGHT_CONVERSIONS[item.weightUnit];
+    // Safely handle null/undefined values
+    const length = item.length || 0;
+    const width = item.width || 0;
+    const height = item.height || 0;
+    const weight = item.weight || 0;
+    const quantity = item.quantity || 0;
+
+    const lengthCm = length * DIMENSION_CONVERSIONS[item.dimensionUnit];
+    const widthCm = width * DIMENSION_CONVERSIONS[item.dimensionUnit];
+    const heightCm = height * DIMENSION_CONVERSIONS[item.dimensionUnit];
+    const weightKg = weight * WEIGHT_CONVERSIONS[item.weightUnit];
 
     const volumeCm3 = lengthCm * widthCm * heightCm;
     const cbmPerItem = volumeCm3 / CBM_DIVISOR;
-    const totalCbm = cbmPerItem * item.quantity;
+    const totalCbm = cbmPerItem * quantity;
 
     const volumetricWeightKg = volumeCm3 / IATA_DIVISOR;
-    const totalVolumetricWeight = volumetricWeightKg * item.quantity;
+    const totalVolumetricWeight = volumetricWeightKg * quantity;
 
     return {
-      cbmPerItem,
-      totalCbm,
-      weightKg,
-      totalWeight: weightKg * item.quantity,
-      volumetricWeightKg,
-      totalVolumetricWeight,
+      cbmPerItem: cbmPerItem || 0,
+      totalCbm: totalCbm || 0,
+      weightKg: weightKg || 0,
+      totalWeight: (weightKg * quantity) || 0,
+      volumetricWeightKg: volumetricWeightKg || 0,
+      totalVolumetricWeight: totalVolumetricWeight || 0,
     };
   };
 
@@ -254,21 +261,21 @@ export function ItemDetailsViewer({
               <p className="text-lg font-bold">{items.reduce((sum, item) => sum + item.quantity, 0)}</p>
             </div>
             
-            {totalWeight !== undefined && (
+            {totalWeight !== undefined && totalWeight !== null && (
               <div className="bg-muted/50 p-3 rounded-lg">
                 <p className="text-xs text-muted-foreground mb-1">Total Weight</p>
                 <p className="text-lg font-bold">{totalWeight.toFixed(2)} kg</p>
               </div>
             )}
 
-            {shippingType === "sea" && totalCBM !== undefined && (
+            {shippingType === "sea" && totalCBM !== undefined && totalCBM !== null && (
               <div className="bg-muted/50 p-3 rounded-lg">
                 <p className="text-xs text-muted-foreground mb-1">Total CBM</p>
                 <p className="text-lg font-bold">{totalCBM.toFixed(3)} m³</p>
               </div>
             )}
 
-            {shippingType === "air" && chargeableWeight !== undefined && (
+            {shippingType === "air" && chargeableWeight !== undefined && chargeableWeight !== null && (
               <div className="bg-muted/50 p-3 rounded-lg">
                 <p className="text-xs text-muted-foreground mb-1">Chargeable Weight</p>
                 <p className="text-lg font-bold">{chargeableWeight.toFixed(2)} kg</p>
@@ -279,7 +286,7 @@ export function ItemDetailsViewer({
               <div className="bg-muted/50 p-3 rounded-lg">
                 <p className="text-xs text-muted-foreground mb-1">Container</p>
                 <p className="text-lg font-bold">{containerType}</p>
-                {containerUtilization !== undefined && (
+                {containerUtilization !== undefined && containerUtilization !== null && (
                   <p className="text-xs mt-1">
                     <Badge 
                       variant={containerUtilization > 95 ? "destructive" : containerUtilization > 80 ? "default" : "secondary"}
