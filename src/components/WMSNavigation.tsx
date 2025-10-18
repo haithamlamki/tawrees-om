@@ -188,7 +188,7 @@ const navigationItems: NavigationItem[] = [
       { name: "History", href: "/admin#history", icon: FileText },
       { name: "Quality Check", href: "/admin#qc", icon: ClipboardCheck },
       { name: "Bulk Operations", href: "/admin#bulk", icon: Workflow },
-      { name: "Invoices", href: "/admin#invoices", icon: FileBarChart },
+      { name: "Partner Invoices", href: "/admin#invoices", icon: FileBarChart },
     ],
   },
   {
