@@ -73,20 +73,6 @@ const navigationItems: NavigationItem[] = [
       { name: "My Quotes", href: "/dashboard#quotes", icon: FileCheck },
     ],
   },
-  {
-    name: "Locations",
-    href: "/locations",
-    icon: MapPin,
-    roles: ["admin", "employee", "accountant", "branch_manager"],
-    group: "Main"
-  },
-  {
-    name: "Rates",
-    href: "/rates",
-    icon: DollarSign,
-    roles: ["admin", "employee", "accountant", "branch_manager"],
-    group: "Main"
-  },
   
   // ===== WMS CUSTOMER PAGES =====
   {
