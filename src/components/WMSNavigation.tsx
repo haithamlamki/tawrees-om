@@ -67,7 +67,7 @@ const navigationItems: NavigationItem[] = [
     roles: ["user", "store_customer", "branch_manager", "admin", "shipping_partner"],
     group: "Main",
     subItems: [
-      { name: "Shipment Requests", href: "/dashboard#requests", icon: Package },
+      { name: "My Shipment Requests", href: "/dashboard#requests", icon: Package },
       { name: "Profile", href: "/dashboard#profile", icon: Users },
       { name: "Notifications", href: "/dashboard#notifications", icon: MessageSquare },
       { name: "My Quotes", href: "/dashboard#quotes", icon: FileCheck },
