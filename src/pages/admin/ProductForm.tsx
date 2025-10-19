@@ -160,21 +160,31 @@ export default function ProductForm() {
   const handlePublish = async () => {
     // Validation - check for actual values, not just falsy
     const missingFields = [];
+    const invalidFields = [];
     
     if (!formData.youtube_id?.trim()) missingFields.push("YouTube ID");
     if (!formData.hero_thumbnail?.trim()) missingFields.push("Hero Thumbnail");
-    if (!formData.base_unit_price || formData.base_unit_price <= 0) missingFields.push("Base Price");
+    if (!formData.base_unit_price || formData.base_unit_price <= 0) missingFields.push("Base Price (must be > 0)");
+    if (!formData.min_order_qty || formData.min_order_qty <= 0) invalidFields.push("Min Order Qty (must be > 0)");
     if (!formData.summary?.trim()) missingFields.push("Summary");
+    
+    // Check length constraints
+    if (formData.meta_description && formData.meta_description.length > 160) {
+      invalidFields.push("Meta Description (max 160 chars)");
+    }
+    if (formData.meta_title && formData.meta_title.length > 60) {
+      invalidFields.push("Meta Title (max 60 chars)");
+    }
 
-    if (missingFields.length > 0) {
+    const errors = [...missingFields, ...invalidFields];
+    if (errors.length > 0) {
       toast({
         title: "Cannot Publish",
-        description: `Required fields: ${missingFields.join(", ")}`,
+        description: `Please fix: ${errors.join(", ")}`,
         variant: "destructive",
       });
       return;
     }
-
     await handleSubmit(undefined, "published");
   };
 
@@ -331,6 +341,7 @@ export default function ProductForm() {
                     id="base_unit_price"
                     type="number"
                     step="0.01"
+                    min="0.01"
                     value={formData.base_unit_price}
                     onChange={(e) => setFormData({ ...formData, base_unit_price: parseFloat(e.target.value) })}
                     required
@@ -341,6 +352,7 @@ export default function ProductForm() {
                   <Input
                     id="min_order_qty"
                     type="number"
+                    min="1"
                     value={formData.min_order_qty}
                     onChange={(e) => setFormData({ ...formData, min_order_qty: parseInt(e.target.value) })}
                     required
