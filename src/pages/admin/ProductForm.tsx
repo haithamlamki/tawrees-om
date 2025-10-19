@@ -158,11 +158,18 @@ export default function ProductForm() {
   };
 
   const handlePublish = async () => {
-    // Validation
-    if (!formData.youtube_id || !formData.hero_thumbnail || !formData.base_unit_price || !formData.summary) {
+    // Validation - check for actual values, not just falsy
+    const missingFields = [];
+    
+    if (!formData.youtube_id?.trim()) missingFields.push("YouTube ID");
+    if (!formData.hero_thumbnail?.trim()) missingFields.push("Hero Thumbnail");
+    if (!formData.base_unit_price || formData.base_unit_price <= 0) missingFields.push("Base Price");
+    if (!formData.summary?.trim()) missingFields.push("Summary");
+
+    if (missingFields.length > 0) {
       toast({
         title: "Cannot Publish",
-        description: "YouTube ID, hero thumbnail, base price, and summary are required",
+        description: `Required fields: ${missingFields.join(", ")}`,
         variant: "destructive",
       });
       return;
