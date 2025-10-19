@@ -162,8 +162,7 @@ export default function ProductForm() {
     const missingFields = [];
     const invalidFields = [];
     
-    if (!formData.youtube_id?.trim()) missingFields.push("YouTube ID");
-    if (!formData.hero_thumbnail?.trim()) missingFields.push("Hero Thumbnail");
+    if (!formData.youtube_id?.trim()) missingFields.push("Video URL");
     if (!formData.base_unit_price || formData.base_unit_price <= 0) missingFields.push("Base Price (must be > 0)");
     if (!formData.min_order_qty || formData.min_order_qty <= 0) invalidFields.push("Min Order Qty (must be > 0)");
     if (!formData.summary?.trim()) missingFields.push("Summary");
@@ -299,23 +298,40 @@ export default function ProductForm() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label htmlFor="youtube_id">YouTube Video ID *</Label>
+                <Label htmlFor="video_url">Video URL *</Label>
                 <Input
-                  id="youtube_id"
-                  value={formData.youtube_id}
-                  onChange={(e) => setFormData({ ...formData, youtube_id: e.target.value })}
-                  placeholder="dQw4w9WgXcQ"
+                  id="video_url"
+                  value={formData.youtube_id ? `https://www.youtube.com/watch?v=${formData.youtube_id}` : ''}
+                  onChange={(e) => {
+                    const url = e.target.value;
+                    // Extract YouTube ID from various URL formats
+                    let videoId = '';
+                    
+                    if (url.includes('youtube.com/watch?v=')) {
+                      videoId = url.split('v=')[1]?.split('&')[0] || '';
+                    } else if (url.includes('youtu.be/')) {
+                      videoId = url.split('youtu.be/')[1]?.split('?')[0] || '';
+                    } else if (url.includes('youtube.com/embed/')) {
+                      videoId = url.split('embed/')[1]?.split('?')[0] || '';
+                    } else {
+                      // Assume it's just the ID
+                      videoId = url;
+                    }
+                    
+                    setFormData({ 
+                      ...formData, 
+                      youtube_id: videoId,
+                      hero_thumbnail: videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : ''
+                    });
+                  }}
+                  placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
                   required
                 />
-              </div>
-              <div>
-                <Label htmlFor="hero_thumbnail">Hero Thumbnail URL *</Label>
-                <Input
-                  id="hero_thumbnail"
-                  value={formData.hero_thumbnail}
-                  onChange={(e) => setFormData({ ...formData, hero_thumbnail: e.target.value })}
-                  required
-                />
+                {formData.youtube_id && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Video ID: {formData.youtube_id}
+                  </p>
+                )}
               </div>
             </CardContent>
           </Card>
