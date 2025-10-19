@@ -103,15 +103,20 @@ export default function ProductForm() {
       .replace(/^-+|-+$/g, "");
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e?: React.FormEvent, statusOverride?: string) => {
+    if (e) e.preventDefault();
     setLoading(true);
 
     try {
+      // Exclude volume_cbm as it's a generated column
+      const { volume_cbm, ...dataToSave } = formData;
+      
       const productData: any = {
-        ...formData,
+        ...dataToSave,
         slug: formData.slug || generateSlug(formData.name || ""),
         updated_by: userId,
+        ...(statusOverride && { status: statusOverride }),
+        ...(statusOverride === "published" && !formData.published_at && { published_at: new Date().toISOString() }),
         ...(id ? {} : { created_by: userId }),
       };
 
@@ -125,7 +130,7 @@ export default function ProductForm() {
 
         toast({
           title: "Success",
-          description: "Product updated successfully",
+          description: statusOverride === "published" ? "Product published successfully" : "Product updated successfully",
         });
       } else {
         const { error } = await supabase
@@ -136,7 +141,7 @@ export default function ProductForm() {
 
         toast({
           title: "Success",
-          description: "Product created successfully",
+          description: statusOverride === "published" ? "Product published successfully" : "Product created successfully",
         });
       }
 
@@ -163,8 +168,7 @@ export default function ProductForm() {
       return;
     }
 
-    setFormData({ ...formData, status: "published", published_at: new Date().toISOString() });
-    // Submit will handle the save
+    await handleSubmit(undefined, "published");
   };
 
   return (
