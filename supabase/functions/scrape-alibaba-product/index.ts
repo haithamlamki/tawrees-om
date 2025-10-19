@@ -131,6 +131,8 @@ function parseAlibabaHTML(html: string, url: string): any {
   const sku = `ALI-${urlParts[urlParts.length - 1].replace(/[^0-9]/g, "").slice(0, 8) || Date.now().toString().slice(-8)}`;
 
   // Simplified product structure
+  const metaDesc = `${title} - Imported from Alibaba`;
+  
   return {
     name: title,
     short_name: title.substring(0, 30),
@@ -153,12 +155,12 @@ function parseAlibabaHTML(html: string, url: string): any {
     lead_time_days: 15,
     delivery_options: ["pickup", "door"],
     quote_validity_days: 7,
-    summary: `Imported from Alibaba: ${title}`,
+    summary: `Imported from Alibaba: ${title}`.substring(0, 160),
     highlight_bullets: ["Quality product", "Competitive pricing", "Fast shipping"],
     description: `Product imported from Alibaba. Please review and update details before publishing.`,
     specs: {},
     meta_title: title.substring(0, 60),
-    meta_description: `${title} - Imported from Alibaba`,
+    meta_description: metaDesc.substring(0, 160),
     supplier_data: {
       name: "Alibaba Supplier",
       rating: null,

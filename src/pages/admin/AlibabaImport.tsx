@@ -121,8 +121,13 @@ export default function AlibabaImport() {
         return;
       }
 
+      // Ensure field constraints are met before saving
       const productData = {
         ...extractedProduct,
+        meta_description: extractedProduct.meta_description?.substring(0, 160) || null,
+        meta_title: extractedProduct.meta_title?.substring(0, 60) || null,
+        summary: extractedProduct.summary?.substring(0, 160) || null,
+        short_name: extractedProduct.short_name?.substring(0, 30) || extractedProduct.name?.substring(0, 30),
         created_by: session.user.id,
         updated_by: session.user.id,
       };
