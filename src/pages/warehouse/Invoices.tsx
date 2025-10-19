@@ -316,6 +316,7 @@ export default function WMSInvoices() {
                             size="sm"
                             variant="ghost"
                             onClick={() => handleViewInvoice(invoice)}
+                            aria-label="View"
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
@@ -323,6 +324,7 @@ export default function WMSInvoices() {
                             size="sm"
                             variant="ghost"
                             onClick={() => handleDownloadInvoice(invoice)}
+                            aria-label="Download"
                           >
                             <Download className="h-4 w-4" />
                           </Button>
@@ -416,7 +418,7 @@ export default function WMSInvoices() {
                     <span className="font-medium">{selectedInvoice.subtotal.toFixed(2)} OMR</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Tax ({((selectedInvoice.tax_amount / selectedInvoice.subtotal) * 100).toFixed(0)}%)</span>
+                    <span className="text-muted-foreground">Tax ({selectedInvoice.subtotal > 0 ? ((selectedInvoice.tax_amount / selectedInvoice.subtotal) * 100).toFixed(0) : 0}%)</span>
                     <span className="font-medium">{selectedInvoice.tax_amount.toFixed(2)} OMR</span>
                   </div>
                   <Separator />
